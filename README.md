@@ -38,6 +38,7 @@ make              # build libnymya.so
 make deb          # build .deb for current arch
 make ARCH=arm64 deb  # cross-compile for ARM
 sudo make install    # optional system-wide install
+```
 
 ## Disclaimer:
 nymyaOS is not designed or optimized to run on annealed quantum systems such as D-Wave. For the best compatibility and performance, we recommend using nymyaOS on gate-based quantum platforms like Microsoft Majorana, Google Willow, IBM-Q, or QuEra.
