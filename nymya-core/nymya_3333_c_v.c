@@ -1,0 +1,56 @@
+// src/nymya_3333_c_v.c
+
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <complex.h>
+
+#include "nymya.h"
+
+#ifndef __KERNEL__
+
+// Userland implementation
+int nymya_3333_c_v(nymya_qubit* qc, nymya_qubit* qt) {
+    if (!qc || !qt) return -1;
+
+    if (cabs(qc->amplitude) > 0.5) {
+        nymya_3307_sqrt_x_gate(qt);
+        log_symbolic_event("C_V", qt->id, qt->tag, "Controlled-V applied");
+    } else {
+        log_symbolic_event("C_V", qt->id, qt->tag, "Control=0, no action");
+    }
+    return 0;
+}
+
+#else
+    #include <linux/kernel.h>
+    #include <linux/syscalls.h>
+    #include <linux/uaccess.h>
+
+SYSCALL_DEFINE2(nymya_3333_c_v,
+    struct nymya_qubit __user *, user_qc,
+    struct nymya_qubit __user *, user_qt) {
+
+    struct nymya_qubit k_qc, k_qt;
+
+    if (!user_qc || !user_qt)
+        return -EINVAL;
+
+    if (copy_from_user(&k_qc, user_qc, sizeof(k_qc)))
+        return -EFAULT;
+
+    if (copy_from_user(&k_qt, user_qt, sizeof(k_qt)))
+        return -EFAULT;
+
+    int ret = nymya_3333_c_v(&k_qc, &k_qt);
+
+    if (ret == 0)
+        log_symbolic_event("C_V", k_qt.id, k_qt.tag, "Controlled-V applied");
+
+    if (copy_to_user(user_qt, &k_qt, sizeof(k_qt)))
+        return -EFAULT;
+
+    return ret;
+}
+
+#endif
