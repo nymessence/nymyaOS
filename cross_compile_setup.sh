@@ -4,7 +4,7 @@ set -e
 # Update and install cross-compiler, git, make, build tools
 sudo apt update
 sudo apt install -y gcc-aarch64-linux-gnu git make build-essential
-sudo apt install flex bison libncurses-dev build-essential
+sudo apt install -y flex bison libncurses-dev libelf-dev
 
 # Install generic headers and image as fallback
 sudo apt install -y linux-image-generic linux-headers-generic
