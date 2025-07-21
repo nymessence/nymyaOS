@@ -1,8 +1,6 @@
 // src/nymya_3352_e8_group.c
 
-#include <stdint.h>
 #include <stdlib.h>
-#include <complex.h>
 #include "nymya.h"
 
 #ifndef __KERNEL__

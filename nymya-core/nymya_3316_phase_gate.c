@@ -1,7 +1,5 @@
 // src/nymya_3316_phase_gate.c
 
-#include <stdint.h>
-#include <complex.h>
 #include "nymya.h"
 
 #ifndef __KERNEL__

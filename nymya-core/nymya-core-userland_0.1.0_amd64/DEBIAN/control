@@ -1,0 +1,5 @@
+Package: nymya-core-userland
+Version: 0.1.0
+Architecture: amd64
+Maintainer: Nymessence
+Description: NymyaOS Core Syscall SDK (Userland)

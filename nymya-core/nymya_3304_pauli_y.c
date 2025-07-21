@@ -1,7 +1,5 @@
 // src/nymya_3304_pauli_y.c
 
-#include <stdint.h>
-#include <complex.h>
 #include "nymya.h"
 
 #ifndef __KERNEL__

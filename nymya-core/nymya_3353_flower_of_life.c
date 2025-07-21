@@ -1,8 +1,6 @@
 // src/nymya_3353_flower_of_life.c
 
-#include <stdint.h>
 #include <stdlib.h>
-#include <complex.h>
 #include "nymya.h"
 
 #ifndef __KERNEL__

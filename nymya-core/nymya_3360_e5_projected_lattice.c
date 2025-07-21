@@ -1,9 +1,7 @@
 // src/nymya_3360_e5_projected_lattice.c
 
-#include <stdint.h>
 #include <stdlib.h>
 #include <math.h>
-#include <complex.h>
 #include "nymya.h"
 
 #ifndef __KERNEL__

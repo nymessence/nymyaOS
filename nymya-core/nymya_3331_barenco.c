@@ -1,7 +1,6 @@
 // src/nymya_3331_barenco.c
 
 #include <stdlib.h>
-#include <complex.h>
 #include "nymya.h"
 
 #ifndef __KERNEL__

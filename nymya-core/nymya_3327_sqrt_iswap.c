@@ -1,7 +1,5 @@
 // src/nymya_3327_sqrt_iswap.c
 
-#include <stdint.h>
-#include <complex.h>
 #include "nymya.h"
 
 #ifndef __KERNEL__

@@ -1,7 +1,5 @@
 // src/nymya_3318_controlled_phase_s.c
 
-#include <stdint.h>
-#include <complex.h>
 #include "nymya.h"
 
 #ifndef __KERNEL__

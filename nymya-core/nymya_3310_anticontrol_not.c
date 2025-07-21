@@ -1,7 +1,5 @@
 // src/nymya_3310_anticontrol_not.c
 
-#include <stdint.h>
-#include <complex.h>
 #include "nymya.h"
 
 #ifndef __KERNEL__

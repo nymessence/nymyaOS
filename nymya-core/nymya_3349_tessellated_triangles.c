@@ -1,8 +1,6 @@
 // src/nymya_3349_tessellated_triangles.c
 
-#include <stdint.h>
 #include <stdlib.h>
-#include <complex.h>
 #include "nymya.h"
 
 #ifndef __KERNEL__

@@ -1,7 +1,5 @@
 // src/nymya_3308_hadamard_gate.c
 
-#include <stdint.h>
-#include <complex.h>
 #include "nymya.h"
 
 #ifndef __KERNEL__

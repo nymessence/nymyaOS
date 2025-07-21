@@ -1,9 +1,7 @@
 // src/nymya_3335_dagwood.c
 
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <complex.h>
 
 #include "nymya.h"
 

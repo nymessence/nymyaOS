@@ -1,0 +1,1 @@
+/home/erick/nymyaOS/nymya-core/nymya_3312_double_controlled_not.c

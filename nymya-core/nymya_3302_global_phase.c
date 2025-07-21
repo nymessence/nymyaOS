@@ -1,25 +1,27 @@
-// src/nymya_3302_global_phase.c
-
-#include <stdint.h>
-#include <complex.h>
 #include "nymya.h"
 
 #ifndef __KERNEL__
     #include <stdio.h>
     #include <stdlib.h>
+    #include <math.h>
 #else
     #include <linux/kernel.h>
     #include <linux/syscalls.h>
     #include <linux/uaccess.h>
+    #include <linux/math64.h>
 #endif
 
+// Use shared complex math macros
+#define nymya_cexp(theta) complex_exp_i(theta)
+#define nymya_cmul(a, b)  complex_mul((a), (b))
+
 #ifndef __KERNEL__
-// Userland version: direct function call
+// === Userland version ===
 int nymya_3302_global_phase(nymya_qubit* q, double theta) {
     if (!q) return -1;
 
-    _Complex double phase = cexp(I * theta);
-    q->amplitude *= phase;
+    complex_double phase = nymya_cexp(theta);
+    q->amplitude = nymya_cmul(q->amplitude, phase);
 
     char log_msg[128];
     snprintf(log_msg, sizeof(log_msg), "Applied phase shift θ=%.3f rad", theta);
@@ -28,8 +30,7 @@ int nymya_3302_global_phase(nymya_qubit* q, double theta) {
     return 0;
 }
 #else
-// Kernel syscall wrapper
-
+// === Kernel syscall version ===
 SYSCALL_DEFINE2(nymya_3302_global_phase, struct nymya_qubit __user *, user_q, double, theta) {
     struct nymya_qubit kq;
 
@@ -38,16 +39,11 @@ SYSCALL_DEFINE2(nymya_3302_global_phase, struct nymya_qubit __user *, user_q, do
     if (copy_from_user(&kq, user_q, sizeof(kq)))
         return -EFAULT;
 
-    // Reuse the same logic here, but kernel can't use snprintf
-    // So call internal function or replicate minimal logging
+    complex_double phase = nymya_cexp(theta);
+    kq.amplitude = nymya_cmul(kq.amplitude, phase);
 
-    // Minimal internal logic for kernel:
-    kq.amplitude *= cexp(I * theta);
-
-    // Kernel can't use snprintf, so just do symbolic log with fixed msg
     log_symbolic_event("GPHASE", kq.id, kq.tag, "Applied phase shift");
 
-    // If you want to reflect changes back to user, use copy_to_user:
     if (copy_to_user(user_q, &kq, sizeof(kq)))
         return -EFAULT;
 

@@ -1,10 +1,8 @@
 // src/nymya_3361_qrng_range.c
 
-#include <stdint.h>
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
-#include <complex.h>
 #include "nymya.h"
 
 #ifndef __KERNEL__

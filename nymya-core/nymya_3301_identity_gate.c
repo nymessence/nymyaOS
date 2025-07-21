@@ -1,13 +1,13 @@
 // src/nymya_3301_identity_gate.c
 
-#include <stdint.h>
-#include <complex.h>
 #include "nymya.h"
 
 #ifdef __KERNEL__
     #include <linux/kernel.h>
     #include <linux/syscalls.h>
     #include <linux/uaccess.h>
+#include <linux/types.h>
+#include <linux/kernel.h>
 
     SYSCALL_DEFINE1(nymya_3301_identity_gate, struct nymya_qubit __user *, user_q) {
         struct nymya_qubit kq;

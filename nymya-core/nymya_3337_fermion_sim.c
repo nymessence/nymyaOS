@@ -1,7 +1,5 @@
 // src/nymya_3337_fermion_sim.c
 
-#include <stdint.h>
-#include <complex.h>
 #include "nymya.h"
 
 #ifndef __KERNEL__
@@ -18,7 +16,7 @@
 int nymya_3337_fermion_sim(nymya_qubit* q1, nymya_qubit* q2) {
     if (!q1 || !q2) return -1;
 
-    swap(q1, q2);
+    nymya_swap(q1, q2);
     q1->amplitude *= -1;
 
     log_symbolic_event("FERMION_SIM", q1->id, q1->tag, "Fermionic exchange");

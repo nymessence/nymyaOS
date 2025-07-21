@@ -1,7 +1,5 @@
 // src/nymya_3346_triangular_lattice.c
 
-#include <stdint.h>
-#include <complex.h>
 #include "nymya.h"
 
 #ifndef __KERNEL__

@@ -1,7 +1,5 @@
 // src/nymya_3322_xx_interaction.c
 
-#include <stdint.h>
-#include <complex.h>
 #include "nymya.h"
 
 #ifndef __KERNEL__

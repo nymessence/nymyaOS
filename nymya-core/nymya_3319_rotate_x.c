@@ -1,7 +1,5 @@
 // src/nymya_3319_rotate_x.c
 
-#include <stdint.h>
-#include <complex.h>
 #include "nymya.h"
 
 #ifndef __KERNEL__
