@@ -6,6 +6,10 @@ KERNEL_BUILD_DIR := /lib/modules/$(shell uname -r)/build
 CFLAGS           := -Wall -fPIC -O2
 LDFLAGS          := -shared
 
+# --- Kernel Build Vars (for cross-compilation) ---
+ARCH            ?= arm64
+CROSS_COMPILE   ?= aarch64-linux-gnu-
+
 # --- Paths & names ---
 INCLUDE_DIR      := .
 SRC_DIR          := .
@@ -21,13 +25,13 @@ INSTALL_KERNEL_DIR  := /lib/modules/$(shell uname -r)/extra
 
 # --- Package metadata (from version.conf) ---
 VERSION     ?= 0.0.0
-ARCH        ?= amd64
+PKG_ARCH    ?= amd64
 MAINTAINER  ?= Unknown <>
 DESCRIPTION := NymyaOS Core Syscall SDK
 
 # --- .deb output dirs ---
-DEB_USERLAND_DIR := nymya-core-userland_$(VERSION)_$(ARCH)
-DEB_KERNEL_DIR   := nymya-core-kernel_$(VERSION)_$(ARCH)
+DEB_USERLAND_DIR := nymya-core-userland_$(VERSION)_$(PKG_ARCH)
+DEB_KERNEL_DIR   := nymya-core-kernel_$(VERSION)_$(PKG_ARCH)
 
 # --- Userland sources & objects ---
 SOURCES := $(wildcard $(SRC_DIR)/*.c)
@@ -45,14 +49,6 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 
 $(LIB_FILE): $(OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $^
-
-# -----------------------------------------------------------------------------
-# prepare: old prepare behavior
-# -----------------------------------------------------------------------------
-.PHONY: prepare
-prepare:
-	@mkdir -p $(INCLUDE_DIR)
-	@ln -sf ./nymya.h $(INCLUDE_DIR)/nymya.h
 
 # -----------------------------------------------------------------------------
 # Kernel module build — sync sources & header, then auto-generate Kbuild
@@ -77,7 +73,7 @@ kernel:
 	@printf "\n" >> $(KERNEL_SRC_DIR)/Makefile
 
 	@echo ">> Building kernel module"
-	@$(MAKE) -C $(KERNEL_BUILD_DIR) M=$(PWD)/$(KERNEL_SRC_DIR) modules
+	@$(MAKE) -C $(KERNEL_BUILD_DIR) M=$(PWD)/$(KERNEL_SRC_DIR) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) modules
 
 # -----------------------------------------------------------------------------
 # Install & uninstall
@@ -117,7 +113,7 @@ clean:
 	@echo ">> Cleaning userland artifacts"
 	@rm -rf $(OBJ_DIR) $(LIB_FILE)
 	@echo ">> Cleaning kernel build artifacts"
-	@$(MAKE) -C $(KERNEL_BUILD_DIR) M=$(PWD)/$(KERNEL_SRC_DIR) clean || true
+	@$(MAKE) -C $(KERNEL_BUILD_DIR) M=$(PWD)/$(KERNEL_SRC_DIR) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) clean || true
 	@rm -f $(KERNEL_SRC_DIR)/Makefile $(KERNEL_SRC_DIR)/$(KERNEL_MODULE)
 
 clean_dir: clean
@@ -134,7 +130,7 @@ deb-userland: all
 	         $(DEB_USERLAND_DIR)/usr/include/$(LIB_NAME)
 	@cp $(LIB_FILE) $(DEB_USERLAND_DIR)/usr/lib/
 	@cp nymya.h    $(DEB_USERLAND_DIR)/usr/include/$(LIB_NAME)/
-	@printf "Package: $(LIB_NAME)-core-userland\nVersion: $(VERSION)\nArchitecture: $(ARCH)\nMaintainer: $(MAINTAINER)\nDescription: $(DESCRIPTION) (Userland)\n" \
+	@printf "Package: $(LIB_NAME)-core-userland\nVersion: $(VERSION)\nArchitecture: $(PKG_ARCH)\nMaintainer: $(MAINTAINER)\nDescription: $(DESCRIPTION) (Userland)\n" \
 	         > $(DEB_USERLAND_DIR)/DEBIAN/control
 	@dpkg-deb --build $(DEB_USERLAND_DIR)
 	@echo "✅ Built $(DEB_USERLAND_DIR).deb"
@@ -153,7 +149,7 @@ deb-kernel: kernel
 	else \
 	  echo "❌ Kernel module missing, aborting"; exit 1; \
 	fi
-	@printf "Package: $(LIB_NAME)-core-kernel\nVersion: $(VERSION)\nArchitecture: $(ARCH)\nMaintainer: $(MAINTAINER)\nDescription: $(DESCRIPTION) (Kernel)\n" \
+	@printf "Package: $(LIB_NAME)-core-kernel\nVersion: $(VERSION)\nArchitecture: $(PKG_ARCH)\nMaintainer: $(MAINTAINER)\nDescription: $(DESCRIPTION) (Kernel)\n" \
 	         > $(DEB_KERNEL_DIR)/DEBIAN/control
 	@dpkg-deb --build $(DEB_KERNEL_DIR)
 	@echo "✅ Built $(DEB_KERNEL_DIR).deb"
@@ -164,3 +160,4 @@ deb-kernel: kernel
 .PHONY: deb-all deb
 deb-all: deb-userland deb-kernel
 deb: deb-all
+
