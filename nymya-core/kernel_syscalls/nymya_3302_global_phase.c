@@ -1,1 +1,0 @@
-/home/erick/nymyaOS/nymya-core/nymya_3302_global_phase.c

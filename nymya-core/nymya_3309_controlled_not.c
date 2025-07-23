@@ -33,6 +33,8 @@ SYSCALL_DEFINE2(nymya_3309_controlled_not,
     struct nymya_qubit __user *, user_target) {
 
     struct nymya_qubit k_ctrl, k_target;
+    double ctrl_real, ctrl_imag;
+    double ctrl_magnitude;
 
     if (!user_ctrl || !user_target)
         return -EINVAL;
@@ -42,8 +44,13 @@ SYSCALL_DEFINE2(nymya_3309_controlled_not,
     if (copy_from_user(&k_target, user_target, sizeof(k_target)))
         return -EFAULT;
 
-    if (cabs(k_ctrl.amplitude) > 0.5) {
-        k_target.amplitude *= -1;
+    ctrl_real = __real k_ctrl.amplitude;
+    ctrl_imag = __imag k_ctrl.amplitude;
+    ctrl_magnitude = sqrt(ctrl_real * ctrl_real + ctrl_imag * ctrl_imag);
+
+    if (ctrl_magnitude > 0.5) {
+        // Flip target amplitude phase
+        k_target.amplitude = (complex_double){ .real = -__real k_target.amplitude, .imag = -__imag k_target.amplitude };
         log_symbolic_event("CNOT", k_target.id, k_target.tag, "NOT applied via control");
     } else {
         log_symbolic_event("CNOT", k_target.id, k_target.tag, "No action (control = 0)");
@@ -56,3 +63,4 @@ SYSCALL_DEFINE2(nymya_3309_controlled_not,
 }
 
 #endif
+

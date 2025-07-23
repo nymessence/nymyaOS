@@ -1,1 +1,0 @@
-/home/erick/nymyaOS/nymya-core/nymya_3345_cf_swap.c

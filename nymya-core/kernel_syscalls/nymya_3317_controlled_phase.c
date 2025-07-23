@@ -1,1 +1,0 @@
-/home/erick/nymyaOS/nymya-core/nymya_3317_controlled_phase.c

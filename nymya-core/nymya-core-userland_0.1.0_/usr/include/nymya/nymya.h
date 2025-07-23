@@ -1,72 +1,37 @@
 #ifndef NYMYA_H
 #define NYMYA_H
 
-#define NYMYA_TAG_MAXLEN 32   // moved to top to avoid undeclared error
-
 #ifdef __KERNEL__
     #include <linux/types.h>
     #include <linux/string.h>
 
-    // Fixed-point Q32.32 format to avoid floating point in kernel
-    #define FIXED_POINT_SCALE (1ULL << 32)
-
     typedef struct {
-        int64_t re; // fixed-point real part
-        int64_t im; // fixed-point imaginary part
+        double re, im;
     } complex_double;
 
     static inline complex_double make_complex(double re, double im) {
-        complex_double c;
-        c.re = (int64_t)(re * FIXED_POINT_SCALE);
-        c.im = (int64_t)(im * FIXED_POINT_SCALE);
+        complex_double c = { re, im };
         return c;
     }
 
     static inline complex_double complex_mul(complex_double a, complex_double b) {
         complex_double result;
-        result.re = ((__int128)a.re * b.re - (__int128)a.im * b.im) >> 32;
-        result.im = ((__int128)a.re * b.im + (__int128)a.im * b.re) >> 32;
+        result.re = a.re * b.re - a.im * b.im;
+        result.im = a.re * b.im + a.im * b.re;
         return result;
     }
 
+    // Stubbed in kernel space: trig not available
     static inline complex_double complex_exp_i(double theta) {
-        // No trig in kernel; just return identity (1 + 0i)
-        complex_double result = { FIXED_POINT_SCALE, 0 };
+        complex_double result = {1.0, 0.0}; // TODO: Replace with kernel-safe trig if needed
         return result;
     }
-
-    static inline int64_t complex_re(complex_double c) { return c.re; }
-    static inline int64_t complex_im(complex_double c) { return c.im; }
-    static inline complex_double complex_conj(complex_double c) {
-        complex_double conj = { c.re, -c.im };
-        return conj;
-    }
-
-    // Helpers to convert fixed-point to double (for easier use in kernel code)
-    static inline double fixed_to_double(int64_t fixed) {
-        return (double)fixed / (double)FIXED_POINT_SCALE;
-    }
-
-    static inline double complex_re_double(complex_double c) {
-        return fixed_to_double(c.re);
-    }
-
-    static inline double complex_im_double(complex_double c) {
-        return fixed_to_double(c.im);
-    }
-
-    typedef struct nymya_qubit {
-        uint64_t id;
-        char tag[NYMYA_TAG_MAXLEN];
-        complex_double amplitude;
-    } nymya_qubit;
 
 #else
     #include <stdio.h>
     #include <stdlib.h>
     #include <stdint.h>
     #include <complex.h>
-    #include <string.h>
     #include <math.h>
 
     typedef _Complex double complex_double;
@@ -82,39 +47,29 @@
     static inline complex_double complex_exp_i(double theta) {
         return cexp(I * theta);
     }
+#endif
 
-    static inline double complex_re(complex_double c) { return creal(c); }
-    static inline double complex_im(complex_double c) { return cimag(c); }
-    static inline complex_double complex_conj(complex_double c) { return conj(c); }
-
-    typedef struct nymya_qubit {
-        uint64_t id;
-        char tag[NYMYA_TAG_MAXLEN];
-        complex_double amplitude;
-    } nymya_qubit;
-
-#endif  // __KERNEL__
-
-// Define position structs after nymya_qubit so visible everywhere
+// Shared structures
+typedef struct nymya_qubit {
+    uint64_t id;
+    const char* tag;
+    complex_double amplitude;
+} nymya_qubit;
 
 typedef struct {
     double x, y, z;
-    nymya_qubit q;
+    nymya_qubit* q;
 } nymya_qpos3d;
 
 typedef struct {
     double x, y, z, w;
-    nymya_qubit q;
+    nymya_qubit* q;
 } nymya_qpos4d;
 
 typedef struct {
     double x, y, z, w, v;
-    nymya_qubit q;
+    nymya_qubit* q;
 } nymya_qpos5d;
-
-#endif // NYMYA_H
-
-
 
 // Shared function declarations
 int log_symbolic_event(const char* gate, uint64_t id, const char* tag, const char* msg);
@@ -369,3 +324,5 @@ int nymya_3361_qrng_range(uint64_t* out, uint64_t min, uint64_t max, size_t coun
 
 #define qrng_range(out, min, max, count) nymya_3361_qrng_range(out, min, max, count)
 #define NYMYA_QRNG_CODE                3361
+
+#endif // NYMYA_H

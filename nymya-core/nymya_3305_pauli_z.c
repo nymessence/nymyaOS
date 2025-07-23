@@ -9,6 +9,7 @@
     #include <linux/kernel.h>
     #include <linux/syscalls.h>
     #include <linux/uaccess.h>
+    #include <linux/errno.h>
 #endif
 
 #ifndef __KERNEL__
@@ -26,13 +27,16 @@ int nymya_3305_pauli_z(nymya_qubit* q) {
 
 SYSCALL_DEFINE1(nymya_3305_pauli_z, struct nymya_qubit __user *, user_q) {
     struct nymya_qubit kq;
+    double real, imag;
 
     if (!user_q)
         return -EINVAL;
     if (copy_from_user(&kq, user_q, sizeof(kq)))
         return -EFAULT;
 
-    kq.amplitude *= -1;
+    real = __real kq.amplitude;
+    imag = __imag kq.amplitude;
+    kq.amplitude = (complex_double){ .real = -real, .imag = -imag };
 
     log_symbolic_event("PAULI_Z", kq.id, kq.tag, "Inverted inner state");
 
@@ -43,3 +47,4 @@ SYSCALL_DEFINE1(nymya_3305_pauli_z, struct nymya_qubit __user *, user_q) {
 }
 
 #endif
+

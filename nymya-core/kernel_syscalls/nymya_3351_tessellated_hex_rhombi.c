@@ -1,1 +1,0 @@
-/home/erick/nymyaOS/nymya-core/nymya_3351_tessellated_hex_rhombi.c

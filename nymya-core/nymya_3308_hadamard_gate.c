@@ -27,13 +27,19 @@ int nymya_3308_hadamard_gate(nymya_qubit* q) {
 
 SYSCALL_DEFINE1(nymya_3308_hadamard_gate, struct nymya_qubit __user *, user_q) {
     struct nymya_qubit kq;
+    double real, imag;
+    const double scale = 0.70710678; // 1/sqrt(2)
 
     if (!user_q)
         return -EINVAL;
     if (copy_from_user(&kq, user_q, sizeof(kq)))
         return -EFAULT;
 
-    kq.amplitude *= (1.0 / sqrt(2.0));
+    real = __real kq.amplitude;
+    imag = __imag kq.amplitude;
+
+    // Scale both real and imaginary parts
+    kq.amplitude = (complex_double){ .real = real * scale, .imag = imag * scale };
 
     log_symbolic_event("HADAMARD", kq.id, kq.tag, "Applied H gate (superposition)");
 
@@ -44,3 +50,4 @@ SYSCALL_DEFINE1(nymya_3308_hadamard_gate, struct nymya_qubit __user *, user_q) {
 }
 
 #endif
+

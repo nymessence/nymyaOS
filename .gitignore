@@ -1,4 +1,5 @@
 *.deb
 *.so
 *.env
+*.o
 update_git.sh

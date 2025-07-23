@@ -10,6 +10,7 @@
     #include <linux/kernel.h>
     #include <linux/syscalls.h>
     #include <linux/uaccess.h>
+    #include <linux/errno.h>
 #endif
 
 #ifndef __KERNEL__
@@ -27,13 +28,17 @@ int nymya_3306_phase_gate(nymya_qubit* q) {
 
 SYSCALL_DEFINE1(nymya_3306_phase_gate, struct nymya_qubit __user *, user_q) {
     struct nymya_qubit kq;
+    double real, imag;
 
     if (!user_q)
         return -EINVAL;
     if (copy_from_user(&kq, user_q, sizeof(kq)))
         return -EFAULT;
 
-    kq.amplitude *= cexp(I * M_PI_2);
+    real = __real kq.amplitude;
+    imag = __imag kq.amplitude;
+    // Multiply by i: (a + bi) * i = -b + ai
+    kq.amplitude = (complex_double){ .real = -imag, .imag = real };
 
     log_symbolic_event("PHASE_S", kq.id, kq.tag, "Applied S gate (π/2 phase)");
 
@@ -44,3 +49,4 @@ SYSCALL_DEFINE1(nymya_3306_phase_gate, struct nymya_qubit __user *, user_q) {
 }
 
 #endif
+

@@ -1,1 +1,0 @@
-/home/erick/nymyaOS/nymya-core/nymya_3327_sqrt_iswap.c

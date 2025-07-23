@@ -6,9 +6,12 @@ KERNEL_BUILD_DIR := /lib/modules/$(shell uname -r)/build
 CFLAGS           := -Wall -fPIC -O2
 LDFLAGS          := -shared
 
-# --- Kernel Build Vars (for cross-compilation) ---
-ARCH            ?= arm64
-CROSS_COMPILE   ?= aarch64-linux-gnu-
+# --- Supported architectures ---
+ARCHS            := arm64 x86_64
+
+# --- Cross-compilers per arch ---
+CROSS_COMPILE_arm64   := aarch64-linux-gnu-
+CROSS_COMPILE_x86_64  :=
 
 # --- Paths & names ---
 INCLUDE_DIR      := .
@@ -29,19 +32,21 @@ PKG_ARCH    ?= amd64
 MAINTAINER  ?= Unknown <>
 DESCRIPTION := NymyaOS Core Syscall SDK
 
-# --- .deb output dirs ---
+# --- .deb output dirs template ---
 DEB_USERLAND_DIR := nymya-core-userland_$(VERSION)_$(PKG_ARCH)
-DEB_KERNEL_DIR   := nymya-core-kernel_$(VERSION)_$(PKG_ARCH)
+DEB_KERNEL_DIR   := nymya-core-kernel_$(VERSION)_#ARCH#
 
 # --- Userland sources & objects ---
 SOURCES := $(wildcard $(SRC_DIR)/*.c)
 OBJECTS := $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SOURCES))
 
 # -----------------------------------------------------------------------------
-# Default target: build userland library
+# Default: build userland library
 # -----------------------------------------------------------------------------
-.PHONY: all
-all: $(LIB_FILE)
+.PHONY: all userland
+all: userland
+
+userland: $(LIB_FILE)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(OBJ_DIR)
@@ -51,70 +56,69 @@ $(LIB_FILE): $(OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $^
 
 # -----------------------------------------------------------------------------
-# Kernel module build — sync sources & header, then auto-generate Kbuild
+# Kernel module build for each architecture
 # -----------------------------------------------------------------------------
-.PHONY: kernel
-kernel:
-	@echo ">> Syncing sources to $(KERNEL_SRC_DIR)"
-	@mkdir -p $(KERNEL_SRC_DIR)
-	@rm -f $(KERNEL_SRC_DIR)/*.c $(KERNEL_SRC_DIR)/nymya.h
-	@for f in $(wildcard nymya_*.c); do \
-	  ln -sf $(PWD)/$$f $(KERNEL_SRC_DIR)/; \
-	done
-	@ln -sf $(PWD)/nymya.h $(KERNEL_SRC_DIR)/nymya.h
+.PHONY: kernel $(ARCHS)
+kernel: $(ARCHS)
 
-	@echo ">> Generating $(KERNEL_SRC_DIR)/Makefile"
-	@printf "obj-m := nymya_syscalls.o\n" > $(KERNEL_SRC_DIR)/Makefile
-	@printf "nymya_syscalls-objs := "   >> $(KERNEL_SRC_DIR)/Makefile
-	@for src in $(wildcard nymya_*.c); do \
-	  base=$$(basename $$src .c); \
-	  printf "$$base.o " >> $(KERNEL_SRC_DIR)/Makefile; \
-	done
-	@printf "\n" >> $(KERNEL_SRC_DIR)/Makefile
-
-	@echo ">> Building kernel module"
-	@$(MAKE) -C $(KERNEL_BUILD_DIR) M=$(PWD)/$(KERNEL_SRC_DIR) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) modules
+$(ARCHS):
+	$(eval CCP := $(CROSS_COMPILE_$@))
+	$(eval OUT_DIR := $(KERNEL_SRC_DIR)/$@)
+	@echo "Building kernel module for $@ with CROSS_COMPILE='$(CCP)'"
+	@mkdir -p $(OUT_DIR)
+	@rm -f $(OUT_DIR)/*.c $(OUT_DIR)/nymya.h
+	@for f in $(wildcard nymya_*.c); do ln -sf $(PWD)/$$f $(OUT_DIR)/; done
+	@ln -sf $(PWD)/nymya.h $(OUT_DIR)/
+	@printf "obj-m := nymya_syscalls.o\n" > $(OUT_DIR)/Makefile
+	@printf "nymya_syscalls-objs := " >> $(OUT_DIR)/Makefile
+	@for src in $(wildcard nymya_*.c); do base=$$(basename $$src .c); printf "$$base.o "; done >> $(OUT_DIR)/Makefile
+	@printf "\n" >> $(OUT_DIR)/Makefile
+	@$(MAKE) -C $(KERNEL_BUILD_DIR) M=$(PWD)/$(OUT_DIR) ARCH=$@ CROSS_COMPILE=$(CCP) modules
 
 # -----------------------------------------------------------------------------
-# Install & uninstall
+# Install & uninstall targets
 # -----------------------------------------------------------------------------
-.PHONY: install
-install: all kernel
+.PHONY: install uninstall
+install: userland kernel
 	@echo ">> Installing userland library to $(INSTALL_LIB_DIR)"
 	@mkdir -p $(INSTALL_LIB_DIR)
 	@cp $(LIB_FILE) $(INSTALL_LIB_DIR)/
 	@echo ">> Installing headers to $(INSTALL_INCLUDE_DIR)"
 	@mkdir -p $(INSTALL_INCLUDE_DIR)
 	@cp nymya.h $(INSTALL_INCLUDE_DIR)/
-	@if [ -f $(KERNEL_SRC_DIR)/$(KERNEL_MODULE) ]; then \
-	  echo ">> Installing kernel module"; \
-	  mkdir -p $(INSTALL_KERNEL_DIR); \
-	  cp $(KERNEL_SRC_DIR)/$(KERNEL_MODULE) $(INSTALL_KERNEL_DIR)/; \
-	  depmod -a; \
-	else \
-	  echo ">> Kernel module not built, skipping"; \
-	fi
+	@for ARCH in $(ARCHS); do \
+	  MOD=$$(KERNEL_SRC_DIR)/$$ARCH/$(KERNEL_MODULE); \
+	  if [ -f $$MOD ]; then \
+	    echo ">> Installing $$ARCH kernel module"; \
+	    mkdir -p $(INSTALL_KERNEL_DIR); \
+	    cp $$MOD $(INSTALL_KERNEL_DIR)/; \
+	  else \
+	    echo ">> $$ARCH kernel module not built, skipping"; \
+	  fi; \
+	done
 
-.PHONY: uninstall
 uninstall:
 	@echo ">> Uninstalling userland library"
 	@rm -f $(INSTALL_LIB_DIR)/$(LIB_FILE)
 	@echo ">> Removing headers"
 	@rm -f $(INSTALL_INCLUDE_DIR)/nymya.h
-	@echo ">> Removing kernel module"
+	@echo ">> Removing kernel modules"
 	@rm -f $(INSTALL_KERNEL_DIR)/$(KERNEL_MODULE)
 	@depmod -a
 
 # -----------------------------------------------------------------------------
-# Cleaning
+# Cleaning build artifacts
 # -----------------------------------------------------------------------------
 .PHONY: clean clean_dir
 clean:
 	@echo ">> Cleaning userland artifacts"
 	@rm -rf $(OBJ_DIR) $(LIB_FILE)
 	@echo ">> Cleaning kernel build artifacts"
-	@$(MAKE) -C $(KERNEL_BUILD_DIR) M=$(PWD)/$(KERNEL_SRC_DIR) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) clean || true
-	@rm -f $(KERNEL_SRC_DIR)/Makefile $(KERNEL_SRC_DIR)/$(KERNEL_MODULE)
+	@for ARCH in $(ARCHS); do \
+	  DIR=$(KERNEL_SRC_DIR)/$$ARCH; \
+	  make -C $(KERNEL_BUILD_DIR) M=$$PWD/$$DIR ARCH=$$ARCH clean || true; \
+	  rm -rf $$DIR; \
+	done
 
 clean_dir: clean
 
@@ -122,16 +126,15 @@ clean_dir: clean
 # .deb packaging for userland
 # -----------------------------------------------------------------------------
 .PHONY: deb-userland
-deb-userland: all
+deb-userland: userland
 	@echo ">> Creating userland .deb"
 	@rm -rf $(DEB_USERLAND_DIR)
 	@mkdir -p $(DEB_USERLAND_DIR)/DEBIAN \
-	         $(DEB_USERLAND_DIR)/usr/lib \
-	         $(DEB_USERLAND_DIR)/usr/include/$(LIB_NAME)
+	          $(DEB_USERLAND_DIR)/usr/lib \
+	          $(DEB_USERLAND_DIR)/usr/include/$(LIB_NAME)
 	@cp $(LIB_FILE) $(DEB_USERLAND_DIR)/usr/lib/
 	@cp nymya.h    $(DEB_USERLAND_DIR)/usr/include/$(LIB_NAME)/
-	@printf "Package: $(LIB_NAME)-core-userland\nVersion: $(VERSION)\nArchitecture: $(PKG_ARCH)\nMaintainer: $(MAINTAINER)\nDescription: $(DESCRIPTION) (Userland)\n" \
-	         > $(DEB_USERLAND_DIR)/DEBIAN/control
+	@printf "Package: $(LIB_NAME)-core-userland\nVersion: $(VERSION)\nArchitecture: $(PKG_ARCH)\nMaintainer: $(MAINTAINER)\nDescription: $(DESCRIPTION) (Userland)\n" > $(DEB_USERLAND_DIR)/DEBIAN/control
 	@dpkg-deb --build $(DEB_USERLAND_DIR)
 	@echo "✅ Built $(DEB_USERLAND_DIR).deb"
 
@@ -140,19 +143,22 @@ deb-userland: all
 # -----------------------------------------------------------------------------
 .PHONY: deb-kernel
 deb-kernel: kernel
-	@echo ">> Creating kernel .deb"
-	@rm -rf $(DEB_KERNEL_DIR)
-	@mkdir -p $(DEB_KERNEL_DIR)/DEBIAN \
-	         $(DEB_KERNEL_DIR)/lib/modules/$(shell uname -r)/extra
-	@if [ -f $(KERNEL_SRC_DIR)/$(KERNEL_MODULE) ]; then \
-	  cp $(KERNEL_SRC_DIR)/$(KERNEL_MODULE) $(DEB_KERNEL_DIR)/lib/modules/$(shell uname -r)/extra/; \
-	else \
-	  echo "❌ Kernel module missing, aborting"; exit 1; \
-	fi
-	@printf "Package: $(LIB_NAME)-core-kernel\nVersion: $(VERSION)\nArchitecture: $(PKG_ARCH)\nMaintainer: $(MAINTAINER)\nDescription: $(DESCRIPTION) (Kernel)\n" \
-	         > $(DEB_KERNEL_DIR)/DEBIAN/control
-	@dpkg-deb --build $(DEB_KERNEL_DIR)
-	@echo "✅ Built $(DEB_KERNEL_DIR).deb"
+	@echo ">> Creating kernel .deb for each architecture"
+	@for ARCH in $(ARCHS); do \
+	  DEB_DIR=$$(echo $(DEB_KERNEL_DIR) | sed "s/#ARCH#/$${ARCH}/"); \
+	  MOD_SRC=$(KERNEL_SRC_DIR)/$$ARCH/$(KERNEL_MODULE); \
+	  echo "Building $$DEB_DIR.deb..."; \
+	  rm -rf $$DEB_DIR; \
+	  mkdir -p $$DEB_DIR/DEBIAN $$DEB_DIR/lib/modules/$(shell uname -r)/extra; \
+	  if [ -f $$MOD_SRC ]; then \
+	    cp $$MOD_SRC $$DEB_DIR/lib/modules/$(shell uname -r)/extra/; \
+	    printf "Package: $(LIB_NAME)-core-kernel\nVersion: $(VERSION)\nArchitecture: $${ARCH}\nMaintainer: $(MAINTAINER)\nDescription: $(DESCRIPTION) (Kernel for $${ARCH})\n" > $$DEB_DIR/DEBIAN/control; \
+	    dpkg-deb --build $$DEB_DIR; \
+	    echo "✅ Built $$DEB_DIR.deb"; \
+	  else \
+	    echo "❌ Missing $$MOD_SRC, skipping"; \
+	  fi; \
+	done
 
 # -----------------------------------------------------------------------------
 # Meta-targets

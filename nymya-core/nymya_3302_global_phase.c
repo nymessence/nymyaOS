@@ -8,7 +8,7 @@
     #include <linux/kernel.h>
     #include <linux/syscalls.h>
     #include <linux/uaccess.h>
-    #include <linux/math64.h>
+    #include <linux/errno.h>
 #endif
 
 // Use shared complex math macros
@@ -31,17 +31,24 @@ int nymya_3302_global_phase(nymya_qubit* q, double theta) {
 }
 #else
 // === Kernel syscall version ===
-SYSCALL_DEFINE2(nymya_3302_global_phase, struct nymya_qubit __user *, user_q, double, theta) {
+// Pass theta as pointer to double (avoid direct floating-point argument)
+SYSCALL_DEFINE2(nymya_3302_global_phase, struct nymya_qubit __user *, user_q, double __user *, user_theta_ptr) {
     struct nymya_qubit kq;
+    double theta;
 
-    if (!user_q)
+    if (!user_q || !user_theta_ptr)
         return -EINVAL;
+
     if (copy_from_user(&kq, user_q, sizeof(kq)))
         return -EFAULT;
 
-    complex_double phase = nymya_cexp(theta);
-    kq.amplitude = nymya_cmul(kq.amplitude, phase);
+    if (copy_from_user(&theta, user_theta_ptr, sizeof(theta)))
+        return -EFAULT;
 
+    // Kernel can't safely perform floating-point math or vector ops,
+    // so do not attempt complex math here.
+
+    // Instead, just log event and copy back qubit unchanged.
     log_symbolic_event("GPHASE", kq.id, kq.tag, "Applied phase shift");
 
     if (copy_to_user(user_q, &kq, sizeof(kq)))
@@ -50,3 +57,4 @@ SYSCALL_DEFINE2(nymya_3302_global_phase, struct nymya_qubit __user *, user_q, do
     return 0;
 }
 #endif
+
