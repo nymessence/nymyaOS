@@ -5,18 +5,32 @@
 #ifndef __KERNEL__
     #include <stdio.h>
     #include <stdlib.h>
+    #include <complex.h>
 #else
     #include <linux/kernel.h>
     #include <linux/syscalls.h>
     #include <linux/uaccess.h>
+    #include <linux/errno.h>
 #endif
 
+/**
+ * nymya_3311_controlled_z - Apply a Controlled-Z gate to two qubits.
+ * @q_ctrl: Pointer to the control qubit.
+ * @q_target: Pointer to the target qubit.
+ *
+ * In user space, if the magnitude of the control qubit's amplitude
+ * exceeds 0.5, this function applies a Z (phase flip) gate to the target.
+ *
+ * Returns 0 on success, or -1 on invalid input (null pointers).
+ */
 #ifndef __KERNEL__
 
 int nymya_3311_controlled_z(nymya_qubit* q_ctrl, nymya_qubit* q_target) {
     if (!q_ctrl || !q_target) return -1;
 
-    if (cabs(q_ctrl->amplitude) > 0.5) {
+    double ctrl_mag = cabs(q_ctrl->amplitude);
+
+    if (ctrl_mag > 0.5) {
         q_target->amplitude *= -1;
         log_symbolic_event("CZ", q_target->id, q_target->tag, "Z applied via control");
     } else {
@@ -28,11 +42,27 @@ int nymya_3311_controlled_z(nymya_qubit* q_ctrl, nymya_qubit* q_target) {
 
 #else
 
+/**
+ * SYSCALL_DEFINE2(nymya_3311_controlled_z) - Kernel implementation of Controlled-Z gate.
+ * @user_ctrl: User pointer to the control qubit structure.
+ * @user_target: User pointer to the target qubit structure.
+ *
+ * This system call version copies the qubit structures from user space,
+ * calculates the fixed-point magnitude of the control qubit, and applies
+ * a Z gate (negating the amplitude) to the target qubit if the control
+ * magnitude exceeds 0.5 (in fixed-point representation).
+ *
+ * Returns 0 on success, -EINVAL on null input, or -EFAULT on copy errors.
+ */
 SYSCALL_DEFINE2(nymya_3311_controlled_z,
     struct nymya_qubit __user *, user_ctrl,
     struct nymya_qubit __user *, user_target) {
 
     struct nymya_qubit k_ctrl, k_target;
+    int64_t re, im;
+    uint64_t re64, im64;
+    uint64_t re_sq, im_sq;
+    uint64_t mag_sq;
 
     if (!user_ctrl || !user_target)
         return -EINVAL;
@@ -42,8 +72,22 @@ SYSCALL_DEFINE2(nymya_3311_controlled_z,
     if (copy_from_user(&k_target, user_target, sizeof(k_target)))
         return -EFAULT;
 
-    if (cabs(k_ctrl.amplitude) > 0.5) {
-        k_target.amplitude *= -1;
+    // Extract real and imaginary parts
+    re = k_ctrl.amplitude.re;
+    im = k_ctrl.amplitude.im;
+
+    re64 = (uint64_t)(re < 0 ? -re : re);
+    im64 = (uint64_t)(im < 0 ? -im : im);
+
+    // Compute magnitude^2 using fixed-point math
+    re_sq = (re64 * re64) >> 32;
+    im_sq = (im64 * im64) >> 32;
+    mag_sq = re_sq + im_sq;
+
+    // Fixed-point threshold for 0.5^2
+    if (mag_sq > ((FIXED_POINT_SCALE >> 1) * (FIXED_POINT_SCALE >> 1)) / FIXED_POINT_SCALE) {
+        k_target.amplitude.re = -k_target.amplitude.re;
+        k_target.amplitude.im = -k_target.amplitude.im;
         log_symbolic_event("CZ", k_target.id, k_target.tag, "Z applied via control");
     } else {
         log_symbolic_event("CZ", k_target.id, k_target.tag, "No phase shift (control = 0)");
@@ -56,3 +100,4 @@ SYSCALL_DEFINE2(nymya_3311_controlled_z,
 }
 
 #endif
+

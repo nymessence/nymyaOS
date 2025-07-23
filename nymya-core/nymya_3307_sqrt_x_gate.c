@@ -10,10 +10,14 @@
     #include <linux/kernel.h>
     #include <linux/syscalls.h>
     #include <linux/uaccess.h>
+    #include <linux/errno.h>
 #endif
 
 #ifndef __KERNEL__
 
+/*
+ * User-space √X gate: multiplies qubit amplitude by (1/√2)(1 + i).
+ */
 int nymya_3307_sqrt_x_gate(nymya_qubit* q) {
     if (!q) return -1;
 
@@ -26,25 +30,32 @@ int nymya_3307_sqrt_x_gate(nymya_qubit* q) {
 
 #else
 
+/*
+ * Kernel syscall: √X gate using fixed-point arithmetic.
+ */
 SYSCALL_DEFINE1(nymya_3307_sqrt_x_gate, struct nymya_qubit __user *, user_q) {
     struct nymya_qubit kq;
-    double real, imag;
-    const double c_re = 0.70710678; // 1/sqrt(2)
-    const double c_im = 0.70710678;
+    int64_t re, im;
+    // fixed-point approximation of 1/sqrt(2)
+    const int64_t c_re = (int64_t)(0.70710678 * FIXED_POINT_SCALE);
+    const int64_t c_im = (int64_t)(0.70710678 * FIXED_POINT_SCALE);
 
     if (!user_q)
         return -EINVAL;
     if (copy_from_user(&kq, user_q, sizeof(kq)))
         return -EFAULT;
 
-    real = __real kq.amplitude;
-    imag = __imag kq.amplitude;
+    re = kq.amplitude.re;
+    im = kq.amplitude.im;
 
-    // Multiply by (1/sqrt(2))*(1 + i)
-    double new_re = real * c_re - imag * c_im;
-    double new_im = real * c_im + imag * c_re;
+    // Fixed-point complex multiplication:
+    // new_re = re*c_re - im*c_im
+    // new_im = re*c_im + im*c_re
+    __int128 temp_re = (__int128)re * c_re - (__int128)im * c_im;
+    __int128 temp_im = (__int128)re * c_im + (__int128)im * c_re;
 
-    kq.amplitude = (complex_double){ .real = new_re, .imag = new_im };
+    kq.amplitude.re = (int64_t)(temp_re >> 32);
+    kq.amplitude.im = (int64_t)(temp_im >> 32);
 
     log_symbolic_event("SQRT_X", kq.id, kq.tag, "Applied √X gate (liminal rotation)");
 

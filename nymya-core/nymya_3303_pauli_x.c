@@ -1,9 +1,16 @@
 #include "nymya.h"
 
 #ifdef __KERNEL__
-    #include <linux/kernel.h>
-    #include <linux/syscalls.h>
-    #include <linux/uaccess.h>
+#include <linux/kernel.h>
+#include <linux/syscalls.h>
+#include <linux/uaccess.h>
+
+/*
+ * Flip imaginary part sign in fixed-point amplitude
+ */
+static inline void flip_imag_part(struct nymya_qubit *q) {
+    q->amplitude.im = -q->amplitude.im;
+}
 
 SYSCALL_DEFINE1(nymya_3303_pauli_x, struct nymya_qubit __user *, user_q) {
     struct nymya_qubit kq;
@@ -14,8 +21,7 @@ SYSCALL_DEFINE1(nymya_3303_pauli_x, struct nymya_qubit __user *, user_q) {
     if (copy_from_user(&kq, user_q, sizeof(kq)))
         return -EFAULT;
 
-    // Flip imaginary part sign: conjugate amplitude
-    kq.amplitude.im = -kq.amplitude.im;
+    flip_imag_part(&kq);
 
     log_symbolic_event("PAULI_X", kq.id, kq.tag, "Polarity flipped");
 
@@ -25,15 +31,23 @@ SYSCALL_DEFINE1(nymya_3303_pauli_x, struct nymya_qubit __user *, user_q) {
     return 0;
 }
 
-#else // User-space implementation
+#else
 
 #include <stdio.h>
 
-int nymya_3303_pauli_x(nymya_qubit* q) {
+/*
+ * Flip imaginary part sign in builtin complex amplitude
+ */
+static inline void flip_imag_part(nymya_qubit *q) {
+    double re = complex_re(q->amplitude);
+    double im = complex_im(q->amplitude);
+    q->amplitude = make_complex(re, -im);
+}
+
+int nymya_3303_pauli_x(nymya_qubit *q) {
     if (!q) return -1;
 
-    // Flip imaginary part sign: conjugate amplitude
-    q->amplitude.im = -q->amplitude.im;
+    flip_imag_part(q);
 
     log_symbolic_event("PAULI_X", q->id, q->tag, "Polarity flipped");
     return 0;

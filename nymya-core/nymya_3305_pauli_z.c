@@ -14,10 +14,14 @@
 
 #ifndef __KERNEL__
 
+/*
+ * User-space implementation of Pauli-Z gate.
+ * Multiplies the qubit amplitude by -1 (negates both real and imag parts).
+ */
 int nymya_3305_pauli_z(nymya_qubit* q) {
     if (!q) return -1;
 
-    q->amplitude *= -1;
+    q->amplitude = make_complex(-complex_re(q->amplitude), -complex_im(q->amplitude));
 
     log_symbolic_event("PAULI_Z", q->id, q->tag, "Inverted inner state");
     return 0;
@@ -25,18 +29,24 @@ int nymya_3305_pauli_z(nymya_qubit* q) {
 
 #else
 
+/*
+ * Kernel syscall: nymya_3305_pauli_z
+ * Negates the fixed-point amplitude of the qubit.
+ */
 SYSCALL_DEFINE1(nymya_3305_pauli_z, struct nymya_qubit __user *, user_q) {
     struct nymya_qubit kq;
-    double real, imag;
+    int64_t re, im;
 
     if (!user_q)
         return -EINVAL;
     if (copy_from_user(&kq, user_q, sizeof(kq)))
         return -EFAULT;
 
-    real = __real kq.amplitude;
-    imag = __imag kq.amplitude;
-    kq.amplitude = (complex_double){ .real = -real, .imag = -imag };
+    re = kq.amplitude.re;
+    im = kq.amplitude.im;
+
+    kq.amplitude.re = -re;
+    kq.amplitude.im = -im;
 
     log_symbolic_event("PAULI_Z", kq.id, kq.tag, "Inverted inner state");
 

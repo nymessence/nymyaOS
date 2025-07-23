@@ -15,6 +15,10 @@
 
 #ifndef __KERNEL__
 
+/*
+ * User-space implementation of Phase (S) gate.
+ * Multiplies amplitude by exp(i * π/2) == i.
+ */
 int nymya_3306_phase_gate(nymya_qubit* q) {
     if (!q) return -1;
 
@@ -26,19 +30,26 @@ int nymya_3306_phase_gate(nymya_qubit* q) {
 
 #else
 
+/*
+ * Kernel syscall: nymya_3306_phase_gate
+ * Multiplies qubit amplitude by fixed-point i (equivalent to phase shift π/2).
+ */
 SYSCALL_DEFINE1(nymya_3306_phase_gate, struct nymya_qubit __user *, user_q) {
     struct nymya_qubit kq;
-    double real, imag;
+    int64_t re, im;
 
     if (!user_q)
         return -EINVAL;
+
     if (copy_from_user(&kq, user_q, sizeof(kq)))
         return -EFAULT;
 
-    real = __real kq.amplitude;
-    imag = __imag kq.amplitude;
-    // Multiply by i: (a + bi) * i = -b + ai
-    kq.amplitude = (complex_double){ .real = -imag, .imag = real };
+    re = kq.amplitude.re;
+    im = kq.amplitude.im;
+
+    // (a + bi) * i = -b + ai
+    kq.amplitude.re = -im;
+    kq.amplitude.im = re;
 
     log_symbolic_event("PHASE_S", kq.id, kq.tag, "Applied S gate (π/2 phase)");
 

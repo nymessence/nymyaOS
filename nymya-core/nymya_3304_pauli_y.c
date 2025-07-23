@@ -14,10 +14,16 @@
 
 #ifndef __KERNEL__
 
+/*
+ * User-space implementation of Pauli-Y gate on a qubit.
+ * Multiplies amplitude by the imaginary unit i:
+ * (a + bi) * i = -b + ai
+ */
 int nymya_3304_pauli_y(nymya_qubit* q) {
     if (!q) return -1;
 
-    q->amplitude *= I;
+    // Using complex_double as _Complex double in user-space:
+    q->amplitude = make_complex(-complex_im(q->amplitude), complex_re(q->amplitude));
 
     log_symbolic_event("PAULI_Y", q->id, q->tag, "Dream vector rotated");
     return 0;
@@ -25,19 +31,27 @@ int nymya_3304_pauli_y(nymya_qubit* q) {
 
 #else
 
+/*
+ * Kernel syscall: nymya_3304_pauli_y
+ * Multiplies the qubit amplitude by i.
+ * Note: kernel uses fixed-point complex, so manually swap real and imag parts.
+ */
 SYSCALL_DEFINE1(nymya_3304_pauli_y, struct nymya_qubit __user *, user_q) {
     struct nymya_qubit kq;
-    double real, imag;
+    int64_t re, im;
 
     if (!user_q)
         return -EINVAL;
     if (copy_from_user(&kq, user_q, sizeof(kq)))
         return -EFAULT;
 
-    // Multiply amplitude by I: (a + bi) * i = -b + ai
-    real = __real kq.amplitude;
-    imag = __imag kq.amplitude;
-    kq.amplitude = (complex_double){ .real = -imag, .imag = real };
+    // Extract fixed-point real and imaginary parts
+    re = kq.amplitude.re;
+    im = kq.amplitude.im;
+
+    // Multiply amplitude by i: (a + bi)*i = -b + ai
+    kq.amplitude.re = -im;
+    kq.amplitude.im = re;
 
     log_symbolic_event("PAULI_Y", kq.id, kq.tag, "Dream vector rotated");
 

@@ -1,20 +1,41 @@
 #ifndef NYMYA_H
 #define NYMYA_H
 
-#define NYMYA_TAG_MAXLEN 32   // moved to top to avoid undeclared error
+// Fixed-point scale for Q32.32 format.
+// 1 unit = 2^-32 in real value.
+// Allows representing fractional numbers without floating-point.
+#define FIXED_POINT_SCALE (1ULL << 32)
+
+// Maximum length for qubit tags (labels)
+#define NYMYA_TAG_MAXLEN 32
 
 #ifdef __KERNEL__
+
     #include <linux/types.h>
     #include <linux/string.h>
 
-    // Fixed-point Q32.32 format to avoid floating point in kernel
-    #define FIXED_POINT_SCALE (1ULL << 32)
-
+    /**
+     * complex_double - Fixed-point complex number type for kernel space.
+     * @re: Real part in Q32.32 fixed-point.
+     * @im: Imaginary part in Q32.32 fixed-point.
+     *
+     * Used instead of native floating-point complex types,
+     * since kernel code generally avoids floating-point arithmetic.
+     */
     typedef struct {
-        int64_t re; // fixed-point real part
-        int64_t im; // fixed-point imaginary part
+        int64_t re;  // Fixed-point real component
+        int64_t im;  // Fixed-point imaginary component
     } complex_double;
 
+    /**
+     * make_complex - Converts double precision real and imaginary parts
+     *                to fixed-point complex_double.
+     * @re: Real part as double.
+     * @im: Imaginary part as double.
+     *
+     * Returns:
+     *   complex_double with components scaled to Q32.32 fixed-point.
+     */
     static inline complex_double make_complex(double re, double im) {
         complex_double c;
         c.re = (int64_t)(re * FIXED_POINT_SCALE);
@@ -22,46 +43,121 @@
         return c;
     }
 
+    /**
+     * complex_mul - Multiplies two fixed-point complex_double values.
+     * @a: First operand.
+     * @b: Second operand.
+     *
+     * Uses 128-bit intermediate to prevent overflow during multiplication,
+     * then shifts right by 32 bits to maintain fixed-point format.
+     *
+     * Returns:
+     *   The product as a complex_double.
+     */
     static inline complex_double complex_mul(complex_double a, complex_double b) {
+        __int128 re_part = (__int128)a.re * b.re - (__int128)a.im * b.im;
+        __int128 im_part = (__int128)a.re * b.im + (__int128)a.im * b.re;
+
         complex_double result;
-        result.re = ((__int128)a.re * b.re - (__int128)a.im * b.im) >> 32;
-        result.im = ((__int128)a.re * b.im + (__int128)a.im * b.re) >> 32;
+        result.re = (int64_t)(re_part >> 32);
+        result.im = (int64_t)(im_part >> 32);
         return result;
     }
 
+    /**
+     * complex_exp_i - Kernel stub for complex exponential of imaginary number.
+     * @theta: Angle in radians (double).
+     *
+     * Floating-point trig functions are generally disallowed in kernel code.
+     * For now, returns identity (1 + 0i). Userspace should do the trig and pass
+     * fixed-point sine and cosine instead.
+     *
+     * Returns:
+     *   complex_double representing e^(i * theta) — currently identity.
+     */
     static inline complex_double complex_exp_i(double theta) {
-        // No trig in kernel; just return identity (1 + 0i)
+        (void)theta; // suppress unused parameter warning
         complex_double result = { FIXED_POINT_SCALE, 0 };
         return result;
     }
 
+    /**
+     * complex_re - Returns the real part of fixed-point complex_double.
+     * @c: complex_double value.
+     *
+     * Returns:
+     *   Fixed-point real component.
+     */
     static inline int64_t complex_re(complex_double c) { return c.re; }
+
+    /**
+     * complex_im - Returns the imaginary part of fixed-point complex_double.
+     * @c: complex_double value.
+     *
+     * Returns:
+     *   Fixed-point imaginary component.
+     */
     static inline int64_t complex_im(complex_double c) { return c.im; }
+
+    /**
+     * complex_conj - Returns the complex conjugate of a fixed-point complex_double.
+     * @c: complex_double value.
+     *
+     * Returns:
+     *   The conjugate with imaginary part negated.
+     */
     static inline complex_double complex_conj(complex_double c) {
         complex_double conj = { c.re, -c.im };
         return conj;
     }
 
-    // Helpers to convert fixed-point to double (for easier use in kernel code)
+    /**
+     * fixed_to_double - Converts fixed-point Q32.32 to double precision.
+     * @fixed: Fixed-point number.
+     *
+     * Returns:
+     *   Double precision floating-point number.
+     */
     static inline double fixed_to_double(int64_t fixed) {
         return (double)fixed / (double)FIXED_POINT_SCALE;
     }
 
+    /**
+     * complex_re_double - Converts fixed-point complex real part to double.
+     * @c: complex_double value.
+     *
+     * Returns:
+     *   Double precision real component.
+     */
     static inline double complex_re_double(complex_double c) {
         return fixed_to_double(c.re);
     }
 
+    /**
+     * complex_im_double - Converts fixed-point complex imaginary part to double.
+     * @c: complex_double value.
+     *
+     * Returns:
+     *   Double precision imaginary component.
+     */
     static inline double complex_im_double(complex_double c) {
         return fixed_to_double(c.im);
     }
 
+    /**
+     * nymya_qubit - Qubit struct for kernel mode.
+     * @id: Unique qubit identifier.
+     * @tag: Label/tag for qubit, max NYMYA_TAG_MAXLEN chars.
+     * @amplitude: Qubit amplitude as fixed-point complex number.
+     */
     typedef struct nymya_qubit {
         uint64_t id;
         char tag[NYMYA_TAG_MAXLEN];
         complex_double amplitude;
     } nymya_qubit;
 
-#else
+#else // userspace
+
     #include <stdio.h>
     #include <stdlib.h>
     #include <stdint.h>
@@ -69,55 +165,132 @@
     #include <string.h>
     #include <math.h>
 
+    /**
+     * complex_double - Userspace native complex double type (_Complex double).
+     */
     typedef _Complex double complex_double;
 
+    /**
+     * make_complex - Create a complex_double from real and imaginary doubles.
+     * @re: Real part.
+     * @im: Imaginary part.
+     *
+     * Returns:
+     *   Native complex double.
+     */
     static inline complex_double make_complex(double re, double im) {
         return re + im * I;
     }
 
+    /**
+     * complex_mul - Multiply two complex_double numbers.
+     * @a: First operand.
+     * @b: Second operand.
+     *
+     * Returns:
+     *   The product (a * b).
+     */
     static inline complex_double complex_mul(complex_double a, complex_double b) {
         return a * b;
     }
 
+    /**
+     * complex_exp_i - Computes e^(i * theta).
+     * @theta: Angle in radians.
+     *
+     * Returns:
+     *   Complex exponential with imaginary exponent.
+     */
     static inline complex_double complex_exp_i(double theta) {
         return cexp(I * theta);
     }
 
+    /**
+     * complex_re - Returns real part of complex_double.
+     * @c: complex_double value.
+     *
+     * Returns:
+     *   Real part.
+     */
     static inline double complex_re(complex_double c) { return creal(c); }
+
+    /**
+     * complex_im - Returns imaginary part of complex_double.
+     * @c: complex_double value.
+     *
+     * Returns:
+     *   Imaginary part.
+     */
     static inline double complex_im(complex_double c) { return cimag(c); }
+
+    /**
+     * complex_conj - Returns complex conjugate.
+     * @c: complex_double value.
+     *
+     * Returns:
+     *   Conjugated complex_double.
+     */
     static inline complex_double complex_conj(complex_double c) { return conj(c); }
 
+    /**
+     * nymya_qubit - Qubit struct for userspace.
+     * @id: Unique qubit identifier.
+     * @tag: Label/tag for qubit, max NYMYA_TAG_MAXLEN chars.
+     * @amplitude: Qubit amplitude as native complex_double.
+     */
     typedef struct nymya_qubit {
         uint64_t id;
         char tag[NYMYA_TAG_MAXLEN];
         complex_double amplitude;
     } nymya_qubit;
 
-#endif  // __KERNEL__
+#endif // __KERNEL__
 
-// Define position structs after nymya_qubit so visible everywhere
-
+/**
+ * nymya_qpos3d - 3D position struct for a qubit.
+ * @x, y, z: Spatial coordinates.
+ * @q: Associated qubit.
+ */
 typedef struct {
     double x, y, z;
     nymya_qubit q;
 } nymya_qpos3d;
 
+/**
+ * nymya_qpos4d - 4D position struct for a qubit.
+ * @x, y, z, w: 4D spatial coordinates.
+ * @q: Associated qubit.
+ */
 typedef struct {
     double x, y, z, w;
     nymya_qubit q;
 } nymya_qpos4d;
 
+/**
+ * nymya_qpos5d - 5D position struct for a qubit.
+ * @x, y, z, w, v: 5D spatial coordinates.
+ * @q: Associated qubit.
+ */
 typedef struct {
     double x, y, z, w, v;
     nymya_qubit q;
 } nymya_qpos5d;
 
-#endif // NYMYA_H
-
-
-
 // Shared function declarations
 int log_symbolic_event(const char* gate, uint64_t id, const char* tag, const char* msg);
+
+#ifdef __KERNEL__
+/**
+ * Fixed-point sine and cosine functions.
+ * @theta: angle in Q32.32 fixed-point format.
+ *
+ * Returns sine or cosine of the angle as Q32.32 fixed-point integer.
+ */
+int64_t fixed_sin(int64_t theta);
+int64_t fixed_cos(int64_t theta);
+#endif
+
+#endif // NYMYA_H
 
 // Quantum-symbolic syscalls
 int nymya_3301_identity_gate(nymya_qubit* q);
