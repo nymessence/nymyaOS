@@ -17,13 +17,14 @@
 #endif
 
 // Define PI and PI/2 in fixed-point for kernel calculations if not already in nymya.h
-#ifndef FIXED_POINT_PI
-#define FIXED_POINT_PI (int64_t)(3.141592653589793 * FIXED_POINT_SCALE)
-#endif
+// These are now defined in nymya.h and should not be redefined here.
+// #ifndef FIXED_POINT_PI
+// #define FIXED_POINT_PI (int64_t)(3.141592653589793 * FIXED_POINT_SCALE)
+// #endif
 
-#ifndef FIXED_POINT_PI_DIV_2
-#define FIXED_POINT_PI_DIV_2 (int64_t)(1.5707963267948966 * FIXED_POINT_SCALE) // M_PI / 2.0
-#endif
+// #ifndef FIXED_POINT_PI_DIV_2
+// #define FIXED_POINT_PI_DIV_2 (int64_t)(1.5707963267948966 * FIXED_POINT_SCALE) // M_PI / 2.0
+// #endif
 
 #ifndef __KERNEL__
 
@@ -67,76 +68,8 @@ int nymya_3328_swap_pow(nymya_qubit* q1, nymya_qubit* q2, double alpha) {
 
 #else // __KERNEL__
 
-/**
- * fixed_point_mul - Performs fixed-point multiplication.
- * @val1: The first fixed-point value.
- * @val2: The second fixed-point value.
- *
- * Multiplies two fixed-point numbers and scales the result back to fixed-point.
- * Uses __int128 for intermediate calculation to prevent overflow.
- *
- * Returns:
- * The product as an int64_t (fixed-point).
- */
-static inline int64_t fixed_point_mul(int64_t val1, int64_t val2) {
-    // Corrected to use __int128 (two underscores) as a GCC extension
-    return (int64_t)(((__int128)val1 * val2) >> 32);
-}
-
-/**
- * fixed_point_cos - Calculates the cosine of a fixed-point angle.
- * @angle_fp: The angle in fixed-point format.
- *
- * This is a simplified fixed-point cosine approximation for kernel use.
- * For production, consider a more robust implementation (e.g., CORDIC or lookup table).
- *
- * Returns:
- * The cosine value in fixed-point format.
- */
-static inline int64_t fixed_point_cos(int64_t angle_fp) {
-    // Normalize angle to [-PI, PI] for better approximation range
-    while (angle_fp > FIXED_POINT_PI) angle_fp -= (FIXED_POINT_PI << 1);
-    while (angle_fp < -FIXED_POINT_PI) angle_fp += (FIXED_POINT_PI << 1);
-
-    // Simple Taylor series approximation for cos(x) = 1 - x^2/2! + x^4/4! ...
-    // Note: This is a very basic approximation and may not be accurate for all angles.
-    // It's meant to resolve compilation errors and provide a placeholder.
-    int64_t term1 = FIXED_POINT_SCALE; // 1
-    int64_t term2 = fixed_point_mul(angle_fp, angle_fp); // x^2
-    term2 = fixed_point_mul(term2, (int64_t)(0.5 * FIXED_POINT_SCALE)); // x^2 / 2
-    // For higher accuracy, more terms would be needed:
-    // int64_t term3 = fixed_point_mul(fixed_point_mul(fixed_point_mul(angle_fp, angle_fp), fixed_point_mul(angle_fp, angle_fp)), (int64_t)(1.0/24.0 * FIXED_POINT_SCALE)); // x^4 / 4!
-
-    return term1 - term2; // Simplified to 1 - x^2/2
-}
-
-/**
- * fixed_point_sin - Calculates the sine of a fixed-point angle.
- * @angle_fp: The angle in fixed-point format.
- *
- * This is a simplified fixed-point sine approximation for kernel use.
- * For production, consider a more robust implementation (e.g., CORDIC or lookup table).
- *
- * Returns:
- * The sine value in fixed-point format.
- */
-static inline int64_t fixed_point_sin(int64_t angle_fp) {
-    // Normalize angle to [-PI, PI] for better approximation range
-    while (angle_fp > FIXED_POINT_PI) angle_fp -= (FIXED_POINT_PI << 1);
-    while (angle_fp < -FIXED_POINT_PI) angle_fp += (FIXED_POINT_PI << 1);
-
-    // Simple Taylor series approximation for sin(x) = x - x^3/3! + x^5/5! ...
-    // Note: This is a very basic approximation and may not be accurate for all angles.
-    // It's meant to resolve compilation errors and provide a placeholder.
-    int64_t term1 = angle_fp; // x
-    int64_t term2_numerator = fixed_point_mul(fixed_point_mul(angle_fp, angle_fp), angle_fp); // x^3
-    int64_t term2 = fixed_point_mul(term2_numerator, (int64_t)(1.0/6.0 * FIXED_POINT_SCALE)); // x^3 / 6
-    // For higher accuracy, more terms would be needed:
-    // int64_t term3 = fixed_point_mul(fixed_point_mul(fixed_point_mul(fixed_point_mul(fixed_point_mul(angle_fp, angle_fp), angle_fp), angle_fp), angle_fp), (int64_t)(1.0/120.0 * FIXED_POINT_SCALE)); // x^5 / 5!
-
-    return term1 - term2; // Simplified to x - x^3/6
-}
-
+// fixed_point_mul, fixed_point_cos, fixed_point_sin are now defined as static inline in nymya.h
+// and should NOT be redefined here.
 
 /**
  * __do_sys_nymya_3328_swap_pow - Kernel system call implementation for SWAP^alpha gate.
@@ -179,9 +112,9 @@ SYSCALL_DEFINE3(nymya_3328_swap_pow,
     // Calculate fixed-point angle: alpha * (PI / 2)
     int64_t angle_fp = fixed_point_mul(alpha_fp, FIXED_POINT_PI_DIV_2);
 
-    // Calculate fixed-point cosine and sine values
-    int64_t c_fp = fixed_point_cos(angle_fp);
-    int64_t s_fp = fixed_point_sin(angle_fp);
+    // Calculate fixed-point cosine and sine values using wrappers from nymya.h
+    int64_t c_fp = fixed_cos(angle_fp);
+    int64_t s_fp = fixed_sin(angle_fp);
 
     // Get current amplitudes in fixed-point complex_double format
     complex_double a = k_q1.amplitude;

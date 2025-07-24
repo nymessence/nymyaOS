@@ -52,21 +52,7 @@ int nymya_3327_sqrt_iswap(nymya_qubit* q1, nymya_qubit* q2) {
 
 #else // __KERNEL__
 
-/**
- * fixed_point_mul - Performs fixed-point multiplication.
- * @val1: The first fixed-point value.
- * @val2: The second fixed-point value.
- *
- * Multiplies two fixed-point numbers and scales the result back to fixed-point.
- * Uses __int128 for intermediate calculation to prevent overflow.
- *
- * Returns:
- * The product as an int64_t (fixed-point).
- */
-static inline int64_t fixed_point_mul(int64_t val1, int64_t val2) {
-    // Corrected to use __int128 (two underscores) as a GCC extension
-    return (int64_t)(((__int128)val1 * val2) >> 32);
-}
+// fixed_point_mul is now defined as static inline in nymya.h and should NOT be redefined here.
 
 /**
  * __do_sys_nymya_3327_sqrt_iswap - Kernel system call implementation for √iSWAP gate.
@@ -127,10 +113,11 @@ SYSCALL_DEFINE2(nymya_3327_sqrt_iswap,
     term2.im = k_q2.amplitude.im + k_q1.amplitude.re;
 
     // Divide by sqrt(2.0) by multiplying with 1/sqrt(2) in fixed-point
-    k_q1.amplitude.re = fixed_point_mul(term1.re, FIXED_POINT_SQRT2_INV_FP);
-    k_q1.amplitude.im = fixed_point_mul(term1.im, FIXED_POINT_SQRT2_INV_FP);
-    k_q2.amplitude.re = fixed_point_mul(term2.re, FIXED_POINT_SQRT2_INV_FP);
-    k_q2.amplitude.im = fixed_point_mul(term2.im, FIXED_POINT_SQRT2_INV_FP);
+    // Use complex_mul for scalar multiplication of complex numbers
+    complex_double scalar_factor = make_complex(FIXED_POINT_SQRT2_INV_FP, 0);
+
+    k_q1.amplitude = complex_mul(term1, scalar_factor);
+    k_q2.amplitude = complex_mul(term2, scalar_factor);
 
     // Log the symbolic event
     log_symbolic_event("√iSWAP", k_q2.id, k_q2.tag, "√iSWAP applied");

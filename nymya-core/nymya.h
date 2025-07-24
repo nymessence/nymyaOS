@@ -14,6 +14,11 @@
     #include <linux/types.h>
     #include <linux/string.h>
 
+    // Fixed-point constants for kernel calculations
+    #define FIXED_POINT_PI (int64_t)(3.141592653589793 * FIXED_POINT_SCALE)
+    #define FIXED_POINT_PI_DIV_2 (int64_t)(1.5707963267948966 * FIXED_POINT_SCALE)
+    #define FIXED_POINT_SQRT2_INV_FP (int64_t)(0.7071067811865476 * FIXED_POINT_SCALE)
+
     /**
      * complex_double - Fixed-point complex number type for kernel space.
      * @re: Real part in Q32.32 fixed-point.
@@ -26,6 +31,76 @@
         int64_t re;  // Fixed-point real component
         int64_t im;  // Fixed-point imaginary component
     } complex_double;
+
+    /**
+     * fixed_point_mul - Performs fixed-point multiplication.
+     * @val1: The first fixed-point value.
+     * @val2: The second fixed-point value.
+     *
+     * Multiplies two fixed-point numbers and scales the result back to fixed-point.
+     * Uses 128-bit intermediate to prevent overflow during multiplication,
+     * then shifts right by 32 bits to maintain fixed-point format.
+     *
+     * Returns:
+     * The product as an int64_t (fixed-point).
+     */
+    static inline int64_t fixed_point_mul(int64_t val1, int64_t val2) {
+        return (int64_t)(((__int128)val1 * val2) >> 32);
+    }
+
+    /**
+     * fixed_point_cos - Calculates the cosine of a fixed-point angle.
+     * @angle_fp: The angle in fixed-point format.
+     *
+     * This is a simplified fixed-point cosine approximation for kernel use.
+     * For production, consider a more robust implementation (e.g., CORDIC or lookup table).
+     *
+     * Returns:
+     * The cosine value in fixed-point format.
+     */
+    static inline int64_t fixed_point_cos(int64_t angle_fp) {
+        // Normalize angle to [-PI, PI] for better approximation range
+        while (angle_fp > FIXED_POINT_PI) angle_fp -= (FIXED_POINT_PI << 1);
+        while (angle_fp < -FIXED_POINT_PI) angle_fp += (FIXED_POINT_PI << 1);
+        // Simple Taylor series approximation for cos(x) = 1 - x^2/2!
+        int64_t term1 = FIXED_POINT_SCALE; // 1
+        int64_t term2 = fixed_point_mul(angle_fp, angle_fp); // x^2
+        term2 = fixed_point_mul(term2, (int64_t)(0.5 * FIXED_POINT_SCALE)); // x^2 / 2
+        return term1 - term2;
+    }
+
+    /**
+     * fixed_point_sin - Calculates the sine of a fixed-point angle.
+     * @angle_fp: The angle in fixed-point format.
+     *
+     * This is a simplified fixed-point sine approximation for kernel use.
+     * For production, consider a more robust implementation (e.g., CORDIC or lookup table).
+     *
+     * Returns:
+     * The sine value in fixed-point format.
+     */
+    static inline int64_t fixed_point_sin(int64_t angle_fp) {
+        // Normalize angle to [-PI, PI] for better approximation range
+        while (angle_fp > FIXED_POINT_PI) angle_fp -= (FIXED_POINT_PI << 1);
+        while (angle_fp < -FIXED_POINT_PI) angle_fp += (FIXED_POINT_PI << 1);
+        // Simple Taylor series approximation for sin(x) = x - x^3/3!
+        int64_t term1 = angle_fp; // x
+        int64_t term2_numerator = fixed_point_mul(fixed_point_mul(angle_fp, angle_fp), angle_fp); // x^3
+        int64_t term2 = fixed_point_mul(term2_numerator, (int64_t)(1.0/6.0 * FIXED_POINT_SCALE)); // x^3 / 6
+        return term1 - term2;
+    }
+
+    /**
+     * fixed_point_square - Calculates the square of a fixed-point number.
+     * @val: The fixed-point number.
+     *
+     * Returns:
+     * The square of the fixed-point number, adjusted for the fixed-point scale.
+     */
+    static inline int64_t fixed_point_square(int64_t val) {
+        // Perform multiplication using __int128 to prevent overflow, then shift.
+        return (int64_t)((__int128)val * val >> 32);
+    }
 
     /**
      * make_complex - Creates a fixed-point complex_double from fixed-point real and imaginary parts.
@@ -65,17 +140,15 @@
 
     /**
      * complex_exp_i - Kernel stub for complex exponential of imaginary number.
-     * @theta: Angle in radians (double).
+     * @theta_fp: Angle in fixed-point radians.
      *
-     * Floating-point trig functions are generally disallowed in kernel code.
-     * For now, returns identity (1 + 0i) in fixed-point.
+     * This function now takes fixed-point input and uses fixed-point sine/cosine.
      *
      * Returns:
-     * complex_double representing e^(i * theta) — currently identity.
+     * complex_double representing e^(i * theta_fp).
      */
-    static inline complex_double complex_exp_i(double theta) {
-        (void)theta; // suppress unused parameter warning
-        complex_double result = { FIXED_POINT_SCALE, 0 };
+    static inline complex_double complex_exp_i(int64_t theta_fp) {
+        complex_double result = { .re = fixed_point_cos(theta_fp), .im = fixed_point_sin(theta_fp) };
         return result;
     }
 
@@ -109,9 +182,28 @@
         return conj;
     }
 
-    // Removed fixed_to_double and related double-conversion functions from kernel section
-    // as they are incompatible with -mgeneral-regs-only compilation flag.
-    // Use fixed-point values directly within the kernel.
+    /**
+     * fixed_sin - Wrapper for fixed_point_sin to maintain existing API usage.
+     * @theta: The angle in fixed-point format.
+     *
+     * Returns:
+     * The sine value in fixed-point format.
+     */
+    static inline int64_t fixed_sin(int64_t theta) {
+        return fixed_point_sin(theta);
+    }
+
+    /**
+     * fixed_cos - Wrapper for fixed_point_cos to maintain existing API usage.
+     * @theta: The angle in fixed-point format.
+     *
+     * Returns:
+     * The cosine value in fixed-point format.
+     */
+    static inline int64_t fixed_cos(int64_t theta) {
+        return fixed_point_cos(theta);
+    }
+
 
     /**
      * nymya_qubit - Qubit struct for kernel mode.
@@ -289,6 +381,16 @@ complex_double fixed_complex_multiply(int64_t re1, int64_t im1, int64_t re2, int
 
 // Quantum-symbolic syscalls
 
+// These declarations should ideally be conditional if their parameter types change
+// based on __KERNEL__. They are currently non-conditional here, which might
+// lead to issues if their actual implementations (in their respective .c files)
+// use different types for kernel vs. userland.
+// The conditional declarations were in the 'nymya-function-documentation' immersive,
+// which represents the *intended* nymya.h content. This section here is a duplicate
+// and should be removed or made conditional. For now, assuming the top #ifndef NYMYA_H
+// and the conditional sections within this file are the primary source of truth.
+
+
 /**
  * nymya_3301_identity_gate - Applies the Identity gate to a single qubit.
  * @q: Pointer to the target qubit.
@@ -305,7 +407,7 @@ int nymya_3301_identity_gate(nymya_qubit* q);
 /**
  * nymya_3302_global_phase - Applies a global phase shift to a single qubit.
  * @q: Pointer to the target qubit.
- * @theta: The phase angle in radians.
+ * @theta: The phase angle in radians (double for userland, int64_t fixed-point for kernel).
  *
  * This function applies a global phase shift of $e^{i\theta}$ to the qubit's
  * amplitude. A global phase is generally unobservable but can be important
@@ -315,7 +417,11 @@ int nymya_3301_identity_gate(nymya_qubit* q);
  * - 0 on success.
  * - -1 if the qubit pointer is NULL.
  */
+#ifndef __KERNEL__
 int nymya_3302_global_phase(nymya_qubit* q, double theta);
+#else
+int nymya_3302_global_phase(nymya_qubit* q, int64_t theta);
+#endif
 
 /**
  * nymya_3303_pauli_x - Applies the Pauli-X (NOT) gate to a single qubit.
@@ -482,7 +588,7 @@ int nymya_3314_imaginary_swap(nymya_qubit* q1, nymya_qubit* q2);
 /**
  * nymya_3315_phase_shift - Applies a phase shift gate (Rz($\theta$)) to a single qubit.
  * @q: Pointer to the target qubit.
- * @theta: The phase angle in radians.
+ * @theta: The phase angle in radians (double for userland, int64_t fixed-point for kernel).
  *
  * This function applies a rotation around the Z-axis of the Bloch sphere by an angle $\theta$.
  * It applies a phase of $e^{i\theta}$ to the |1> state.
@@ -491,12 +597,16 @@ int nymya_3314_imaginary_swap(nymya_qubit* q1, nymya_qubit* q2);
  * - 0 on success.
  * - -1 if the qubit pointer is NULL.
  */
+#ifndef __KERNEL__
 int nymya_3315_phase_shift(nymya_qubit* q, double theta);
+#else
+int nymya_3315_phase_shift(nymya_qubit* q, int64_t theta);
+#endif
 
 /**
  * nymya_3316_phase_gate - Applies a specific phase gate (P gate) to a single qubit.
  * @q: Pointer to the target qubit.
- * @phi: The phase angle in radians.
+ * @phi: The phase angle in radians (double for userland, int64_t fixed-point for kernel).
  *
  * This function applies a general phase gate, which is a rotation around the Z-axis.
  * It maps $|1\rangle \rightarrow e^{i\phi}|1\rangle$.
@@ -505,13 +615,17 @@ int nymya_3315_phase_shift(nymya_qubit* q, double theta);
  * - 0 on success.
  * - -1 if the qubit pointer is NULL.
  */
+#ifndef __KERNEL__
 int nymya_3316_phase_gate(nymya_qubit* q, double phi);
+#else
+int nymya_3316_phase_gate(nymya_qubit* q, int64_t phi);
+#endif
 
 /**
  * nymya_3317_controlled_phase - Applies a Controlled-Phase (CPHASE) gate to two qubits.
  * @qc: Pointer to the control qubit.
  * @qt: Pointer to the target qubit.
- * @theta: The phase angle in radians.
+ * @theta: The phase angle in radians (double for userland, int64_t fixed-point for kernel).
  *
  * The CPHASE gate applies a phase of $e^{i\theta}$ to the |11> state if both
  * control and target qubits are in the |1> state.
@@ -520,7 +634,11 @@ int nymya_3316_phase_gate(nymya_qubit* q, double phi);
  * - 0 on success.
  * - -1 if any qubit pointer is NULL.
  */
+#ifndef __KERNEL__
 int nymya_3317_controlled_phase(nymya_qubit* qc, nymya_qubit* qt, double theta);
+#else
+int nymya_3317_controlled_phase(nymya_qubit* qc, nymya_qubit* qt, int64_t theta);
+#endif
 
 /**
  * nymya_3318_controlled_phase_s - Applies a Controlled-S (CS) gate to two qubits.
@@ -539,8 +657,7 @@ int nymya_3318_controlled_phase_s(nymya_qubit* qc, nymya_qubit* qt);
 /**
  * nymya_3319_rotate_x - Applies a rotation around the X-axis to a single qubit.
  * @q: Pointer to the target qubit.
- * @theta: The angle of rotation in radians.
- * (double for userland, int64_t fixed-point for kernel).
+ * @theta: The angle of rotation in radians (double for userland, int64_t fixed-point for kernel).
  *
  * This function applies a rotation $R_x(\theta)$ to the qubit's state vector
  * on the Bloch sphere.
@@ -558,8 +675,7 @@ int nymya_3319_rotate_x(nymya_qubit* q, int64_t theta); // Kernel version accept
 /**
  * nymya_3320_rotate_y - Applies a rotation around the Y-axis to a single qubit.
  * @q: Pointer to the target qubit.
- * @theta: The angle of rotation in radians.
- * (double for userland, int64_t fixed-point for kernel).
+ * @theta: The angle of rotation in radians (double for userland, int64_t fixed-point for kernel).
  *
  * This function applies a rotation $R_y(\theta)$ to the qubit's state vector
  * on the Bloch sphere.
@@ -577,8 +693,7 @@ int nymya_3320_rotate_y(nymya_qubit* q, int64_t theta); // Kernel version accept
 /**
  * nymya_3321_rotate_z - Applies a rotation around the Z-axis to a single qubit.
  * @q: Pointer to the target qubit.
- * @theta: The angle of rotation in radians.
- * (double for userland, int64_t fixed-point for kernel).
+ * @theta: The angle of rotation in radians (double for userland, int64_t fixed-point for kernel).
  *
  * This function applies a rotation $R_z(\theta)$ to the qubit's state vector
  * on the Bloch sphere.
@@ -597,7 +712,7 @@ int nymya_3321_rotate_z(nymya_qubit* q, int64_t theta); // Kernel version accept
  * nymya_3322_xx_interaction - Applies an XX interaction gate to two qubits.
  * @q1: Pointer to the first qubit.
  * @q2: Pointer to the second qubit.
- * @theta: The interaction angle.
+ * @theta: The interaction angle (double for userland, int64_t fixed-point for kernel).
  *
  * This gate implements an interaction Hamiltonian proportional to $\sigma_x \otimes \sigma_x$.
  * It is often used in quantum simulation.
@@ -606,13 +721,17 @@ int nymya_3321_rotate_z(nymya_qubit* q, int64_t theta); // Kernel version accept
  * - 0 on success.
  * - -1 if any qubit pointer is NULL.
  */
+#ifndef __KERNEL__
 int nymya_3322_xx_interaction(nymya_qubit* q1, nymya_qubit* q2, double theta);
+#else
+int nymya_3322_xx_interaction(nymya_qubit* q1, nymya_qubit* q2, int64_t theta);
+#endif
 
 /**
  * nymya_3323_yy_interaction - Applies a YY interaction gate to two qubits.
  * @q1: Pointer to the first qubit.
  * @q2: Pointer to the second qubit.
- * @theta: The interaction angle.
+ * @theta: The interaction angle (double for userland, int64_t fixed-point for kernel).
  *
  * This gate implements an interaction Hamiltonian proportional to $\sigma_y \otimes \sigma_y$.
  * It is often used in quantum simulation.
@@ -621,13 +740,17 @@ int nymya_3322_xx_interaction(nymya_qubit* q1, nymya_qubit* q2, double theta);
  * - 0 on success.
  * - -1 if any qubit pointer is NULL.
  */
+#ifndef __KERNEL__
 int nymya_3323_yy_interaction(nymya_qubit* q1, nymya_qubit* q2, double theta);
+#else
+int nymya_3323_yy_interaction(nymya_qubit* q1, nymya_qubit* q2, int64_t theta);
+#endif
 
 /**
  * nymya_3324_zz_interaction - Applies a ZZ interaction gate to two qubits.
  * @q1: Pointer to the first qubit.
  * @q2: Pointer to the second qubit.
- * @theta: The interaction angle.
+ * @theta: The interaction angle (double for userland, int64_t fixed-point for kernel).
  *
  * This gate implements an interaction Hamiltonian proportional to $\sigma_z \otimes \sigma_z$.
  * It is often used in quantum simulation.
@@ -636,13 +759,17 @@ int nymya_3323_yy_interaction(nymya_qubit* q1, nymya_qubit* q2, double theta);
  * - 0 on success.
  * - -1 if any qubit pointer is NULL.
  */
+#ifndef __KERNEL__
 int nymya_3324_zz_interaction(nymya_qubit* q1, nymya_qubit* q2, double theta);
+#else
+int nymya_3324_zz_interaction(nymya_qubit* q1, nymya_qubit* q2, int64_t theta);
+#endif
 
 /**
  * nymya_3325_xyz_entangle - Applies an XYZ entangling gate to two qubits.
  * @q1: Pointer to the first qubit.
  * @q2: Pointer to the second qubit.
- * @theta: The entangling angle.
+ * @theta: The entangling angle (double for userland, int64_t fixed-point for kernel).
  *
  * This gate implements a specific entangling operation involving X, Y, and Z Pauli matrices.
  * The exact transformation depends on the underlying implementation.
@@ -651,7 +778,11 @@ int nymya_3324_zz_interaction(nymya_qubit* q1, nymya_qubit* q2, double theta);
  * - 0 on success.
  * - -1 if any qubit pointer is NULL.
  */
+#ifndef __KERNEL__
 int nymya_3325_xyz_entangle(nymya_qubit* q1, nymya_qubit* q2, double theta);
+#else
+int nymya_3325_xyz_entangle(nymya_qubit* q1, nymya_qubit* q2, int64_t theta);
+#endif
 
 /**
  * nymya_3326_sqrt_swap - Applies the square root of SWAP gate to two qubits.
@@ -685,7 +816,7 @@ int nymya_3327_sqrt_iswap(nymya_qubit* q1, nymya_qubit* q2);
  * nymya_3328_swap_pow - Applies an interpolated SWAP^alpha gate to two qubits.
  * @q1: Pointer to the first qubit.
  * @q2: Pointer to the second qubit.
- * @alpha: The interpolation parameter. A value of 0 results in an Identity gate,
+ * @alpha: The interpolation parameter (double for userland, int64_t fixed-point for kernel). A value of 0 results in an Identity gate,
  * and a value of 1 results in a full SWAP gate.
  *
  * This gate allows for continuous interpolation between the Identity and SWAP gates.
@@ -694,7 +825,11 @@ int nymya_3327_sqrt_iswap(nymya_qubit* q1, nymya_qubit* q2);
  * - 0 on success.
  * - -1 if either qubit pointer is NULL.
  */
+#ifndef __KERNEL__
 int nymya_3328_swap_pow(nymya_qubit* q1, nymya_qubit* q2, double alpha);
+#else
+int nymya_3328_swap_pow(nymya_qubit* q1, nymya_qubit* q2, int64_t alpha);
+#endif
 
 /**
  * nymya_3329_fredkin - Applies a Fredkin (Controlled-SWAP) gate to three qubits.
@@ -715,7 +850,7 @@ int nymya_3329_fredkin(nymya_qubit* q_ctrl, nymya_qubit* q1, nymya_qubit* q2);
  * nymya_3330_rotate - Applies a rotation gate to a single qubit around a specified axis.
  * @q: Pointer to the qubit to rotate.
  * @axis: The axis of rotation ('X', 'Y', or 'Z', case-insensitive).
- * @theta: The angle of rotation in radians.
+ * @theta: The angle of rotation in radians (double for userland, int64_t fixed-point for kernel).
  *
  * This function acts as a wrapper, calling the appropriate single-qubit rotation
  * gate ($R_x$, $R_y$, or $R_z$) based on the specified axis and angle.
@@ -724,7 +859,11 @@ int nymya_3329_fredkin(nymya_qubit* q_ctrl, nymya_qubit* q1, nymya_qubit* q2);
  * - 0 on success.
  * - -1 if the qubit pointer is NULL or an unknown axis is specified.
  */
+#ifndef __KERNEL__
 int nymya_3330_rotate(nymya_qubit* q, char axis, double theta);
+#else
+int nymya_3330_rotate(nymya_qubit* q, char axis, int64_t theta);
+#endif
 
 /**
  * nymya_3331_barenco - Applies a Barenco (Controlled-Controlled-Controlled-NOT) gate to three qubits.
@@ -745,7 +884,7 @@ int nymya_3331_barenco(nymya_qubit* q1, nymya_qubit* q2, nymya_qubit* q3);
  * nymya_3332_berkeley - Applies a Berkeley gate to two qubits.
  * @q1: Pointer to the first qubit.
  * @q2: Pointer to the second qubit.
- * @theta: The gate parameter.
+ * @theta: The gate parameter (double for userland, int64_t fixed-point for kernel).
  *
  * This function implements a two-qubit Berkeley gate, which is a parameterized
  * entangling gate. The exact transformation depends on the parameter $\theta$.
@@ -754,7 +893,11 @@ int nymya_3331_barenco(nymya_qubit* q1, nymya_qubit* q2, nymya_qubit* q3);
  * - 0 on success.
  * - -1 if any qubit pointer is NULL.
  */
+#ifndef __KERNEL__
 int nymya_3332_berkeley(nymya_qubit* q1, nymya_qubit* q2, double theta);
+#else
+int nymya_3332_berkeley(nymya_qubit* q1, nymya_qubit* q2, int64_t theta);
+#endif
 
 /**
  * nymya_3333_c_v - Applies a Controlled-V gate to two qubits.
@@ -803,7 +946,7 @@ int nymya_3335_dagwood(nymya_qubit* q1, nymya_qubit* q2, nymya_qubit* q3);
  * nymya_3336_echo_cr - Applies an Echo Cross-Resonance gate to two qubits.
  * @q1: Pointer to the first qubit.
  * @q2: Pointer to the second qubit.
- * @theta: The interaction angle.
+ * @theta: The interaction angle (double for userland, int64_t fixed-point for kernel).
  *
  * This function implements an Echo Cross-Resonance gate, a common entangling
  * gate used in superconducting qubit architectures. It applies a controlled
@@ -813,7 +956,11 @@ int nymya_3335_dagwood(nymya_qubit* q1, nymya_qubit* q2, nymya_qubit* q3);
  * - 0 on success.
  * - -1 if any qubit pointer is NULL.
  */
+#ifndef __KERNEL__
 int nymya_3336_echo_cr(nymya_qubit* q1, nymya_qubit* q2, double theta);
+#else
+int nymya_3336_echo_cr(nymya_qubit* q1, nymya_qubit* q2, int64_t theta);
+#endif
 
 /**
  * nymya_3337_fermion_sim - Applies a fermionic simulation gate to two qubits.
@@ -833,7 +980,7 @@ int nymya_3337_fermion_sim(nymya_qubit* q1, nymya_qubit* q2);
  * nymya_3338_givens - Applies a Givens rotation gate to two qubits.
  * @q1: Pointer to the first qubit.
  * @q2: Pointer to the second qubit.
- * @theta: The rotation angle.
+ * @theta: The rotation angle (double for userland, int64_t fixed-point for kernel).
  *
  * This function implements a Givens rotation, which is a unitary operation
  * used in linear algebra, adapted for two-qubit systems. It can be used
@@ -843,7 +990,11 @@ int nymya_3337_fermion_sim(nymya_qubit* q1, nymya_qubit* q2);
  * - 0 on success.
  * - -1 if any qubit pointer is NULL.
  */
+#ifndef __KERNEL__
 int nymya_3338_givens(nymya_qubit* q1, nymya_qubit* q2, double theta);
+#else
+int nymya_3338_givens(nymya_qubit* q1, nymya_qubit* q2, int64_t theta);
+#endif
 
 /**
  * nymya_3339_magic - Applies a Magic gate to two qubits.
@@ -1102,81 +1253,82 @@ int nymya_3355_fcc_lattice(nymya_qpos3d qubits[], size_t count);
  * Returns:
  * - 0 on success.
  * - -EINVAL if the qubits array is NULL or count is less than the minimum for an HCP unit.
- */
+ */
 int nymya_3356_hcp_lattice(nymya_qpos3d qubits[], size_t count);
 
 /**
- * nymya_3357_e8_projected_lattice - Applies quantum operations on qubits in an E8 projected lattice.
- * @qubits: An array of nymya_qpos3d structures, representing qubits with their 3D positions.
- * @count: The number of qubits in the array.
- *
- * This function simulates quantum operations (e.g., Hadamard, CNOT) on qubits
- * arranged in a 3D projection of an E8 lattice structure.
- *
- * Returns:
- * - 0 on success.
- * - -EINVAL if the qubits array is NULL or count is less than the minimum for an E8 projection.
- */
+ * nymya_3357_e8_projected_lattice - Applies quantum operations on qubits in an E8 projected lattice.
+ * @qubits: An array of nymya_qpos3d structures, representing qubits with their 3D positions.
+ * @count: The number of qubits in the array.
+ *
+ * This function simulates quantum operations (e.g., Hadamard, CNOT) on qubits
+ * arranged in a 3D projection of an E8 lattice structure.
+ *
+ * Returns:
+ * - 0 on success.
+ * - -EINVAL if the qubits array is NULL or count is less than the minimum for an E8 projection.
+ */
 int nymya_3357_e8_projected_lattice(nymya_qpos3d qubits[], size_t count);
 
 /**
- * nymya_3358_d4_lattice - Applies quantum operations on qubits in a D4 lattice.
- * @qubits: An array of nymya_qpos4d structures, representing qubits with their 4D positions.
- * @count: The number of qubits in the array.
- *
- * This function simulates quantum operations (e.g., Hadamard, CNOT) on qubits
- * arranged in a D4 lattice structure in 4D space.
- *
- * Returns:
- * - 0 on success.
- * - -EINVAL if the qubits array is NULL or count is less than the minimum for a D4 unit.
- */
+ * nymya_3358_d4_lattice - Applies quantum operations on qubits in a D4 lattice.
+ * @qubits: An array of nymya_qpos4d structures, representing qubits with their 4D positions.
+ * @count: The number of qubits in the array.
+ *
+ * This function simulates quantum operations (e.g., Hadamard, CNOT) on qubits
+ * arranged in a D4 lattice structure in 4D space.
+ *
+ * Returns:
+ * - 0 on success.
+ * - -EINVAL if the qubits array is NULL or count is less than the minimum for a D4 unit.
+ */
 int nymya_3358_d4_lattice(nymya_qpos4d qubits[], size_t count);
 
 /**
- * nymya_3359_b5_lattice - Applies quantum operations on qubits in a B5 lattice.
- * @qubits: An array of nymya_qpos5d structures, representing qubits with their 5D positions.
- * @count: The number of qubits in the array.
- *
- * This function simulates quantum operations (e.g., Hadamard, CNOT) on qubits
- * arranged in a B5 lattice structure in 5D space.
- *
- * Returns:
- * - 0 on success.
- * - -EINVAL if the qubits array is NULL or count is less than the minimum for a B5 unit.
- */
+ * nymya_3359_b5_lattice - Applies quantum operations on qubits in a B5 lattice.
+ * @qubits: An array of nymya_qpos5d structures, representing qubits with their 5D positions.
+ * @count: The number of qubits in the array.
+ *
+ * This function simulates quantum operations (e.g., Hadamard, CNOT) on qubits
+ * arranged in a B5 lattice structure in 5D space.
+ *
+ * Returns:
+ * - 0 on success.
+ * - -EINVAL if the qubits array is NULL or count is less than the minimum for a B5 unit.
+ */
 int nymya_3359_b5_lattice(nymya_qpos5d qubits[], size_t count);
 
 /**
- * nymya_3360_e5_projected_lattice - Applies quantum operations on qubits in an E5 projected lattice.
- * @qubits: An array of nymya_qpos5d structures, representing qubits with their 5D positions.
- * @count: The number of qubits in the array.
- *
- * This function simulates quantum operations (e.g., Hadamard, CNOT) on qubits
- * arranged in a 5D projection of an E5 lattice structure.
- *
- * Returns:
- * - 0 on success.
- * - -EINVAL if the qubits array is NULL or count is less than the minimum for an E5 projection.
- */
+ * nymya_3360_e5_projected_lattice - Applies quantum operations on qubits in an E5 projected lattice.
+ * @qubits: An array of nymya_qpos5d structures, representing qubits with their 5D positions.
+ * @count: The number of qubits in the array.
+ *
+ * This function simulates quantum operations (e.g., Hadamard, CNOT) on qubits
+ * arranged in a 5D projection of an E5 lattice structure.
+ *
+ * Returns:
+ * - 0 on success.
+ * - -EINVAL if the qubits array is NULL or count is less than the minimum for an E5 projection.
+ */
 int nymya_3360_e5_projected_lattice(nymya_qpos5d qubits[], size_t count);
 
 /**
- * nymya_3361_qrng_range - Generates quantum random numbers within a specified range.
- * @out: Pointer to an array where the generated random numbers will be stored.
- * @min: The minimum value for the generated random numbers (inclusive).
- * @max: The maximum value for the generated random numbers (inclusive).
- * @count: The number of random numbers to generate.
- *
- * This function leverages quantum properties to generate true random numbers
- * within a given range. The underlying quantum process is assumed to be
- * accessible and properly measured.
- *
- * Returns:
- * - 0 on success.
- * - -1 if the output array is NULL or if min > max.
- */
+ * nymya_3361_qrng_range - Generates quantum random numbers within a specified range.
+ * @out: Pointer to an array where the generated random numbers will be stored.
+ * @min: The minimum value for the generated random numbers (inclusive).
+ * @max: The maximum value for the generated random numbers (inclusive).
+ * @count: The number of random numbers to generate.
+ *
+ * This function leverages quantum properties to generate true random numbers
+ * within a given range. The underlying quantum process is assumed to be
+ * accessible and properly measured.
+ *
+ * Returns:
+ * - 0 on success.
+ * - -1 if the output array is NULL or if min > max.
+ */
 int nymya_3361_qrng_range(uint64_t* out, uint64_t min, uint64_t max, size_t count);
+
 
 
 // Shared complex math macros

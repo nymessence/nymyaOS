@@ -6,7 +6,7 @@
 #ifdef __KERNEL__
 
 /**
- * fixed_complex_multiply - Multiplies two fixed-point complex numbers.
+ * fixed_complex_multiply - Multiplies two fixed-point complex numbers (internal static function).
  * @re1: Real part of the first complex number in Q32.32 fixed-point.
  * @im1: Imaginary part of the first complex number in Q32.32 fixed-point.
  * @re2: Real part of the second complex number in Q32.32 fixed-point.
@@ -21,10 +21,14 @@
  * Uses 128-bit intermediate types (`__int128`) to prevent overflow during intermediate
  * multiplications before shifting back to the 64-bit fixed-point format.
  *
+ * This function is now 'static', meaning it is only visible and callable within this
+ * compilation unit (nymya_complex_math.c). Other files should use `complex_mul`
+ * from `nymya.h` which operates on `complex_double` structs.
+ *
  * Returns:
  * A `complex_double` struct containing both the real and imaginary parts of the product.
  */
-complex_double fixed_complex_multiply(int64_t re1, int64_t im1, int64_t re2, int64_t im2)
+static complex_double fixed_complex_multiply(int64_t re1, int64_t im1, int64_t re2, int64_t im2)
 {
     // Calculate the real part of the product: (re1 * re2) - (im1 * im2)
     // Use __int128 for intermediate calculations to prevent overflow.
