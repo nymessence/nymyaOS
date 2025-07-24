@@ -1,102 +1,204 @@
 // src/nymya_3355_fcc_lattice.c
 
 #include <stdlib.h>
-#include <math.h>
+// #include <math.h> // math.h is for floating-point, avoid in kernel
 #include "nymya.h"
 
 #ifndef __KERNEL__
     #include <stdio.h>
+    #include <math.h> // Include math.h for userspace for sqrt and pow
 #else
     #include <linux/kernel.h>
     #include <linux/syscalls.h>
     #include <linux/uaccess.h>
     #include <linux/slab.h>
+    // No math.h for kernel, fixed-point math assumed or implemented
 #endif
 
 #ifndef __KERNEL__
 
+/**
+ * fcc_distance - Calculates the Euclidean distance between two nymya_qpos3d points (userland version).
+ * @a: The first 3D qubit position.
+ * @b: The second 3D qubit position.
+ *
+ * This function computes the standard Euclidean distance between two points
+ * in 3D space using floating-point arithmetic.
+ *
+ * Returns:
+ * The distance as a double.
+ */
 double fcc_distance(nymya_qpos3d a, nymya_qpos3d b) {
     return sqrt(pow(a.x - b.x, 2) +
                 pow(a.y - b.y, 2) +
                 pow(a.z - b.z, 2));
 }
 
+/**
+ * nymya_3355_fcc_lattice - Applies quantum operations on qubits in an FCC lattice (userland version).
+ * @qubits: An array of nymya_qpos3d structures, representing qubits with their 3D positions.
+ * @count: The number of qubits in the array.
+ *
+ * This function simulates quantum operations on qubits arranged in a Face-Centered
+ * Cubic (FCC) lattice structure. It initializes each qubit with a Hadamard gate
+ * and then applies CNOT gates between qubits that are within a certain interaction
+ * distance (epsilon).
+ *
+ * Returns:
+ * - 0 on success.
+ * - -1 if the qubits array is NULL or count is less than 14 (minimum for a meaningful FCC unit).
+ */
 int nymya_3355_fcc_lattice(nymya_qpos3d qubits[], size_t count) {
+    // Check for valid input array and minimum count for FCC lattice
     if (!qubits || count < 14) return -1;
 
+    // Epsilon defines the interaction radius for CNOT gates.
+    // Qubits within this distance are considered "neighbors" for entanglement.
     const double epsilon = 1.01;
 
+    // Apply Hadamard gate to each qubit to put them in superposition
     for (size_t i = 0; i < count; i++) {
-        if (!qubits[i].q) return -1;
-        hadamard(qubits[i].q);
+        // qubits[i].q is a nymya_qubit struct, pass its address to hadamard
+        hadamard(&qubits[i].q);
     }
 
+    // Apply CNOT gates between neighboring qubits based on distance
     for (size_t i = 0; i < count; i++) {
         for (size_t j = i + 1; j < count; j++) {
+            // Calculate distance between qubit positions
             if (fcc_distance(qubits[i], qubits[j]) <= epsilon) {
-                cnot(qubits[i].q, qubits[j].q);
+                // Apply CNOT gate, passing addresses of the qubit structs
+                cnot(&qubits[i].q, &qubits[j].q);
             }
         }
     }
 
-    log_symbolic_event("FCC_3D", qubits[0].q->id, qubits[0].q->tag, "FCC lattice entangled");
+    // Log the symbolic event for the FCC lattice entanglement
+    // Access struct members directly using '.' operator
+    log_symbolic_event("FCC_3D", qubits[0].q.id, qubits[0].q.tag, "FCC lattice entangled");
     return 0;
 }
 
-#else
+#else // __KERNEL__
 
-static double fcc_distance_k(const nymya_qpos3d *a, const nymya_qpos3d *b) {
-    return sqrt(pow(a->x - b->x, 2) +
-                pow(a->y - b->y, 2) +
-                pow(a->z - b->z, 2));
+/**
+ * fixed_point_square - Calculates the square of a fixed-point number.
+ * @val: The fixed-point number.
+ *
+ * Returns:
+ * The square of the fixed-point number, adjusted for the fixed-point scale.
+ */
+static inline int64_t fixed_point_square(int64_t val) {
+    // Perform multiplication using __int128 to prevent overflow, then shift.
+    return (int64_t)((__int128)val * val >> 32);
 }
 
+/**
+ * fcc_distance_squared_k - Calculates the squared Euclidean distance between two nymya_qpos3d points (kernel version).
+ * @a: Pointer to the first 3D qubit position.
+ * @b: Pointer to the second 3D qubit position.
+ *
+ * This function computes the squared Euclidean distance between two points
+ * in 3D space using fixed-point arithmetic. It avoids floating-point operations
+ * which are generally disallowed in kernel code.
+ *
+ * Returns:
+ * The squared distance as an int64_t (fixed-point).
+ */
+static int64_t fcc_distance_squared_k(const nymya_qpos3d *a, const nymya_qpos3d *b) {
+    // Calculate differences in fixed-point
+    int64_t dx = (int64_t)((a->x - b->x) * FIXED_POINT_SCALE);
+    int64_t dy = (int64_t)((a->y - b->y) * FIXED_POINT_SCALE);
+    int64_t dz = (int64_t)((a->z - b->z) * FIXED_POINT_SCALE);
+
+    // Calculate squared differences in fixed-point
+    int64_t dx_sq = fixed_point_square(dx);
+    int64_t dy_sq = fixed_point_square(dy);
+    int64_t dz_sq = fixed_point_square(dz);
+
+    // Sum the squared differences. No shift needed here as fixed_point_square already handles it.
+    return dx_sq + dy_sq + dz_sq;
+}
+
+/**
+ * nymya_3355_fcc_lattice - Applies quantum operations on qubits in an FCC lattice (kernel version).
+ * @user_qubits: Pointer to an array of nymya_qpos3d structures in user space.
+ * @count: The number of qubits in the array.
+ *
+ * This system call simulates quantum operations on qubits arranged in a Face-Centered
+ * Cubic (FCC) lattice structure. It copies qubit data from user space to kernel space,
+ * applies Hadamard gates to each qubit, and then applies CNOT gates between qubits
+ * that are within a certain interaction distance (using fixed-point squared distance).
+ * Finally, it copies the modified qubit data back to user space.
+ *
+ * Returns:
+ * - 0 on success.
+ * - -EINVAL if user_qubits is NULL or count is less than 14.
+ * - -ENOMEM if kernel memory allocation fails.
+ * - -EFAULT if copying data between user and kernel space fails.
+ */
 SYSCALL_DEFINE2(nymya_3355_fcc_lattice,
     struct nymya_qpos3d __user *, user_qubits,
     size_t, count) {
 
-    if (!user_qubits || count < 14)
+    int ret = 0; // Return value for syscall
+    nymya_qpos3d *k_qubits = NULL; // Kernel-space copy of qubits
+
+    // 1. Validate input arguments
+    if (!user_qubits || count < 14) {
+        pr_err("nymya_3355_fcc_lattice: Invalid user_qubits pointer or count (%zu < 14)\n", count);
         return -EINVAL;
+    }
 
-    nymya_qpos3d *k_qubits = kmalloc_array(count, sizeof(nymya_qpos3d), GFP_KERNEL);
-    if (!k_qubits)
+    // 2. Allocate kernel memory for qubit data
+    k_qubits = kmalloc_array(count, sizeof(nymya_qpos3d), GFP_KERNEL);
+    if (!k_qubits) {
+        pr_err("nymya_3355_fcc_lattice: Failed to allocate kernel memory for qubits\n");
         return -ENOMEM;
+    }
 
+    // 3. Copy qubit data from user space to kernel space
     if (copy_from_user(k_qubits, user_qubits, count * sizeof(nymya_qpos3d))) {
-        kfree(k_qubits);
-        return -EFAULT;
+        pr_err("nymya_3355_fcc_lattice: Failed to copy qubits from user space\n");
+        ret = -EFAULT;
+        goto free_k_qubits; // Jump to cleanup
     }
 
-    // Validate pointers inside k_qubits
+    // Define the squared epsilon for fixed-point comparison
+    // (1.01)^2 = 1.0201. Convert this to fixed-point.
+    const int64_t fixed_epsilon_squared = (int64_t)(1.0201 * FIXED_POINT_SCALE);
+
+    // 4. Apply Hadamard gate to each qubit
     for (size_t i = 0; i < count; i++) {
-        if (!k_qubits[i].q) {
-            kfree(k_qubits);
-            return -EINVAL;
-        }
+        // Pass the address of the nymya_qubit struct to the hadamard macro/function
+        hadamard(&k_qubits[i].q);
     }
 
-    for (size_t i = 0; i < count; i++) {
-        hadamard(k_qubits[i].q);
-    }
-
+    // 5. Apply CNOT gates between neighboring qubits based on fixed-point squared distance
     for (size_t i = 0; i < count; i++) {
         for (size_t j = i + 1; j < count; j++) {
-            if (fcc_distance_k(&k_qubits[i], &k_qubits[j]) <= 1.01) {
-                cnot(k_qubits[i].q, k_qubits[j].q);
+            // Calculate squared distance in fixed-point
+            if (fcc_distance_squared_k(&k_qubits[i], &k_qubits[j]) <= fixed_epsilon_squared) {
+                // Apply CNOT gate, passing addresses of the qubit structs
+                cnot(&k_qubits[i].q, &k_qubits[j].q);
             }
         }
     }
 
-    log_symbolic_event("FCC_3D", k_qubits[0].q->id, k_qubits[0].q->tag, "FCC lattice entangled");
+    // 6. Log the symbolic event for the FCC lattice entanglement
+    // Access struct members directly using '.' operator
+    log_symbolic_event("FCC_3D", k_qubits[0].q.id, k_qubits[0].q.tag, "FCC lattice entangled");
 
-    // Write back if needed (positions unchanged, but qubit states changed)
+    // 7. Copy the modified qubits back to user space
     if (copy_to_user(user_qubits, k_qubits, count * sizeof(nymya_qpos3d))) {
-        kfree(k_qubits);
-        return -EFAULT;
+        pr_err("nymya_3355_fcc_lattice: Failed to copy qubits to user space\n");
+        ret = -EFAULT;
     }
 
-    kfree(k_qubits);
-    return 0;
+free_k_qubits:
+    kfree(k_qubits); // Free allocated kernel memory
+    return ret;
 }
 
 #endif
+

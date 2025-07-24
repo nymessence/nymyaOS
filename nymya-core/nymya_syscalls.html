@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nymya Quantum Syscall Explorer</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- MathJax for rendering LaTeX equations -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+        .card {
+            background-color: #ffffff;
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* shadow-md */
+            padding: 1.5rem; /* p-6 */
+            margin-bottom: 1rem; /* mb-4 */
+            transition: transform 0.2s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .syscall-code {
+            background-color: #e0e7ff; /* indigo-100 */
+            color: #4338ca; /* indigo-700 */
+            padding: 0.25rem 0.75rem; /* px-3 py-1 */
+            border-radius: 0.375rem; /* rounded-md */
+            font-family: monospace;
+            font-size: 0.875rem; /* text-sm */
+        }
+        .section-title {
+            border-bottom: 2px solid #e2e8f0; /* border-gray-200 */
+            padding-bottom: 0.5rem; /* pb-2 */
+            margin-bottom: 1.5rem; /* mb-6 */
+            color: #1a202c; /* text-gray-900 */
+        }
+        .filter-button {
+            background-color: #e2e8f0; /* gray-200 */
+            color: #4a5568; /* gray-700 */
+            padding: 0.5rem 1rem; /* py-2 px-4 */
+            border-radius: 0.5rem; /* rounded-lg */
+            font-weight: 500; /* font-medium */
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        .filter-button.active {
+            background-color: #4f46e5; /* indigo-600 */
+            color: #ffffff;
+            box-shadow: 0 4px 6px rgba(79, 70, 229, 0.3);
+        }
+        .filter-button:hover:not(.active) {
+            background-color: #cbd5e0; /* gray-300 */
+        }
+        .search-input {
+            border: 1px solid #cbd5e0; /* border-gray-300 */
+            border-radius: 0.5rem; /* rounded-lg */
+            padding: 0.75rem 1rem; /* py-3 px-4 */
+            width: 100%;
+            font-size: 1rem;
+            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .search-input:focus {
+            outline: none;
+            border-color: #6366f1; /* indigo-500 */
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-6 lg:p-8">
+    <div class="max-w-6xl mx-auto">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-extrabold text-gray-900 mb-2">Nymya Quantum Syscall Explorer</h1>
+            <p class="text-lg text-gray-600">Explore quantum-symbolic syscalls and gate macros</p>
+        </header>
+
+        <div class="mb-8 p-6 bg-white rounded-xl shadow-md">
+            <div class="mb-4">
+                <input type="text" id="searchInput" placeholder="Search syscalls or codes..." class="search-input">
+            </div>
+            <div class="flex flex-wrap gap-3 justify-center">
+                <button class="filter-button active" data-filter="all">All</button>
+                <button class="filter-button" data-filter="single-qubit">Single-Qubit Gates</button>
+                <button class="filter-button" data-filter="two-qubit">Two-Qubit Gates</button>
+                <button class="filter-button" data-filter="three-qubit">Three-Qubit Gates</button>
+                <button class="filter-button" data-filter="higher-level">Higher-Level Operations</button>
+                <button class="filter-button" data-filter="macros">Gate Macros</button>
+            </div>
+        </div>
+
+        <main id="syscallsContainer">
+            <!-- Syscalls and macros will be rendered here by JavaScript -->
+        </main>
+    </div>
+
+    <script>
+        // Data extracted from the provided Markdown documentation
+        const syscallData = [
+            // Single-Qubit Gates
+            { type: 'syscall', category: 'single-qubit', name: 'nymya_3301_identity_gate', params: 'nymya_qubit* q', purpose: 'Applies an Identity gate to the specified qubit. An Identity gate leaves the qubit\'s state unchanged.', code: '3301', macro: 'identity(q)' },
+            { type: 'syscall', category: 'single-qubit', name: 'nymya_3302_global_phase', params: 'nymya_qubit* q, double theta', purpose: 'Applies a global phase shift to the specified qubit. This operation multiplies the qubit\'s state vector by $e^{i\\theta}$, which does not affect measurement probabilities but can be significant in multi-qubit interference effects.', code: '3302', macro: 'global_phase(q, theta)' },
+            { type: 'syscall', category: 'single-qubit', name: 'nymya_3303_pauli_x', params: 'nymya_qubit* q', purpose: 'Applies the Pauli-X (NOT) gate to the specified qubit. This gate flips the state of the qubit (e.g., $|0\\rangle$ to $|1\\rangle$ and $|1\\rangle$ to $|0\\rangle$).', code: '3303', macro: 'pauli_x(q)' },
+            { type: 'syscall', category: 'single-qubit', name: 'nymya_3304_pauli_y', params: 'nymya_qubit* q', purpose: 'Applies the Pauli-Y gate to the specified qubit. This gate performs a rotation of $\\pi$ radians around the Y-axis of the Bloch sphere.', code: '3304', macro: 'pauli_y(q)' },
+            { type: 'syscall', category: 'single-qubit', name: 'nymya_3305_pauli_z', params: 'nymya_qubit* q', purpose: 'Applies the Pauli-Z gate to the specified qubit. This gate flips the phase of the $|1\\rangle$ state.', code: '3305', macro: 'pauli_z(q)' },
+            { type: 'syscall', category: 'single-qubit', name: 'nymya_3306_phase_gate', params: 'nymya_qubit* q', purpose: 'Applies the S (Phase) gate to the specified qubit. This gate applies a phase shift of $e^{i\\pi/2}$ to the $|1\\rangle$ state.', code: '3306', macro: 'phase_s(q)' },
+            { type: 'syscall', category: 'single-qubit', name: 'nymya_3307_sqrt_x_gate', params: 'nymya_qubit* q', purpose: 'Applies the square root of Pauli-X gate to the specified qubit. This gate performs a rotation of $\\pi/2$ radians around the X-axis.', code: '3307', macro: 'sqrt_x(q)' },
+            { type: 'syscall', category: 'single-qubit', name: 'nymya_3308_hadamard_gate', params: 'nymya_qubit* q', purpose: 'Applies the Hadamard gate to the specified qubit. This gate creates a superposition state from a basis state (e.g., $|0\\rangle$ to $(|0\\rangle + |1\\rangle)/\\sqrt{2}$).', code: '3308', macro: 'hadamard(q)' },
+            { type: 'syscall', category: 'single-qubit', name: 'nymya_3315_phase_shift', params: 'nymya_qubit* q, double theta', purpose: 'Applies a general phase shift gate to the specified qubit. This gate applies a phase shift of $e^{i\\theta}$ to the $|1\\rangle$ state.', code: '3315', macro: 'phase_shift(q, theta)' },
+            { type: 'syscall', category: 'single-qubit', name: 'nymya_3316_phase_gate', params: 'nymya_qubit* q, double phi', purpose: 'Applies a general phase gate (also known as a U1 gate) to the specified qubit. This gate applies a phase shift of $e^{i\\phi}$ to the $|1\\rangle$ state, while leaving $|0\\rangle$ unchanged.', code: '3316', macro: 'phase_gate(q, phi)' },
+            { type: 'syscall', category: 'single-qubit', name: 'nymya_3319_rotate_x', params: 'nymya_qubit* q, double theta', purpose: 'Applies a rotation around the X-axis of the Bloch sphere to the specified qubit.', code: '3319', macro: 'rotate_x(q, theta)' },
+            { type: 'syscall', category: 'single-qubit', name: 'nymya_3320_rotate_y', params: 'nymya_qubit* q, double theta', purpose: 'Applies a rotation around the Y-axis of the Bloch sphere to the specified qubit.', code: '3320', macro: 'rotate_y(q, theta)' },
+            { type: 'syscall', category: 'single-qubit', name: 'nymya_3321_rotate_z', params: 'nymya_qubit* q, double theta', purpose: 'Applies a rotation around the Z-axis of the Bloch sphere to the specified qubit.', code: '3321', macro: 'rotate_z(q, theta)' },
+            { type: 'syscall', category: 'single-qubit', name: 'nymya_3330_rotate', params: 'nymya_qubit* q, char axis, double theta', purpose: 'Applies a general rotation gate to the specified qubit around a given axis.', code: '3330', macro: 'rotate(q, a, t)' },
+
+            // Two-Qubit Gates
+            { type: 'syscall', category: 'two-qubit', name: 'nymya_3309_controlled_not', params: 'nymya_qubit* q_ctrl, nymya_qubit* q_target', purpose: 'Applies a Controlled-NOT (CNOT) gate. The target qubit is flipped if and only if the control qubit is in the $|1\\rangle$ state.', code: '3309', macro: 'cnot(qc, qt)' },
+            { type: 'syscall', category: 'two-qubit', name: 'nymya_3310_anticontrol_not', params: 'nymya_qubit* q_ctrl, nymya_qubit* q_target', purpose: 'Applies an Anti-Controlled-NOT (ACNOT) gate. The target qubit is flipped if and only if the control qubit is in the $|0\\rangle$ state.', code: '3310', macro: 'acnot(qc, qt)' },
+            { type: 'syscall', category: 'two-qubit', name: 'nymya_3311_controlled_z', params: 'nymya_qubit* q_ctrl, nymya_qubit* q_target', purpose: 'Applies a Controlled-Z (CZ) gate. A phase flip is applied to the target qubit if both the control and target qubits are in the $|1\\rangle$ state.', code: '3311', macro: 'cz(qc, qt)' },
+            { type: 'syscall', category: 'two-qubit', name: 'nymya_3313_swap', params: 'nymya_qubit* q1, nymya_qubit* q2', purpose: 'Swaps the states of two qubits.', code: '3313', macro: 'nymya_swap(q1, q2)' },
+            { type: 'syscall', category: 'two-qubit', name: 'nymya_3314_imaginary_swap', params: 'nymya_qubit* q1, nymya_qubit* q2', purpose: 'Applies an Imaginary SWAP (iSWAP) gate. This gate swaps the states of two qubits and applies an additional phase to the $|01\\rangle$ and $|10\\rangle$ components.', code: '3314', macro: 'imswap(q1, q2)' },
+            { type: 'syscall', category: 'two-qubit', name: 'nymya_3317_controlled_phase', params: 'nymya_qubit* qc, nymya_qubit* qt, double theta', purpose: 'Applies a Controlled Phase gate. A phase shift of $e^{i\\theta}$ is applied to the target qubit if the control qubit is in the $|1\\rangle$ state.', code: '3317', macro: 'cphase(qc, qt, theta)' },
+            { type: 'syscall', category: 'two-qubit', name: 'nymya_3318_controlled_phase_s', params: 'nymya_qubit* qc, nymya_qubit* qt', purpose: 'Applies a Controlled-S (Controlled Phase S) gate. This is a controlled phase gate with $\\theta = \\pi/2$.', code: '3318', macro: 'cphase_s(qc, qt)' },
+            { type: 'syscall', category: 'two-qubit', name: 'nymya_3322_xx_interaction', params: 'nymya_qubit* q1, nymya_qubit* q2, double theta', purpose: 'Applies an XX interaction gate. This gate implements a two-qubit rotation proportional to the tensor product of Pauli-X operators.', code: '3322', macro: 'xx(q1, q2, theta)' },
+            { type: 'syscall', category: 'two-qubit', name: 'nymya_3323_yy_interaction', params: 'nymya_qubit* q1, nymya_qubit* q2, double theta', purpose: 'Applies a YY interaction gate. This gate implements a two-qubit rotation proportional to the tensor product of Pauli-Y operators.', code: '3323', macro: 'yy(q1, q2, theta)' },
+            { type: 'syscall', category: 'two-qubit', name: 'nymya_3324_zz_interaction', params: 'nymya_qubit* q1, nymya_qubit* q2, double theta', purpose: 'Applies a ZZ interaction gate. This gate implements a two-qubit rotation proportional to the tensor product of Pauli-Z operators.', code: '3324', macro: 'zz(q1, q2, theta)' },
+            { type: 'syscall', category: 'two-qubit', name: 'nymya_3325_xyz_entangle', params: 'nymya_qubit* q1, nymya_qubit* q2, double theta', purpose: 'Applies an XYZ entangling gate, which is a generalized two-qubit entangling operation.', code: '3325', macro: 'xyz(q1, q2, theta)' },
+            { type: 'syscall', category: 'two-qubit', name: 'nymya_3326_sqrt_swap', params: 'nymya_qubit* q1, nymya_qubit* q2', purpose: 'Applies the square root of SWAP gate. This gate is an entangling gate that, when applied twice, is equivalent to a SWAP gate.', code: '3326', macro: 'sqrt_swap(q1, q2)' },
+            { type: 'syscall', category: 'two-qubit', name: 'nymya_3327_sqrt_iswap', params: 'nymya_qubit* q1, nymya_qubit* q2', purpose: 'Applies the square root of iSWAP gate. This gate is an entangling gate that, when applied twice, is equivalent to an iSWAP gate.', code: '3327', macro: 'sqrt_iswap(q1, q2)' },
+            { type: 'syscall', category: 'two-qubit', name: 'nymya_3328_swap_pow', params: 'nymya_qubit* q1, nymya_qubit* q2, double alpha', purpose: 'Applies a fractional SWAP gate, where `alpha` determines the "power" of the swap.', code: '3328', macro: 'swap_pow(q1, q2, a)' },
+            { type: 'syscall', category: 'two-qubit', name: 'nymya_3332_berkeley', params: 'nymya_qubit* q1, nymya_qubit* q2, double theta', purpose: 'Applies a Berkeley gate, a two-qubit entangling gate.', code: '3332', macro: 'berkeley(q1, q2, t)' },
+            { type: 'syscall', category: 'two-qubit', name: 'nymya_3333_c_v', params: 'nymya_qubit* qc, nymya_qubit* qt', purpose: 'Applies a Controlled-V gate, where V is the square root of Pauli-X.', code: '3333', macro: 'c_v(qc, qt)' },
+            { type: 'syscall', category: 'two-qubit', name: 'nymya_3334_core_entangle', params: 'nymya_qubit* q1, nymya_qubit* q2', purpose: 'Applies a "core entangle" gate, a specific two-qubit entangling operation.', code: '3334', macro: 'core_entangle(q1, q2)' },
+            { type: 'syscall', category: 'two-qubit', name: 'nymya_3336_echo_cr', params: 'nymya_qubit* q1, nymya_qubit* q2, double theta', purpose: 'Applies an Echo Cross-Resonance (CR) gate, often used in superconducting qubit architectures.', code: '3336', macro: 'echo_cr(q1, q2, t)' },
+            { type: 'syscall', category: 'two-qubit', name: 'nymya_3337_fermion_sim', params: 'nymya_qubit* q1, nymya_qubit* q2', purpose: 'Implements a two-qubit fermionic simulation gate.', code: '3337', macro: 'fermion_sim(q1, q2)' },
+            { type: 'syscall', category: 'two-qubit', name: 'nymya_3338_givens', params: 'nymya_qubit* q1, nymya_qubit* q2, double theta', purpose: 'Applies a Givens rotation gate, which is a two-qubit operation used in quantum linear algebra.', code: '3338', macro: 'givens(q1, q2, t)' },
+            { type: 'syscall', category: 'two-qubit', name: 'nymya_3339_magic', params: 'nymya_qubit* q1, nymya_qubit* q2', purpose: 'Applies a "Magic" gate, a specific two-qubit entangling gate.', code: '3339', macro: 'magic(q1, q2)' },
+            { type: 'syscall', category: 'two-qubit', name: 'nymya_3340_sycamore', params: 'nymya_qubit* q1, nymya_qubit* q2', purpose: 'Applies a Sycamore gate, a two-qubit entangling gate known from Google\'s quantum processors.', code: '3340', macro: 'sycamore(q1, q2)' },
+            { type: 'syscall', category: 'two-qubit', name: 'nymya_3341_cz_swap', params: 'nymya_qubit* q1, nymya_qubit* q2', purpose: 'Applies a CZ-SWAP gate, which is a combination of a Controlled-Z and a SWAP operation.', code: '3341', macro: 'cz_swap(q1, q2)' },
+
+            // Three-Qubit Gates
+            { type: 'syscall', category: 'three-qubit', name: 'nymya_3312_double_controlled_not', params: 'nymya_qubit* qc1, nymya_qubit* qc2, nymya_qubit* qt', purpose: 'Applies a Double Controlled-NOT (Toffoli) gate. The target qubit is flipped if and only if both control qubits (`qc1` and `qc2`) are in the $|1\\rangle$ state.', code: '3312', macro: 'dcnot(q1, q2, qt)' },
+            { type: 'syscall', category: 'three-qubit', name: 'nymya_3329_fredkin', params: 'nymya_qubit* q_ctrl, nymya_qubit* q1, nymya_qubit* q2', purpose: 'Applies a Fredkin (Controlled-SWAP) gate. The states of `q1` and `q2` are swapped if and only if the control qubit (`q_ctrl`) is in the $|1\\rangle$ state.', code: '3329', macro: 'fredkin(qc, q1, q2)' },
+            { type: 'syscall', category: 'three-qubit', name: 'nymya_3331_barenco', params: 'nymya_qubit* q1, nymya_qubit* q2, nymya_qubit* q3', purpose: 'Applies a Barenco gate, a three-qubit universal gate.', code: '3331', macro: 'barenco(q1, q2, q3)' },
+            { type: 'syscall', category: 'three-qubit', name: 'nymya_3335_dagwood', params: 'nymya_qubit* q1, nymya_qubit* q2, nymya_qubit* q3', purpose: 'Applies a Dagwood gate, a specific three-qubit gate.', code: '3335', macro: 'dagwood(q1, q2, q3)' },
+            { type: 'syscall', category: 'three-qubit', name: 'nymya_3343_margolis', params: 'nymya_qubit* qc1, nymya_qubit* qc2, nymya_qubit* qt', purpose: 'Applies a Margolis gate, a three-qubit controlled operation.', code: '3343', macro: 'margolis(qc1, qc2, qt)' },
+            { type: 'syscall', category: 'three-qubit', name: 'nymya_3344_peres', params: 'nymya_qubit* q1, nymya_qubit* q2, nymya_qubit* q3', purpose: 'Applies a Peres gate, a three-qubit reversible logic gate.', code: '3344', macro: 'peres(q1, q2, q3)' },
+            { type: 'syscall', category: 'three-qubit', name: 'nymya_3345_cf_swap', params: 'nymya_qubit* qc, nymya_qubit* q1, nymya_qubit* q2', purpose: 'Applies a Controlled-Fredkin (CF-SWAP) gate, which is equivalent to the Fredkin gate.', code: '3345', macro: 'cf_swap(qc, q1, q2)' },
+
+            // Higher-Level Quantum Operations and Structures
+            { type: 'syscall', category: 'higher-level', name: 'nymya_3342_deutsch', params: 'nymya_qubit* q1, nymya_qubit* q2, void (*f)(nymya_qubit*)', purpose: 'Implements the Deutsch algorithm or a component thereof. This function takes a function pointer `f` that represents a quantum oracle.', code: '3342', macro: 'deutsch(q1, q2, f)' },
+            { type: 'syscall', category: 'higher-level', name: 'nymya_3346_triangular_lattice', params: 'nymya_qubit* q1, nymya_qubit* q2, nymya_qubit* q3', purpose: 'Represents an operation or interaction on three qubits arranged in a triangular lattice configuration. This might be used for simulating specific quantum materials or architectures.', code: '3346', macro: 'triangular_lattice(q1, q2, q3)' },
+            { type: 'syscall', category: 'higher-level', name: 'nymya_3347_hexagonal_lattice', params: 'nymya_qubit* q[6]', purpose: 'Represents an operation or interaction on six qubits arranged in a hexagonal lattice configuration.', code: '3347', macro: 'hexagonal_lattice(q)' },
+            { type: 'syscall', category: 'higher-level', name: 'nymya_3348_hex_rhombi_lattice', params: 'nymya_qubit* q[7]', purpose: 'Represents an operation or interaction on seven qubits arranged in a hexagonal-rhombic lattice configuration.', code: '3348', macro: 'hex_rhombi_lattice(q)' },
+            { type: 'syscall', category: 'higher-level', name: 'nymya_3349_tessellated_triangles', params: 'nymya_qubit* q[], size_t count', purpose: 'Applies operations or interactions across a tessellated pattern of triangles using the provided qubits. This suggests a more complex, scalable lattice simulation.', code: '3349', macro: 'tessellate_triangles(q, n)' },
+            { type: 'syscall', category: 'higher-level', name: 'nymya_3350_tessellated_hexagons', params: 'nymya_qubit* q[], size_t count', purpose: 'Applies operations or interactions across a tessellated pattern of hexagons using the provided qubits.', code: '3350', macro: 'tessellate_hexagons(q, n)' },
+            { type: 'syscall', category: 'higher-level', name: 'nymya_3351_tessellated_hex_rhombi', params: 'nymya_qubit* q[], size_t count', purpose: 'Applies operations or interactions across a tessellated pattern of hexagonal-rhombic shapes using the provided qubits.', code: '3351', macro: 'tessellate_hex_rhombi(q, n)' },
+            { type: 'syscall', category: 'higher-level', name: 'nymya_3352_e8_group', params: 'nymya_qubit* q[8]', purpose: 'Represents an operation related to the E8 Lie group, potentially for advanced quantum simulation or error correction codes, involving eight qubits.', code: '3352', macro: 'e8_group(q)' },
+            { type: 'syscall', category: 'higher-level', name: 'nymya_3353_flower_of_life', params: 'nymya_qubit* q[], size_t count', purpose: 'Applies operations related to the geometric pattern known as the "Flower of Life" to a set of qubits, possibly for specific entanglement structures or quantum algorithms.', code: '3353', macro: 'flower_of_life(q, n)' },
+            { type: 'syscall', category: 'higher-level', name: 'nymya_3354_metatron_cube', params: 'nymya_qubit* q[], size_t count', purpose: 'Applies operations related to the geometric pattern known as "Metatron\'s Cube" to a set of qubits.', code: '3354', macro: 'metatron_cube(q, n)' },
+            { type: 'syscall', category: 'higher-level', name: 'nymya_3355_fcc_lattice', params: 'nymya_qpos3d qubits[], size_t count', purpose: 'Simulates or applies operations on qubits arranged in a Face-Centered Cubic (FCC) lattice structure in 3D space. `nymya_qpos3d` likely represents a qubit with 3D positional information.', code: '3355', macro: 'fcc_lattice(q, n)' },
+            { type: 'syscall', category: 'higher-level', name: 'nymya_3356_hcp_lattice', params: 'nymya_qpos3d qubits[], size_t count', purpose: 'Simulates or applies operations on qubits arranged in a Hexagonal Close-Packed (HCP) lattice structure in 3D space.', code: '3356', macro: 'hcp_lattice(q, n)' },
+            { type: 'syscall', category: 'higher-level', name: 'nymya_3357_e8_projected_lattice', params: 'nymya_qpos3d qubits[], size_t count', purpose: 'Simulates or applies operations on qubits arranged in a 3D projection of an E8 lattice.', code: '3357', macro: 'e8_projected_lattice(q, n)' },
+            { type: 'syscall', category: 'higher-level', name: 'nymya_3358_d4_lattice', params: 'nymya_qpos4d qubits[], size_t count', purpose: 'Simulates or applies operations on qubits arranged in a D4 lattice structure in 4D space. `nymya_qpos4d` likely represents a qubit with 4D positional information.', code: '3358', macro: 'd4_lattice(q, n)' },
+            { type: 'syscall', category: 'higher-level', name: 'nymya_3359_b5_lattice', params: 'nymya_qpos5d qubits[], size_t count', purpose: 'Simulates or applies operations on qubits arranged in a B5 lattice structure in 5D space. `nymya_qpos5d` likely represents a qubit with 5D positional information.', code: '3359', macro: 'b5_lattice(q, n)' },
+            { type: 'syscall', category: 'higher-level', name: 'nymya_3360_e5_projected_lattice', params: 'nymya_qpos5d qubits[], size_t count', purpose: 'Simulates or applies operations on qubits arranged in a 5D projection of an E5 lattice.', code: '3360', macro: 'e5_projected_lattice(q, n)' },
+            { type: 'syscall', category: 'higher-level', name: 'nymya_3361_qrng_range', params: 'uint64_t* out, uint64_t min, uint64_t max, size_t count', purpose: 'Generates a specified `count` of quantum random numbers within a given range (`min` to `max`).', code: '3361', macro: 'qrng_range(out, min, max, count)' },
+        ];
+
+        const syscallsContainer = document.getElementById('syscallsContainer');
+        const searchInput = document.getElementById('searchInput');
+        const filterButtons = document.querySelectorAll('.filter-button');
+
+        let currentFilter = 'all';
+
+        // Function to render syscalls
+        function renderSyscalls(filter = 'all', searchTerm = '') {
+            syscallsContainer.innerHTML = ''; // Clear previous content
+
+            const filteredData = syscallData.filter(item => {
+                const matchesFilter = filter === 'all' || item.category === filter || (filter === 'macros' && item.macro);
+                const matchesSearch = searchTerm === '' ||
+                                      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                      item.purpose.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                      (item.code && item.code.includes(searchTerm)) ||
+                                      (item.macro && item.macro.toLowerCase().includes(searchTerm.toLowerCase()));
+                return matchesFilter && matchesSearch;
+            });
+
+            if (filteredData.length === 0) {
+                syscallsContainer.innerHTML = '<p class="text-center text-gray-500 text-lg mt-8">No matching syscalls or macros found.</p>';
+                return;
+            }
+
+            // Group by category for better organization
+            const groupedData = filteredData.reduce((acc, item) => {
+                const category = item.category || 'Shared Complex Math Macros'; // Default for macros
+                if (!acc[category]) {
+                    acc[category] = [];
+                }
+                acc[category].push(item);
+                return acc;
+            }, {});
+
+            for (const category in groupedData) {
+                const sectionTitle = document.createElement('h2');
+                sectionTitle.className = 'text-3xl font-semibold text-gray-800 mt-8 mb-6 section-title';
+                sectionTitle.textContent = formatCategoryName(category);
+                syscallsContainer.appendChild(sectionTitle);
+
+                groupedData[category].forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+
+                    let content = `
+                        <h3 class="text-xl font-semibold text-indigo-700 mb-2">${item.name}</h3>
+                        <p class="text-gray-700 mb-3"><strong>Parameters:</strong> <span class="font-mono text-sm">${item.params}</span></p>
+                        <p class="text-gray-800 mb-3">${item.purpose}</p>
+                    `;
+
+                    if (item.code) {
+                        content += `<p class="text-gray-700 mb-2"><strong>Syscall Code:</strong> <span class="syscall-code">${item.code}</span></p>`;
+                    }
+                    if (item.macro) {
+                        content += `<p class="text-gray-700"><strong>Macro:</strong> <span class="font-mono text-sm bg-purple-100 text-purple-700 px-3 py-1 rounded-md">${item.macro}</span></p>`;
+                    }
+
+                    card.innerHTML = content;
+                    syscallsContainer.appendChild(card);
+                });
+            }
+
+            // Re-render MathJax equations after content is added
+            if (window.MathJax) {
+                window.MathJax.typesetPromise();
+            }
+        }
+
+        // Helper to format category names for display
+        function formatCategoryName(category) {
+            switch (category) {
+                case 'single-qubit': return 'Single-Qubit Gates';
+                case 'two-qubit': return 'Two-Qubit Gates';
+                case 'three-qubit': return 'Three-Qubit Gates';
+                case 'higher-level': return 'Higher-Level Quantum Operations and Structures';
+                case 'Shared Complex Math Macros': return 'Shared Complex Math Macros';
+                default: return category;
+            }
+        }
+
+        // Event Listeners
+        searchInput.addEventListener('input', (event) => {
+            renderSyscalls(currentFilter, event.target.value);
+        });
+
+        filterButtons.forEach(button => {
+            button.addEventListener('click', (event) => {
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                event.target.classList.add('active');
+                currentFilter = event.target.dataset.filter;
+                renderSyscalls(currentFilter, searchInput.value);
+            });
+        });
+
+        // Initial render
+        renderSyscalls();
+    </script>
+</body>
+</html>
