@@ -1,100 +1,243 @@
 // src/nymya_3354_metatron_cube.c
+//
+// This file implements the nymya_3354_metatron_cube syscall, which applies
+// operations to a set of qubits arranged in a pattern inspired by the
+// "Metatron's Cube" geometric design. This involves entangling a central
+// qubit with surrounding ones and then creating connections between specific
+// outer qubits to form a complex entangled structure.
+//
+// The implementation includes both userland and kernel-space versions,
+// ensuring proper header inclusion, robust memory management, and fixed-point
+// arithmetic for kernel operations.
 
-#include <stdlib.h>
-#include "nymya.h"
+#include "nymya.h" // Common definitions like nymya_qubit, and gate macros
 
 #ifndef __KERNEL__
-    #include <stdio.h>
+    #include <stdio.h>    // Userland: For standard I/O (e.g., in log_symbolic_event)
+    #include <stdlib.h>  // Userland: For general utilities (e.g., size_t)
+    #include <math.h>    // Userland: For complex math functions (if needed by sub-gates)
+    #include <complex.h> // Userland: For _Complex double type (if needed by sub-gates)
 #else
-    #include <linux/kernel.h>
-    #include <linux/syscalls.h>
-    #include <linux/uaccess.h>
-    #include <linux/slab.h>
+    #include <linux/kernel.h>   // Kernel: For pr_err and general kernel functions
+    #include <linux/syscalls.h> // Kernel: For SYSCALL_DEFINE macros
+    #include <linux/uaccess.h>  // Kernel: For copy_from_user, copy_to_user
+    #include <linux/errno.h>    // Kernel: For error codes like -EINVAL, -EFAULT, -ENOMEM
+    #include <linux/printk.h>   // Kernel: For pr_err
+    #include <linux/slab.h>     // Kernel: For kmalloc, kfree, kmalloc_array
 #endif
 
 #ifndef __KERNEL__
 
+/**
+ * nymya_3354_metatron_cube - Applies operations related to the "Metatron's Cube" pattern to qubits (userland).
+ * @q: An array of pointers to nymya_qubit objects.
+ * @count: The total number of qubits in the array.
+ *
+ * This function simulates entanglement patterns inspired by the "Metatron's Cube"
+ * geometry. It expects at least 13 qubits to form a central qubit and two rings
+ * of 6 qubits each. The operations include:
+ * 1. Applying Hadamard gates to all 13 qubits.
+ * 2. Entangling the central qubit (q[0]) with all other 12 qubits using CNOTs.
+ * 3. Applying CNOTs between specific pairs of qubits to form the cube's edges,
+ * specifically connecting qubits in the inner ring (q[1] to q[6]) to their
+ * corresponding qubits in the outer ring (q[7] to q[12]).
+ * The function only processes a full 13-qubit unit if `count` is sufficient.
+ *
+ * Returns:
+ * - 0 on success.
+ * - -1 if the qubit array is NULL or if `count` is less than 13.
+ * - -1 if any individual qubit pointer within the processed unit is NULL.
+ */
 int nymya_3354_metatron_cube(nymya_qubit* q[], size_t count) {
+    // Basic null pointer and minimum count check
     if (!q || count < 13) return -1;
 
+    // Apply Hadamard to all 13 qubits
     for (size_t i = 0; i < 13; i++) {
-        if (!q[i]) return -1;
+        if (!q[i]) return -1; // Check for null pointer for each qubit
         hadamard(q[i]);
     }
 
+    // Entangle the central qubit (q[0]) with all other 12 qubits
     for (size_t i = 1; i < 13; i++) {
         cnot(q[0], q[i]);
     }
 
+    // Entangle qubits in the inner ring (q[1] to q[6]) with corresponding outer ring (q[7] to q[12])
+    // This forms the "edges" of the cube structure.
     for (int i = 1; i <= 6; i++) {
-        cnot(q[i], q[i + 6]);
+        cnot(q[i], q[i + 6]); // Connect q[1] to q[7], q[2] to q[8], etc.
     }
 
+    // Log the symbolic event for traceability, using the central qubit's ID and tag.
     log_symbolic_event("METATRON", q[0]->id, q[0]->tag,
         "Metatron’s Cube geometry entangled");
-    return 0;
+    return 0; // Success
 }
 
-#else
+#else // __KERNEL__
 
+/**
+ * SYSCALL_DEFINE2(nymya_3354_metatron_cube) - Kernel syscall for Metatron's Cube entanglement operation.
+ * @user_q_array: User-space pointer to an array of user-space qubit pointers.
+ * (i.e., `struct nymya_qubit __user *[]`)
+ * @count: The total number of qubits in the array provided by user space.
+ *
+ * This syscall copies the array of user-space qubit pointers, then copies each
+ * individual qubit structure from user space to kernel space. It applies the
+ * Metatron's Cube entanglement logic using kernel-space functions (Hadamard and CNOT)
+ * to 13 qubits (if available), and finally copies the modified qubit data back to user space.
+ *
+ * Returns:
+ * - 0 on success.
+ * - -EINVAL if the user_q_array pointer is NULL or `count` is less than 13,
+ * or if any individual user qubit pointer within the unit is NULL.
+ * - -EFAULT if copying data to/from user space fails for any qubit or pointer.
+ * - -ENOMEM if kernel memory allocation fails.
+ * - Error code from underlying gate operations (e.g., nymya_3308_hadamard_gate).
+ */
 SYSCALL_DEFINE2(nymya_3354_metatron_cube,
-    struct nymya_qubit __user * __user * user_q_array,
-    size_t count) {
+    struct nymya_qubit __user * __user *, user_q_array,
+    size_t, count) {
 
-    if (!user_q_array || count < 13)
+    struct nymya_qubit **k_qubits = NULL; // Pointer to array of kernel-space qubit pointers
+    struct nymya_qubit __user **user_qubit_ptrs = NULL; // Pointer to array of user-space qubit pointers
+    int ret = 0; // Return value for syscall and gate operations
+    size_t i; // Loop counter
+    const size_t required_qubits = 13; // Minimum qubits for one Metatron's Cube unit
+
+    // 1. Basic validation: Check for null array pointer and minimum count
+    if (!user_q_array || count < required_qubits) {
+        pr_err("nymya_3354_metatron_cube: Invalid user_q_array or count (%zu). Minimum %zu qubits required.\n", count, required_qubits);
         return -EINVAL;
+    }
 
-    struct nymya_qubit *k_q[13];
+    // 2. Allocate kernel memory for the array of user-space qubit pointers
+    user_qubit_ptrs = kmalloc_array(count, sizeof(struct nymya_qubit __user *), GFP_KERNEL);
+    if (!user_qubit_ptrs) {
+        pr_err("nymya_3354_metatron_cube: Failed to allocate memory for user_qubit_ptrs array\n");
+        return -ENOMEM;
+    }
 
-    for (int i = 0; i < 13; i++) {
-        k_q[i] = kmalloc(sizeof(struct nymya_qubit), GFP_KERNEL);
-        if (!k_q[i]) {
-            for (int j = 0; j < i; j++) kfree(k_q[j]);
-            return -ENOMEM;
+    // Copy the array of user-space qubit pointers from user space
+    if (copy_from_user(user_qubit_ptrs, user_q_array, count * sizeof(struct nymya_qubit __user *))) {
+        pr_err("nymya_3354_metatron_cube: Failed to copy user qubit pointers array\n");
+        ret = -EFAULT;
+        goto cleanup_user_ptrs_array;
+    }
+
+    // 3. Allocate kernel memory for the array of kernel-space qubit structures
+    k_qubits = kmalloc_array(count, sizeof(struct nymya_qubit *), GFP_KERNEL);
+    if (!k_qubits) {
+        pr_err("nymya_3354_metatron_cube: Failed to allocate memory for k_qubits array\n");
+        ret = -ENOMEM;
+        goto cleanup_user_ptrs_array;
+    }
+
+    // Initialize k_qubits elements to NULL for safe cleanup
+    for (i = 0; i < count; i++) {
+        k_qubits[i] = NULL;
+    }
+
+    // 4. Allocate memory for each individual qubit and copy data from user space
+    for (i = 0; i < count; i++) {
+        // Check if individual user-space qubit pointer is NULL
+        if (!user_qubit_ptrs[i]) {
+            pr_err("nymya_3354_metatron_cube: Null individual user qubit pointer at index %zu\n", i);
+            ret = -EINVAL;
+            goto cleanup_k_qubits; // Jump to cleanup allocated memory
+        }
+
+        // Allocate memory for the kernel-space copy of the qubit
+        k_qubits[i] = kmalloc(sizeof(struct nymya_qubit), GFP_KERNEL);
+        if (!k_qubits[i]) {
+            pr_err("nymya_3354_metatron_cube: Failed to allocate memory for k_qubit[%zu]\n", i);
+            ret = -ENOMEM; // Out of memory
+            goto cleanup_k_qubits; // Jump to cleanup allocated memory
+        }
+
+        // Copy the actual qubit data from user space into the allocated kernel memory
+        if (copy_from_user(k_qubits[i], user_qubit_ptrs[i], sizeof(struct nymya_qubit))) {
+            pr_err("nymya_3354_metatron_cube: Failed to copy k_qubit[%zu] data from user\n", i);
+            ret = -EFAULT; // Bad address
+            goto cleanup_k_qubits; // Jump to cleanup allocated memory
         }
     }
 
-    for (int i = 0; i < 13; i++) {
-        struct nymya_qubit temp;
-        if (copy_from_user(&temp, *(user_q_array + i), sizeof(struct nymya_qubit))) {
-            for (int j = 0; j < 13; j++) kfree(k_q[j]);
-            return -EFAULT;
-        }
-        *k_q[i] = temp;
-    }
-
-    for (int i = 0; i < 13; i++) {
-        if (!k_q[i]) {
-            for (int j = 0; j < 13; j++) kfree(k_q[j]);
-            return -EINVAL;
+    // 5. Apply the Metatron's Cube entanglement logic for kernel space
+    // Apply Hadamard to all 13 qubits (or up to 'count' if less than 13)
+    for (i = 0; i < required_qubits; i++) {
+        ret = nymya_3308_hadamard_gate(k_qubits[i]);
+        if (ret) {
+            pr_err("nymya_3354_metatron_cube: Hadamard on q[%zu] failed, error %d\n", i, ret);
+            goto cleanup_k_qubits;
         }
     }
 
-    for (int i = 0; i < 13; i++) {
-        hadamard(k_q[i]);
+    // Entangle the central qubit (k_qubits[0]) with all other 12 qubits
+    for (i = 1; i < required_qubits; i++) {
+        ret = nymya_3309_controlled_not(k_qubits[0], k_qubits[i]);
+        if (ret) {
+            pr_err("nymya_3354_metatron_cube: CNOT(q[0], q[%zu]) failed, error %d\n", i, ret);
+            goto cleanup_k_qubits;
+        }
     }
 
-    for (int i = 1; i < 13; i++) {
-        cnot(k_q[0], k_q[i]);
+    // Entangle qubits in the inner ring (k_qubits[1] to k_qubits[6]) with corresponding outer ring (k_qubits[7] to k_qubits[12])
+    for (int j = 1; j <= 6; j++) {
+        size_t current_idx = j;
+        size_t target_idx = j + 6;
+
+        if (current_idx >= count || target_idx >= count) { // Defensive check
+            pr_err("nymya_3354_metatron_cube: Ring connection CNOT indices out of bounds: %zu, %zu\n", current_idx, target_idx);
+            ret = -EINVAL;
+            goto cleanup_k_qubits;
+        }
+        ret = nymya_3309_controlled_not(k_qubits[current_idx], k_qubits[target_idx]); // Connect q[j] to q[j+6]
+        if (ret) {
+            pr_err("nymya_3354_metatron_cube: CNOT(q[%zu], q[%zu]) failed, error %d\n", current_idx, target_idx, ret);
+            goto cleanup_k_qubits;
+        }
     }
 
-    for (int i = 1; i <= 6; i++) {
-        cnot(k_q[i], k_q[i + 6]);
-    }
-
-    log_symbolic_event("METATRON", k_q[0]->id, k_q[0]->tag,
+    // 6. Log the symbolic event for traceability
+    log_symbolic_event("METATRON", k_qubits[0]->id, k_qubits[0]->tag,
         "Metatron’s Cube geometry entangled");
 
-    for (int i = 0; i < 13; i++) {
-        if (copy_to_user(*(user_q_array + i), k_q[i], sizeof(struct nymya_qubit))) {
-            for (int j = 0; j < 13; j++) kfree(k_q[j]);
-            return -EFAULT;
+    // 7. Copy the modified qubits back to user space
+    // Only proceed if no errors occurred during gate applications
+    if (ret == 0) {
+        for (i = 0; i < count; i++) {
+            // Copy the actual qubit data from kernel memory back to user space
+            if (copy_to_user(user_qubit_ptrs[i], k_qubits[i], sizeof(struct nymya_qubit))) {
+                pr_err("nymya_3354_metatron_cube: Failed to copy k_qubit[%zu] to user\n", i);
+                // Set ret to -EFAULT if any copy fails, but continue to free memory
+                if (ret == 0) ret = -EFAULT; // Preserve first error
+            }
         }
     }
 
-    for (int i = 0; i < 13; i++) kfree(k_q[i]);
+cleanup_k_qubits:
+    // 8. Free all allocated kernel memory for individual qubits
+    for (size_t j = 0; j < count; j++) {
+        if (k_qubits && k_qubits[j]) { // Check if k_qubits array pointer is valid and individual pointer is valid
+            kfree(k_qubits[j]);
+            k_qubits[j] = NULL;
+        }
+    }
+    if (k_qubits) {
+        kfree(k_qubits); // Free the array of pointers itself
+        k_qubits = NULL;
+    }
 
-    return 0;
+cleanup_user_ptrs_array:
+    if (user_qubit_ptrs) {
+        kfree(user_qubit_ptrs); // Free the array holding user-space pointers
+        user_qubit_ptrs = NULL;
+    }
+
+    return ret; // Return 0 on success, or error code if any operation failed
 }
 
 #endif
+

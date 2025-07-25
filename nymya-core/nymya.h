@@ -9,6 +9,7 @@
 // Maximum length for qubit tags (labels)
 #define NYMYA_TAG_MAXLEN 32
 
+// Conditional definition of complex_double and related functions based on compilation environment
 #ifdef __KERNEL__
 
     #include <linux/types.h>
@@ -204,19 +205,6 @@
         return fixed_point_cos(theta);
     }
 
-
-    /**
-     * nymya_qubit - Qubit struct for kernel mode.
-     * @id: Unique qubit identifier.
-     * @tag: Label/tag for qubit, max NYMYA_TAG_MAXLEN chars.
-     * @amplitude: Qubit amplitude as fixed-point complex number.
-     */
-    typedef struct nymya_qubit {
-        uint64_t id;
-        char tag[NYMYA_TAG_MAXLEN];
-        complex_double amplitude;
-    } nymya_qubit;
-
 #else // userspace
 
     #include <stdio.h>
@@ -293,22 +281,54 @@
      */
     static inline complex_double complex_conj(complex_double c) { return conj(c); }
 
-    /**
-     * nymya_qubit - Qubit struct for userspace.
-     * @id: Unique qubit identifier.
-     * @tag: Label/tag for qubit, max NYMYA_TAG_MAXLEN chars.
-     * @amplitude: Qubit amplitude as native complex_double.
-     */
-    typedef struct nymya_qubit {
-        uint64_t id;
-        char tag[NYMYA_TAG_MAXLEN];
-        complex_double amplitude;
-    } nymya_qubit;
-
 #endif // __KERNEL__
 
+// Common structure definitions, visible to both kernel and userspace
 /**
- * nymya_qpos3d - 3D position struct for a qubit.
+ * nymya_qubit - Qubit struct.
+ * @id: Unique qubit identifier.
+ * @tag: Label/tag for qubit, max NYMYA_TAG_MAXLEN chars.
+ * @amplitude: Qubit amplitude as complex number (type depends on compilation).
+ */
+typedef struct nymya_qubit {
+    uint64_t id;
+    char tag[NYMYA_TAG_MAXLEN];
+    complex_double amplitude; // This type is conditionally defined above
+} nymya_qubit;
+
+/**
+ * nymya_qpos3d_k - 3D fixed-point position struct for kernel space (and userland marshalling).
+ * @q: Associated qubit.
+ * @x, y, z: Q32.32 fixed-point coordinates.
+ */
+typedef struct {
+    nymya_qubit q;
+    int64_t    x, y, z;
+} nymya_qpos3d_k;
+
+/**
+ * nymya_qpos4d_k - 4D fixed-point position struct for kernel space (and userland marshalling).
+ * @q: Associated qubit.
+ * @x, y, z, w: Q32.32 fixed-point coordinates.
+ */
+typedef struct {
+    nymya_qubit q;
+    int64_t    x, y, z, w;
+} nymya_qpos4d_k;
+
+/**
+ * nymya_qpos5d_k - 5D fixed-point position struct for kernel space (and userland marshalling).
+ * @q: Associated qubit.
+ * @x, y, z, w, v: Q32.32 fixed-point coordinates.
+ */
+typedef struct {
+    nymya_qubit q;
+    int64_t    x, y, z, w, v;
+} nymya_qpos5d_k;
+
+
+/**
+ * nymya_qpos3d - 3D position struct for a qubit (userspace floating-point).
  * @x, y, z: Spatial coordinates.
  * @q: Associated qubit.
  */
@@ -318,7 +338,7 @@ typedef struct {
 } nymya_qpos3d;
 
 /**
- * nymya_qpos4d - 4D position struct for a qubit.
+ * nymya_qpos4d - 4D position struct for a qubit (userspace floating-point).
  * @x, y, z, w: 4D spatial coordinates.
  * @q: Associated qubit.
  */
@@ -328,7 +348,7 @@ typedef struct {
 } nymya_qpos4d;
 
 /**
- * nymya_qpos5d - 5D position struct for a qubit.
+ * nymya_qpos5d - 5D position struct for a qubit (userspace floating-point).
  * @x, y, z, w, v: 5D spatial coordinates.
  * @q: Associated qubit.
  */
@@ -378,6 +398,7 @@ complex_double fixed_complex_multiply(int64_t re1, int64_t im1, int64_t re2, int
 #endif
 
 #endif // NYMYA_H
+
 
 // Quantum-symbolic syscalls
 
