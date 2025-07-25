@@ -76,7 +76,6 @@ SYSCALL_DEFINE3(nymya_3338_givens,
     int64_t, theta_fp) { // Theta is now fixed-point
 
     struct nymya_qubit k_q1, k_q2; // Kernel-space copies
-    int ret = 0;
 
     // 1. Validate user pointers
     if (!user_q1 || !user_q2) {

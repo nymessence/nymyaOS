@@ -74,11 +74,7 @@ SYSCALL_DEFINE2(nymya_3309_controlled_not,
     struct nymya_qubit __user *, user_target) {
 
     struct nymya_qubit k_ctrl, k_target;
-    int64_t re, im;
     int64_t ctrl_re, ctrl_im;
-    uint64_t id;
-    char tag[NYMYA_TAG_MAXLEN];
-    uint64_t tag_len;
 
     if (!user_ctrl || !user_target)
         return -EINVAL;

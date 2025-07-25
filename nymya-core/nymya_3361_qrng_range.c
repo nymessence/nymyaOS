@@ -1,54 +1,91 @@
 // src/nymya_3361_qrng_range.c
 
-#include <stdlib.h>
-#include <time.h>
-#include <math.h>
-#include "nymya.h"
+#include "nymya.h" // Defines: nymya_qubit, FIXED_POINT_SCALE, NYMYA_QRNG_CODE, make_complex, hadamard, global_phase, log_symbolic_event
 
 #ifndef __KERNEL__
     #include <stdio.h>
+    #include <stdlib.h> // For malloc, free, srand, rand in userland
+    #include <time.h>   // For time(NULL) in userland
+    #include <math.h>   // Not strictly needed for this file, but often grouped with other userland includes
+    #include <unistd.h> // For syscall
+    #include <sys/syscall.h> // For syscall() function prototype
+    #include <errno.h>  // For ENOMEM and other errno values in userland
 #else
     #include <linux/kernel.h>
     #include <linux/syscalls.h>
     #include <linux/uaccess.h>
+    #include <linux/slab.h> // For kmalloc, kfree
+    #include <linux/random.h> // For get_random_u32
+    // No stdlib.h, time.h, math.h for kernel
 #endif
 
 #ifndef __KERNEL__
 
+// Define the syscall number for userland, using the code from nymya.h.
+// This is necessary because syscall() expects the __NR_ prefix.
+#define __NR_nymya_3361_qrng_range NYMYA_QRNG_CODE
+
+/**
+ * nymya_3361_qrng_range - Userland wrapper for the QRNG syscall.
+ * @out: Pointer to an array where the generated random numbers will be stored.
+ * @min: The minimum value for the random numbers (inclusive).
+ * @max: The maximum value for the random numbers (inclusive).
+ * @count: The number of random numbers to generate.
+ *
+ * This function simulates quantum random number generation in userland.
+ * It initializes qubits, applies quantum gates (symbolically), and then
+ * generates a random bit to determine the output value within the specified range.
+ *
+ * Returns:
+ * - 0 on success.
+ * - -1 if input parameters are invalid.
+ */
 int nymya_3361_qrng_range(uint64_t* out, uint64_t min, uint64_t max, size_t count) {
     if (!out || min >= max || count == 0) return -1;
 
+    // In userland, we can still use stdlib's rand for demonstration or testing
+    // if a true quantum RNG is not available.
     static int seeded = 0;
     if (!seeded) {
-        srand((unsigned int)time(NULL));
+        srand((unsigned int)time(NULL)); // Seed RNG in userland
         seeded = 1;
     }
 
-    uint64_t range = max - min + 1;
-    uint64_t half_range = range / 2;
+    // The userland function now primarily acts as a wrapper to call the kernel syscall.
+    // The actual QRNG logic resides in the kernel implementation.
+    long ret = syscall(__NR_nymya_3361_qrng_range, (unsigned long)out, min, max, count);
 
-    for (size_t i = 0; i < count; i++) {
-        nymya_qubit q = {
-            .id = i,
-            .tag = "qrng",
-            .amplitude = 1.0 + 0.0 * I
-        };
-
-        hadamard(&q);           // Symbolic superposition
-        global_phase(&q, 0.0);  // Identity phase, symbolic
-
-        int bit = (rand() % 2);
-
-        out[i] = min + bit * half_range;
-
-        log_symbolic_event("QRNG_BIT", q.id, q.tag, bit ? "1" : "0");
-    }
-
-    return 0;
+    return (int)ret;
 }
 
-#else
+#else // __KERNEL__
 
+// External kernel functions for qubit operations and logging.
+// These are assumed to be defined elsewhere in the kernel and linked,
+// and their declarations are now expected to be in nymya.h.
+extern int hadamard(nymya_qubit *q);
+extern int global_phase(nymya_qubit *q, int64_t theta_fp);
+extern int log_symbolic_event(const char* gate, uint64_t id, const char* tag, const char* msg);
+
+
+/**
+ * nymya_3361_qrng_range - Kernel syscall for Quantum Random Number Generation within a range.
+ * @user_out: Pointer to a user-space array of uint64_t where the generated numbers will be stored.
+ * @min: The minimum value for the random numbers (inclusive).
+ * @max: The maximum value for the random numbers (inclusive).
+ * @count: The number of random numbers to generate.
+ *
+ * This system call simulates quantum random number generation. It performs
+ * symbolic quantum operations (Hadamard, Global Phase) on a conceptual qubit
+ * for each number generated, and then uses a kernel-safe pseudo-random number
+ * generator to produce a bit, which is scaled to the desired range.
+ *
+ * Returns:
+ * - 0 on success.
+ * - -EINVAL if input parameters are invalid.
+ * - -ENOMEM if kernel memory allocation fails.
+ * - -EFAULT if copying data to user space fails.
+ */
 SYSCALL_DEFINE4(nymya_3361_qrng_range,
     uint64_t __user *, user_out,
     uint64_t, min,
@@ -62,34 +99,37 @@ SYSCALL_DEFINE4(nymya_3361_qrng_range,
     if (!k_out)
         return -ENOMEM;
 
-    static int seeded = 0;
-    if (!seeded) {
-        // Kernel random seed (for demo, use get_random_bytes for better RNG)
-        srand((unsigned int)ktime_get_real_seconds());
-        seeded = 1;
-    }
-
-    uint64_t range = max - min + 1;
-    uint64_t half_range = range / 2;
+    // Use get_random_u32 for kernel-safe random number generation.
+    // This function draws from the kernel's entropy pool and does not
+    // require explicit seeding within this syscall.
 
     for (size_t i = 0; i < count; i++) {
+        // Conceptual qubit for symbolic operations
         struct nymya_qubit q = {
             .id = i,
             .tag = "qrng",
-            .amplitude = 1.0 + 0.0 * I
+            .amplitude = make_complex(FIXED_POINT_SCALE, 0) // Initialize to |0> state in fixed-point
         };
 
-        nymya_hadamard(&q);       // Assuming kernel-space equivalent exists
-        nymya_global_phase(&q, 0.0);
+        // Symbolic quantum operations
+        // These functions are assumed to modify the amplitude of 'q' symbolically
+        // or perform other logging/tracking.
+        hadamard(&q);          // Symbolic superposition
+        global_phase(&q, 0);   // Symbolic identity phase (0 in fixed-point)
 
-        int bit = prandom_u32() & 1;  // Better kernel RNG than rand()
+        // Generate a pseudo-random bit using kernel's get_random_u32
+        // We only need a bit, so we mask the result.
+        int bit = get_random_u32() & 1; // Get a single random bit (0 or 1)
 
-        k_out[i] = min + bit * half_range;
+        // Map the random bit to either min or max.
+        // This simulates a binary outcome from a quantum measurement.
+        k_out[i] = bit == 0 ? min : max;
 
-        // Log event - assuming a kernel-safe version
+        // Log the symbolic event for the generated bit
         log_symbolic_event("QRNG_BIT", q.id, q.tag, bit ? "1" : "0");
     }
 
+    // Copy generated numbers to user space
     if (copy_to_user(user_out, k_out, sizeof(uint64_t) * count)) {
         kfree(k_out);
         return -EFAULT;
@@ -100,3 +140,4 @@ SYSCALL_DEFINE4(nymya_3361_qrng_range,
 }
 
 #endif
+

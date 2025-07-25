@@ -77,7 +77,6 @@ SYSCALL_DEFINE3(nymya_3329_fredkin,
     struct nymya_qubit __user *, user_q2) {
 
     struct nymya_qubit k_q_ctrl, k_q1, k_q2; // Kernel-space copies of qubits
-    int ret = 0; // Return value
 
     // 1. Validate user pointers
     if (!user_q_ctrl || !user_q1 || !user_q2) {

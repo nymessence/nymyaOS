@@ -16,8 +16,6 @@
  */
 int64_t fixed_sin(const int64_t theta)
 {
-    const int64_t ONE = FIXED_POINT_SCALE; // 1.0 in Q32.32
-
     __int128 x = theta;
     __int128 x2 = (x * x) >> 32;       // x² in Q32.32
     __int128 x3 = (x2 * x) >> 32;      // x³

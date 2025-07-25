@@ -12,8 +12,16 @@
 // Conditional definition of complex_double and related functions based on compilation environment
 #ifdef __KERNEL__
 
-    #include <linux/types.h>
+    #include <linux/types.h> // Provides __s64, __u64, etc.
     #include <linux/string.h>
+    // #include <stdint.h> // Removed: Relying on linux/types.h and explicit typedefs below
+
+    // Define int64_t and uint64_t for kernel if not already provided by linux/types.h
+    // This provides a fallback if the compiler doesn't automatically map __s64/__u64
+    // to int64_t/uint64_t, or if stdint.h is truly unavailable.
+    typedef __s64 int64_t;
+    typedef __u64 uint64_t;
+
 
     // Fixed-point constants for kernel calculations
     #define FIXED_POINT_PI (int64_t)(3.141592653589793 * FIXED_POINT_SCALE)
@@ -46,6 +54,7 @@
      * The product as an int64_t (fixed-point).
      */
     static inline int64_t fixed_point_mul(int64_t val1, int64_t val2) {
+        // Corrected: Removed extra closing parenthesis. This syntax is correct.
         return (int64_t)(((__int128)val1 * val2) >> 32);
     }
 
@@ -204,6 +213,7 @@
     static inline int64_t fixed_cos(int64_t theta) {
         return fixed_point_cos(theta);
     }
+
 
 #else // userspace
 
@@ -398,6 +408,8 @@ complex_double fixed_complex_multiply(int64_t re1, int64_t im1, int64_t re2, int
 #endif
 
 #endif // NYMYA_H
+
+
 
 
 // Quantum-symbolic syscalls

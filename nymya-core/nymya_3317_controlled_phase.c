@@ -54,7 +54,6 @@ SYSCALL_DEFINE3(nymya_3317_controlled_phase,
 {
     struct nymya_qubit k_qc, k_qt;
     complex_double phase;
-    uint64_t re_abs;
 
     if (!user_qc || !user_qt)
         return -EINVAL;
