@@ -3,6 +3,12 @@
 #include "nymya.h"
 
 #ifndef __KERNEL__
+#include <stdint.h>
+#include <errno.h>
+#include <sys/syscall.h>
+#include <unistd.h>
+#define __NR_nymya_3313_swap NYMYA_SWAP_CODE
+
     #include <stdio.h>
     #include <stdlib.h>
     #include <complex.h>

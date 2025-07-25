@@ -3,7 +3,13 @@
 #include "nymya.h"
 
 #ifndef __KERNEL__
+#include <stdint.h>
+#include <errno.h>
+#include <sys/syscall.h>
+#include <unistd.h>
     #include <stdio.h>
+#define __NR_nymya_3331_barenco NYMYA_BARENCO_CODE
+
     #include <stdlib.h> // Only for userland
     #include <math.h>
     #include <complex.h>

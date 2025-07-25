@@ -3,6 +3,7 @@
 #include "nymya.h" // Defines: nymya_qubit, FIXED_POINT_SCALE, NYMYA_QRNG_CODE, make_complex, hadamard, global_phase, log_symbolic_event
 
 #ifndef __KERNEL__
+#include <stdint.h>
     #include <stdio.h>
     #include <stdlib.h> // For malloc, free, srand, rand in userland
     #include <time.h>   // For time(NULL) in userland

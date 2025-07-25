@@ -3,6 +3,7 @@
 #include "nymya.h" // Defines: nymya_qubit, nymya_qpos3d, nymya_qpos3d_k, FIXED_POINT_SCALE, fixed_point_square, NYMYA_HCP_LATTICE_CODE
 
 #ifndef __KERNEL__
+#include <stdint.h>
     #include <stdio.h>
     #include <stdlib.h> // For malloc, free in userland
     #include <math.h>   // Include math.h for userspace for sqrt and pow

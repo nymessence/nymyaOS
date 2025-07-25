@@ -3,6 +3,12 @@
 #include "nymya.h"
 
 #ifndef __KERNEL__
+#include <stdint.h>
+#include <errno.h>
+#include <sys/syscall.h>
+#include <unistd.h>
+#define __NR_nymya_3306_phase_gate NYMYA_PHASE_S_CODE
+
     #include <stdio.h>
     #include <stdlib.h>
     #include <math.h>

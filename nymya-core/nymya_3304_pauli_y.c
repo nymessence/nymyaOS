@@ -3,6 +3,12 @@
 #include "nymya.h"
 
 #ifndef __KERNEL__
+#include <stdint.h>
+#include <errno.h>
+#include <sys/syscall.h>
+#define __NR_nymya_3304_pauli_y NYMYA_PAULI_Y_CODE
+
+#include <unistd.h>
     #include <stdio.h>
     #include <stdlib.h>
 #else

@@ -13,7 +13,13 @@
 #include "nymya.h" // Common definitions like nymya_qubit, and gate macros
 
 #ifndef __KERNEL__
+#include <stdint.h>
+#include <errno.h>
+#include <sys/syscall.h>
+#include <unistd.h>
     #include <stdio.h>    // Userland: For standard I/O (e.g., in log_symbolic_event)
+#define __NR_nymya_3351_tessellated_hex_rhombi NYMYA_TESS_HEX_RHOMBI_CODE
+
     #include <stdlib.h>  // Userland: For general utilities (e.g., size_t)
     #include <math.h>    // Userland: For complex math functions (if needed by sub-gates)
     #include <complex.h> // Userland: For _Complex double type (if needed by sub-gates)

@@ -10,6 +10,12 @@
 #include "nymya.h"
 
 #ifndef __KERNEL__
+#include <stdint.h>
+#include <errno.h>
+#include <sys/syscall.h>
+#include <unistd.h>
+#define __NR_nymya_3310_anticontrol_not NYMYA_ACNOT_CODE
+
     #include <stdio.h>
     #include <stdlib.h>
     #include <math.h>

@@ -3,7 +3,13 @@
 #include "nymya.h" // This should bring in common definitions and conditional includes
 
 #ifndef __KERNEL__
+#include <stdint.h>
+#include <errno.h>
+#include <sys/syscall.h>
+#include <unistd.h>
     #include <stdio.h>    // Userland only
+#define __NR_nymya_3332_berkeley NYMYA_BERKELEY_CODE
+
     #include <stdlib.h>  // Userland only
     #include <math.h>    // Userland only
     #include <complex.h> // Userland only

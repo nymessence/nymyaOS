@@ -3,6 +3,12 @@
 #include "nymya.h"
 
 #ifndef __KERNEL__
+#include <stdint.h>
+#include <errno.h>
+#include <sys/syscall.h>
+#include <unistd.h>
+#define __NR_nymya_3324_zz_interaction NYMYA_ZZ_CODE
+
     #include <stdio.h>
     #include <stdlib.h>
     #include <math.h>

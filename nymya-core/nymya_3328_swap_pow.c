@@ -3,7 +3,13 @@
 #include "nymya.h" // Includes complex_double, FIXED_POINT_SCALE
 
 #ifndef __KERNEL__
+#include <stdint.h>
+#include <errno.h>
+#include <sys/syscall.h>
+#include <unistd.h>
     #include <stdio.h>
+#define __NR_nymya_3328_swap_pow NYMYA_SWAP_POW_CODE
+
     #include <stdlib.h>
     #include <math.h>
     #include <complex.h> // For _Complex double and I in userland

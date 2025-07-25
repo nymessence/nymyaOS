@@ -3,7 +3,13 @@
 #include "nymya.h" // Common definitions like complex_double
 
 #ifndef __KERNEL__
+#include <stdint.h>
+#include <errno.h>
+#include <sys/syscall.h>
+#include <unistd.h>
     #include <stdio.h>    // Userland only
+#define __NR_nymya_3335_dagwood NYMYA_DAGWOOD_CODE
+
     #include <stdlib.h>  // Userland only
     #include <math.h>    // For cabs in userland
     #include <complex.h> // For _Complex double in userland

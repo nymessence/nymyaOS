@@ -4,6 +4,12 @@
 // are assumed to be provided elsewhere, as they are declared in nymya.h but not defined here.
 
 #ifndef __KERNEL__
+#include <stdint.h>
+#include <errno.h>
+#include <sys/syscall.h>
+#include <unistd.h>
+
+#define __NR_nymya_3325_xyz_entangle NYMYA_XYZ_CODE
 
 /**
  * nymya_3325_xyz_entangle - Applies an XX+YY+ZZ entanglement operation to two qubits (userland version).

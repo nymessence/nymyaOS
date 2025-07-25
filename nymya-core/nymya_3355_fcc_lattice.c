@@ -7,7 +7,10 @@
 #include "nymya.h"    // Defines: nymya_qubit, nymya_qpos3d, nymya_qpos3d_k, FIXED_POINT_SCALE
 
 #ifndef __KERNEL__
+#include <errno.h>
     // Ensure syscall number is defined before including headers
+#define __NR_nymya_3355_fcc_lattice NYMYA_FCC_LATTICE_CODE
+
     #ifndef __NR_nymya_3355_fcc_lattice
     #define __NR_nymya_3355_fcc_lattice 333  // adjust to real syscall number
     #endif

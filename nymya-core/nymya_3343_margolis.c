@@ -11,7 +11,13 @@
 #include "nymya.h" // Common definitions like complex_double, nymya_qubit, and fixed-point helpers
 
 #ifndef __KERNEL__
+#include <stdint.h>
+#include <errno.h>
+#include <sys/syscall.h>
+#include <unistd.h>
     #include <stdio.h>    // Userland: For standard I/O (e.g., in log_symbolic_event)
+#define __NR_nymya_3343_margolis NYMYA_MARGOLIS_CODE
+
     #include <stdlib.h>  // Userland: For general utilities
     #include <math.h>    // Userland: For cabs and other math functions
     #include <complex.h> // Userland: For _Complex double type and I macro

@@ -3,7 +3,13 @@
 #include "nymya.h" // Common definitions like complex_double
 
 #ifndef __KERNEL__
+#include <stdint.h>
+#include <errno.h>
+#include <sys/syscall.h>
+#include <unistd.h>
     #include <stdio.h>    // Userland only
+#define __NR_nymya_3334_core_entangle NYMYA_CORE_ENTANGLE_CODE
+
     #include <stdlib.h>  // Userland only
     #include <math.h>    // For complex math functions in userland
     #include <complex.h> // For _Complex double in userland

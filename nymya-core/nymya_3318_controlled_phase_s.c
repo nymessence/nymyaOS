@@ -3,7 +3,13 @@
 #include "nymya.h"
 
 #ifndef __KERNEL__
+#include <stdint.h>
+#include <errno.h>
+#include <sys/syscall.h>
+#include <unistd.h>
     #include <stdio.h>
+#define __NR_nymya_3318_controlled_phase_s NYMYA_CPHASE_S_CODE
+
     #include <stdlib.h>
     #include <math.h>
     #include <complex.h>

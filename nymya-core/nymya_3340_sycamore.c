@@ -11,7 +11,13 @@
 #include "nymya.h" // Common definitions like complex_double, nymya_qubit, and gate macros
 
 #ifndef __KERNEL__
+#include <stdint.h>
+#include <errno.h>
+#include <sys/syscall.h>
+#include <unistd.h>
     #include <stdio.h>    // Userland: For standard I/O (e.g., in log_symbolic_event)
+#define __NR_nymya_3340_sycamore NYMYA_SYCAMORE_CODE
+
     #include <stdlib.h>  // Userland: For general utilities
     #include <math.h>    // Userland: For M_PI and other math functions
     #include <complex.h> // Userland: For _Complex double type
