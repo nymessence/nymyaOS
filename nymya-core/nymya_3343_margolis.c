@@ -27,6 +27,7 @@
     #include <linux/uaccess.h>  // Kernel: For copy_from_user, copy_to_user
     #include <linux/errno.h>    // Kernel: For error codes like -EINVAL, -EFAULT
     #include <linux/printk.h>   // Kernel: For pr_err
+    #include <linux/module.h>   // ADDED: Required for EXPORT_SYMBOL_GPL
     // No math.h or complex.h in kernel; fixed-point math assumed for amplitude operations
 #endif
 
@@ -81,8 +82,54 @@ int nymya_3343_margolis(nymya_qubit* qc1, nymya_qubit* qc2, nymya_qubit* qt) {
 static inline int64_t fixed_point_magnitude_sq(complex_double c) {
     // Magnitude squared = re*re + im*im
     // Note: This assumes fixed_point_mul is available via nymya.h.
+    // The result of fixed_point_mul is already scaled by FIXED_POINT_SCALE.
+    // So, the sum is also effectively scaled by FIXED_POINT_SCALE.
     return fixed_point_mul(c.re, c.re) + fixed_point_mul(c.im, c.im);
 }
+
+/**
+ * nymya_3343_margolis - Core kernel function for Margolis gate.
+ * @k_qc1: Pointer to the first kernel-space control qubit structure.
+ * @k_qc2: Pointer to the second kernel-space control qubit structure.
+ * @k_qt: Pointer to the kernel-space target qubit structure.
+ *
+ * This function applies the Margolis gate logic. It applies a phase flip
+ * to the target qubit if both control qubits are in a '1' state (based on
+ * amplitude magnitude using fixed-point arithmetic).
+ * This function is designed to be called directly by other kernel code.
+ *
+ * Returns:
+ * - 0 on success.
+ * - -EINVAL if any kernel qubit pointer is NULL.
+ */
+int nymya_3343_margolis(struct nymya_qubit *k_qc1, struct nymya_qubit *k_qc2, struct nymya_qubit *k_qt) {
+    // 1. Check for null pointers
+    if (!k_qc1 || !k_qc2 || !k_qt) {
+        pr_err("nymya_3343_margolis: Null kernel qubit pointer(s)\n");
+        return -EINVAL;
+    }
+
+    // Define the threshold for control qubit being '1' (0.5^2 = 0.25 in floating point)
+    // Convert 0.25 to fixed-point scaled by FIXED_POINT_SCALE.
+    const int64_t threshold_sq_fp = FIXED_POINT_SCALE / 4; // Represents 0.25 in Q32.32
+
+    // Check if both control qubits' amplitude magnitudes squared are above the threshold
+    if (fixed_point_magnitude_sq(k_qc1->amplitude) > threshold_sq_fp &&
+        fixed_point_magnitude_sq(k_qc2->amplitude) > threshold_sq_fp) {
+        // Apply phase flip (multiply by -1) to the target qubit's amplitude
+        // For a complex number (re + i*im), multiplying by -1 results in (-re - i*im).
+        k_qt->amplitude.re = -k_qt->amplitude.re;
+        k_qt->amplitude.im = -k_qt->amplitude.im;
+
+        log_symbolic_event("MARGOLIS", k_qt->id, k_qt->tag, "Margolis gate triggered");
+    } else {
+        log_symbolic_event("MARGOLIS", k_qt->id, k_qt->tag, "Conditions not met");
+    }
+    return 0; // Indicate success for this path
+}
+// Export the symbol for this function so other kernel modules/code can call it directly.
+EXPORT_SYMBOL_GPL(nymya_3343_margolis);
+
 
 /**
  * SYSCALL_DEFINE3(nymya_3343_margolis) - Kernel syscall for Margolis gate.
@@ -90,10 +137,8 @@ static inline int64_t fixed_point_magnitude_sq(complex_double c) {
  * @user_qc2: User-space pointer to the second control qubit structure.
  * @user_qt: User-space pointer to the target qubit structure.
  *
- * This syscall copies qubit data from user space to kernel space, applies the
- * Margolis gate logic using kernel-space fixed-point arithmetic, and then
- * copies the modified data back to user space. The gate applies a phase flip
- * to the target qubit if both control qubits are in a '1' state (based on amplitude magnitude).
+ * This syscall copies qubit data from user space to kernel space, calls the
+ * core Margolis gate logic, and then copies the modified data back to user space.
  *
  * Returns:
  * - 0 on success.
@@ -128,24 +173,12 @@ SYSCALL_DEFINE3(nymya_3343_margolis,
         return -EFAULT; // Bad address
     }
 
-    // 3. Implement the Margolis gate logic for kernel space
-    // Define the threshold for control qubit being '1' (0.5^2 = 0.25 in floating point)
-    // Convert 0.25 to fixed-point squared value
-    const int64_t threshold_sq_fp = FIXED_POINT_SCALE / 4; // Represents 0.25 in Q32.32
+    // 3. Call the core Margolis gate logic
+    ret = nymya_3343_margolis(&k_qc1, &k_qc2, &k_qt);
 
-    // Check if both control qubits' amplitude magnitudes squared are above the threshold
-    if (fixed_point_magnitude_sq(k_qc1.amplitude) > threshold_sq_fp &&
-        fixed_point_magnitude_sq(k_qc2.amplitude) > threshold_sq_fp) {
-        // Apply phase flip (multiply by -1) to the target qubit's amplitude
-        // For a complex number (re + i*im), multiplying by -1 results in (-re - i*im).
-        k_qt.amplitude.re = -k_qt.amplitude.re;
-        k_qt.amplitude.im = -k_qt.amplitude.im;
-
-        log_symbolic_event("MARGOLIS", k_qt.id, k_qt.tag, "Margolis gate triggered");
-        ret = 0; // Indicate success for this path
-    } else {
-        log_symbolic_event("MARGOLIS", k_qt.id, k_qt.tag, "Conditions not met");
-        ret = 0; // Indicate success even if conditions not met (no change)
+    if (ret) {
+        // Error already logged by core function
+        return ret;
     }
 
     // 4. Copy the modified target qubit back to user space

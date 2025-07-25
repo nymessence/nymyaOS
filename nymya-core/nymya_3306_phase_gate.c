@@ -17,53 +17,67 @@
     #include <linux/syscalls.h>
     #include <linux/uaccess.h>
     #include <linux/errno.h>
-#endif
+    #include <linux/module.h> // Required for EXPORT_SYMBOL_GPL
 
-#ifndef __KERNEL__
+    /**
+     * nymya_3306_phase_gate - Core kernel function for Phase (S) gate logic.
+     * @q: Pointer to the nymya_qubit structure.
+     *
+     * This function applies the Phase (S) gate logic to a qubit's amplitude.
+     * It multiplies the amplitude by fixed-point 'i' (equivalent to phase shift π/2).
+     * This function is designed to be called directly by other kernel code.
+     *
+     * Returns: 0 on success.
+     */
+    int nymya_3306_phase_gate(struct nymya_qubit *q) {
+        int64_t re, im;
 
-/*
- * User-space implementation of Phase (S) gate.
- * Multiplies amplitude by exp(i * π/2) == i.
- */
-int nymya_3306_phase_gate(nymya_qubit* q) {
-    if (!q) return -1;
+        if (!q) {
+            pr_err("NYMYA: nymya_3306_phase_gate received NULL qubit pointer\n");
+            return -EINVAL; // Return an error if qubit is null
+        }
 
-    q->amplitude *= cexp(I * M_PI_2);
+        re = q->amplitude.re;
+        im = q->amplitude.im;
 
-    log_symbolic_event("PHASE_S", q->id, q->tag, "Applied S gate (π/2 phase)");
-    return 0;
-}
+        // (a + bi) * i = -b + ai
+        q->amplitude.re = -im;
+        q->amplitude.im = re;
 
-#else
+        log_symbolic_event("PHASE_S", q->id, q->tag, "Applied S gate (π/2 phase)");
+        return 0;
+    }
+    // Export the symbol for this function so other kernel modules/code can call it directly.
+    EXPORT_SYMBOL_GPL(nymya_3306_phase_gate);
 
-/*
- * Kernel syscall: nymya_3306_phase_gate
- * Multiplies qubit amplitude by fixed-point i (equivalent to phase shift π/2).
- */
-SYSCALL_DEFINE1(nymya_3306_phase_gate, struct nymya_qubit __user *, user_q) {
-    struct nymya_qubit kq;
-    int64_t re, im;
+    /*
+     * Kernel syscall: nymya_3306_phase_gate
+     * This is the syscall entry point that wraps the core nymya_3306_phase_gate function.
+     * It handles user-space copy operations before and after calling the core logic.
+     */
+    SYSCALL_DEFINE1(nymya_3306_phase_gate, struct nymya_qubit __user *, user_q) {
+        struct nymya_qubit kq;
+        int ret;
 
-    if (!user_q)
-        return -EINVAL;
+        if (!user_q)
+            return -EINVAL;
 
-    if (copy_from_user(&kq, user_q, sizeof(kq)))
-        return -EFAULT;
+        // Copy qubit data from user space to kernel space
+        if (copy_from_user(&kq, user_q, sizeof(kq)))
+            return -EFAULT;
 
-    re = kq.amplitude.re;
-    im = kq.amplitude.im;
+        // Call the core logic function defined above
+        ret = nymya_3306_phase_gate(&kq);
 
-    // (a + bi) * i = -b + ai
-    kq.amplitude.re = -im;
-    kq.amplitude.im = re;
+        if (ret) // If the core function returned an error, propagate it
+            return ret;
 
-    log_symbolic_event("PHASE_S", kq.id, kq.tag, "Applied S gate (π/2 phase)");
+        // Copy modified qubit data from kernel space back to user space
+        if (copy_to_user(user_q, &kq, sizeof(kq)))
+            return -EFAULT;
 
-    if (copy_to_user(user_q, &kq, sizeof(kq)))
-        return -EFAULT;
-
-    return 0;
-}
+        return 0;
+    }
 
 #endif
 

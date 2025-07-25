@@ -18,6 +18,7 @@
     #include <linux/syscalls.h>
     #include <linux/uaccess.h>
     #include <linux/errno.h>
+    #include <linux/module.h> // ADDED: Required for EXPORT_SYMBOL_GPL
 #endif
 
 /**
@@ -51,15 +52,85 @@ int nymya_3317_controlled_phase(nymya_qubit* qc, nymya_qubit* qt, double theta) 
     return 0;
 }
 
-#else
+#else // __KERNEL__
 
+/**
+ * nymya_3317_controlled_phase - Core kernel function for Controlled-Phase gate.
+ * @k_qc: Pointer to the kernel-space control qubit.
+ * @k_qt: Pointer to the kernel-space target qubit.
+ * @theta_fixed: Phase angle in fixed-point (int64_t) format.
+ *
+ * This function applies a controlled phase rotation to the target qubit.
+ * If the magnitude of the control qubit's amplitude exceeds 0.5 (in fixed-point),
+ * it applies a phase rotation to the target qubit's amplitude.
+ * This function is designed to be called directly by other kernel code.
+ *
+ * Returns 0 on success, -EINVAL on null input.
+ */
+int nymya_3317_controlled_phase(struct nymya_qubit *k_qc, struct nymya_qubit *k_qt, int64_t theta_fixed) {
+    complex_double phase;
+    int64_t re, im;
+    uint64_t re64, im64;
+    uint64_t re_sq, im_sq;
+    uint64_t mag_sq;
+
+    if (!k_qc || !k_qt) {
+        pr_err("NYMYA: nymya_3317_controlled_phase received NULL kernel qubit pointer(s)\n");
+        return -EINVAL;
+    }
+
+    // Extract real and imaginary parts of control qubit
+    re = k_qc->amplitude.re;
+    im = k_qc->amplitude.im;
+
+    re64 = (uint64_t)(re < 0 ? -re : re);
+    im64 = (uint64_t)(im < 0 ? -im : im);
+
+    // Compute magnitude^2 using fixed-point math
+    re_sq = ((__uint128_t)re64 * re64) >> 32;
+    im_sq = ((__uint128_t)im64 * im64) >> 32;
+    mag_sq = re_sq + im_sq;
+
+    // Fixed-point threshold for 0.5^2 (0.25 * FIXED_POINT_SCALE)
+    const uint64_t threshold_sq = (FIXED_POINT_SCALE / 4);
+
+    if (mag_sq > threshold_sq) {
+        // Build phase multiplier
+        phase.re = fixed_cos(theta_fixed);
+        phase.im = fixed_sin(theta_fixed);
+
+        k_qt->amplitude = complex_mul(k_qt->amplitude, phase);
+        log_symbolic_event("C-PHASE", k_qt->id, k_qt->tag, "Controlled phase applied");
+    } else {
+        log_symbolic_event("C-PHASE", k_qt->id, k_qt->tag, "No action (control = 0)");
+    }
+
+    return 0;
+}
+// Export the symbol for this function so other kernel modules/code can call it directly.
+EXPORT_SYMBOL_GPL(nymya_3317_controlled_phase);
+
+
+/**
+ * SYSCALL_DEFINE3(nymya_3317_controlled_phase) - Kernel implementation of Controlled-Z gate.
+ * @user_qc: User pointer to the control qubit structure.
+ * @user_qt: User pointer to the target qubit structure.
+ * @theta_fixed: Phase angle in fixed-point (int64_t) format.
+ *
+ * This system call version copies the qubit structures from user space,
+ * calculates the fixed-point magnitude of the control qubit, and applies
+ * a Z gate (negating the amplitude) to the target qubit if the control
+ * magnitude exceeds 0.5 (in fixed-point representation).
+ *
+ * Returns 0 on success, -EINVAL on null input, or -EFAULT on copy errors.
+ */
 SYSCALL_DEFINE3(nymya_3317_controlled_phase,
     struct nymya_qubit __user *, user_qc,
     struct nymya_qubit __user *, user_qt,
     int64_t, theta_fixed) // theta_fixed in Q32.32 fixed-point
 {
     struct nymya_qubit k_qc, k_qt;
-    complex_double phase;
+    int ret;
 
     if (!user_qc || !user_qt)
         return -EINVAL;
@@ -69,26 +140,11 @@ SYSCALL_DEFINE3(nymya_3317_controlled_phase,
     if (copy_from_user(&k_qt, user_qt, sizeof(k_qt)))
         return -EFAULT;
 
-    // Calculate magnitude of control amplitude squared (re^2 + im^2)
-    // Use 128-bit math for safety (fixed-point Q32.32)
-    __int128 re_sq = (__int128)k_qc.amplitude.re * k_qc.amplitude.re;
-    __int128 im_sq = (__int128)k_qc.amplitude.im * k_qc.amplitude.im;
-    __int128 mag_sq = re_sq + im_sq;
+    // Call the core logic function
+    ret = nymya_3317_controlled_phase(&k_qc, &k_qt, theta_fixed);
 
-    // Threshold: 0.5 magnitude means mag_sq > (0.5 * FIXED_POINT_SCALE)^2
-    // 0.5 in fixed-point = FIXED_POINT_SCALE / 2
-    __int128 threshold = (__int128)(FIXED_POINT_SCALE / 2) * (FIXED_POINT_SCALE / 2);
-
-    if (mag_sq > threshold) {
-        // Build phase multiplier
-        phase.re = fixed_cos(theta_fixed);
-        phase.im = fixed_sin(theta_fixed);
-
-        k_qt.amplitude = complex_mul(k_qt.amplitude, phase);
-        log_symbolic_event("C-PHASE", k_qt.id, k_qt.tag, "Controlled phase applied");
-    } else {
-        log_symbolic_event("C-PHASE", k_qt.id, k_qt.tag, "No action (control = 0)");
-    }
+    if (ret) // Propagate error from core function
+        return ret;
 
     if (copy_to_user(user_qt, &k_qt, sizeof(k_qt)))
         return -EFAULT;

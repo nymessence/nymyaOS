@@ -26,6 +26,7 @@
     #include <linux/syscalls.h> // Kernel: For SYSCALL_DEFINE macros
     #include <linux/uaccess.h>  // Kernel: For copy_from_user, copy_to_user
     #include <linux/errno.h>    // Kernel: For error codes like -EINVAL, -EFAULT
+    #include <linux/module.h>   // ADDED: Required for EXPORT_SYMBOL_GPL
     // No math.h or complex.h in kernel; fixed-point math assumed for amplitude operations
 #endif
 
@@ -64,14 +65,59 @@ int nymya_3337_fermion_sim(nymya_qubit* q1, nymya_qubit* q2) {
 #else // __KERNEL__
 
 /**
+ * nymya_3337_fermion_sim - Core kernel function for fermionic simulation gate.
+ * @k_q1: Pointer to the first kernel-space qubit structure.
+ * @k_q2: Pointer to the second kernel-space qubit structure.
+ *
+ * This function applies the fermionic simulation gate logic. It performs a SWAP
+ * operation between the two qubits and then applies a global phase of -1 to
+ * the first qubit's amplitude using fixed-point arithmetic.
+ * This function is designed to be called directly by other kernel code.
+ *
+ * Returns:
+ * - 0 on success.
+ * - -EINVAL if any kernel qubit pointer is NULL.
+ * - Error code from underlying gate operations (e.g., nymya_3313_swap).
+ */
+int nymya_3337_fermion_sim(struct nymya_qubit *k_q1, struct nymya_qubit *k_q2) {
+    int ret = 0;
+
+    // 1. Check for null pointers
+    if (!k_q1 || !k_q2) {
+        pr_err("nymya_3337_fermion_sim: Null kernel qubit pointer(s)\n");
+        return -EINVAL;
+    }
+
+    // 2. Apply the fermionic simulation logic for kernel space
+    // Call the kernel version of the SWAP gate
+    ret = nymya_3313_swap(k_q1, k_q2);
+    if (ret) {
+        pr_err("nymya_3337_fermion_sim: SWAP gate failed, error %d\n", ret);
+        return ret; // Propagate error from SWAP gate
+    }
+
+    // Apply a phase shift of -1 to the first qubit's amplitude
+    // For a complex number (re + i*im), multiplying by -1 results in (-re - i*im).
+    k_q1->amplitude.re = -k_q1->amplitude.re;
+    k_q1->amplitude.im = -k_q1->amplitude.im;
+
+    // 3. Log the symbolic event for traceability
+    log_symbolic_event("FERMION_SIM", k_q1->id, k_q1->tag, "Fermionic exchange");
+
+    return 0; // Success
+}
+// Export the symbol for this function so other kernel modules/code can call it directly.
+EXPORT_SYMBOL_GPL(nymya_3337_fermion_sim);
+
+
+/**
  * SYSCALL_DEFINE2(nymya_3337_fermion_sim) - Kernel syscall for fermionic simulation gate.
  * @user_q1: User-space pointer to the first qubit structure.
  * @user_q2: User-space pointer to the second qubit structure.
  *
- * This syscall copies qubit data from user space to kernel space, applies the
- * fermionic simulation gate logic using kernel-space functions and fixed-point
- * arithmetic, and then copies the modified data back to user space.
- * The gate involves a SWAP operation followed by a phase shift of -1 on the first qubit.
+ * This syscall copies qubit data from user space to kernel space, calls the
+ * core fermionic simulation gate logic, and then copies the modified data back
+ * to user space.
  *
  * Returns:
  * - 0 on success.
@@ -102,23 +148,15 @@ SYSCALL_DEFINE2(nymya_3337_fermion_sim,
         return -EFAULT; // Bad address
     }
 
-    // 3. Apply the fermionic simulation logic for kernel space
-    // Call the kernel version of the SWAP gate
-    ret = nymya_3313_swap(&k_q1, &k_q2);
+    // 3. Call the core fermionic simulation logic
+    ret = nymya_3337_fermion_sim(&k_q1, &k_q2);
+
     if (ret) {
-        pr_err("nymya_3337_fermion_sim: SWAP gate failed, error %d\n", ret);
-        return ret; // Propagate error from SWAP gate
+        // Error already logged by core function or underlying swap
+        return ret;
     }
 
-    // Apply a phase shift of -1 to the first qubit's amplitude
-    // For a complex number (re + i*im), multiplying by -1 results in (-re - i*im).
-    k_q1.amplitude.re = -k_q1.amplitude.re;
-    k_q1.amplitude.im = -k_q1.amplitude.im;
-
-    // 4. Log the symbolic event for traceability
-    log_symbolic_event("FERMION_SIM", k_q1.id, k_q1.tag, "Fermionic exchange");
-
-    // 5. Copy the modified qubits back to user space
+    // 4. Copy the modified qubits back to user space
     if (copy_to_user(user_q1, &k_q1, sizeof(k_q1))) {
         pr_err("nymya_3337_fermion_sim: Failed to copy k_q1 to user\n");
         ret = -EFAULT; // Bad address

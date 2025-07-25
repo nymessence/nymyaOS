@@ -1,26 +1,26 @@
 include ../version.conf
 
 # --- Toolchain & flags ---
-CC               := gcc
+CC             := gcc
 KERNEL_BUILD_DIR := /lib/modules/$(shell uname -r)/build
-CFLAGS           := -Wall -fPIC -O2
-LDFLAGS          := -shared
+CFLAGS         := -Wall -fPIC -O2
+LDFLAGS        := -shared
 
 # --- Supported architectures ---
-ARCHS            := arm64 x86_64
+ARCHS          := arm64 x86_64
 
 # --- Cross-compilers per arch ---
 CROSS_COMPILE_arm64   := aarch64-linux-gnu-
 CROSS_COMPILE_x86_64  :=
 
 # --- Paths & names ---
-INCLUDE_DIR      := .
-SRC_DIR          := .
-KERNEL_SRC_DIR   := kernel_syscalls
-OBJ_DIR          := build
-LIB_NAME         := nymya
-LIB_FILE         := lib$(LIB_NAME).so
-KERNEL_MODULE    := nymya_syscalls.ko
+INCLUDE_DIR    := .
+SRC_DIR        := .
+KERNEL_SRC_DIR := kernel_syscalls
+OBJ_DIR        := build
+LIB_NAME       := nymya
+LIB_FILE       := lib$(LIB_NAME).so
+KERNEL_MODULE  := nymya_syscalls.ko
 
 INSTALL_LIB_DIR     := /usr/lib
 INSTALL_INCLUDE_DIR := /usr/include/$(LIB_NAME)
@@ -67,10 +67,12 @@ $(ARCHS):
 	@echo "Building kernel module for $@ with CROSS_COMPILE='$(CCP)'"
 	@mkdir -p $(OUT_DIR)
 	@rm -f $(OUT_DIR)/*.c $(OUT_DIR)/nymya.h
+	# Link all nymya_*.c files and log.c into the architecture-specific kernel source directory
 	@for f in $(wildcard nymya_*.c); do ln -sf $(PWD)/$$f $(OUT_DIR)/; done
+	@ln -sf $(PWD)/log.c $(OUT_DIR)/ # Explicitly link log.c
 	@ln -sf $(PWD)/nymya.h $(OUT_DIR)/
 	@printf "obj-m := nymya_syscalls.o\n" > $(OUT_DIR)/Makefile
-	@printf "nymya_syscalls-objs := " >> $(OUT_DIR)/Makefile
+	@printf "nymya_syscalls-objs := log.o " >> $(OUT_DIR)/Makefile # Add log.o explicitly
 	@for src in $(wildcard nymya_*.c); do base=$$(basename $$src .c); printf "$$base.o "; done >> $(OUT_DIR)/Makefile
 	@printf "\n" >> $(OUT_DIR)/Makefile
 	@$(MAKE) -C $(KERNEL_BUILD_DIR) M=$(PWD)/$(OUT_DIR) ARCH=$@ CROSS_COMPILE=$(CCP) modules
@@ -130,8 +132,8 @@ deb-userland: userland
 	@echo ">> Creating userland .deb"
 	@rm -rf $(DEB_USERLAND_DIR)
 	@mkdir -p $(DEB_USERLAND_DIR)/DEBIAN \
-	          $(DEB_USERLAND_DIR)/usr/lib \
-	          $(DEB_USERLAND_DIR)/usr/include/$(LIB_NAME)
+	           $(DEB_USERLAND_DIR)/usr/lib \
+	           $(DEB_USERLAND_DIR)/usr/include/$(LIB_NAME)
 	@cp $(LIB_FILE) $(DEB_USERLAND_DIR)/usr/lib/
 	@cp nymya.h    $(DEB_USERLAND_DIR)/usr/include/$(LIB_NAME)/
 	@printf "Package: $(LIB_NAME)-core-userland\nVersion: $(VERSION)\nArchitecture: $(PKG_ARCH)\nMaintainer: $(MAINTAINER)\nDescription: $(DESCRIPTION) (Userland)\n" > $(DEB_USERLAND_DIR)/DEBIAN/control

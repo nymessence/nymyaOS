@@ -19,6 +19,7 @@
     #include <linux/uaccess.h>
     #include <linux/slab.h> // Required for kmalloc_array if used in other syscalls
     #include <linux/types.h> // For __int128 or other kernel types
+    #include <linux/module.h> // ADDED: Required for EXPORT_SYMBOL_GPL
     // No math.h or complex.h in kernel
 #endif
 
@@ -58,15 +59,71 @@ int nymya_3327_sqrt_iswap(nymya_qubit* q1, nymya_qubit* q2) {
 
 #else // __KERNEL__
 
-// fixed_point_mul is now defined as static inline in nymya.h and should NOT be redefined here.
+/**
+ * nymya_3327_sqrt_iswap - Core kernel function for Square Root iSWAP gate.
+ * @q1: Pointer to the first qubit.
+ * @q2: Pointer to the second qubit.
+ *
+ * This function applies the √iSWAP gate transformation to two qubits
+ * using fixed-point complex arithmetic. This function is designed to be called
+ * directly by other kernel code.
+ *
+ * Returns:
+ * - 0 on success.
+ * - -EINVAL if any qubit pointer is NULL.
+ */
+int nymya_3327_sqrt_iswap(struct nymya_qubit *q1, struct nymya_qubit *q2) {
+    complex_double term1;
+    complex_double term2;
+    complex_double scalar_factor = make_complex(FIXED_POINT_SQRT2_INV_FP, 0);
+
+    // 1. Validate kernel qubit pointers
+    if (!q1 || !q2) {
+        pr_err("nymya_3327_sqrt_iswap: Invalid kernel qubit pointers\n");
+        return -EINVAL;
+    }
+
+    // Perform √iSWAP gate transformation using fixed-point arithmetic
+    // New amplitudes:
+    // q1_new = (a + i * b) / sqrt(2.0)
+    // q2_new = (b + i * a) / sqrt(2.0)
+
+    // Calculate (a + i * b)
+    // If X = X_re + iX_im, then iX = -X_im + iX_re
+    // So, i * b = -b.im + i * b.re
+    // (a + i * b).re = a.re - b.im
+    // (a + i * b).im = a.im + b.re
+    term1.re = q1->amplitude.re - q2->amplitude.im;
+    term1.im = q1->amplitude.im + q2->amplitude.re;
+
+    // Calculate (b + i * a)
+    // So, i * a = -a.im + i * a.re
+    // (b + i * a).re = b.re - a.im
+    // (b + i * a).im = b.im + a.re
+    term2.re = q2->amplitude.re - q1->amplitude.im;
+    term2.im = q2->amplitude.im + q1->amplitude.re;
+
+    // Divide by sqrt(2.0) by multiplying with 1/sqrt(2) in fixed-point
+    // Use complex_mul for scalar multiplication of complex numbers
+    q1->amplitude = complex_mul(term1, scalar_factor);
+    q2->amplitude = complex_mul(term2, scalar_factor);
+
+    // Log the symbolic event
+    log_symbolic_event("√iSWAP", q2->id, q2->tag, "√iSWAP applied");
+
+    return 0; // Success
+}
+// Export the symbol for this function so other kernel modules/code can call it directly.
+EXPORT_SYMBOL_GPL(nymya_3327_sqrt_iswap);
+
 
 /**
- * __do_sys_nymya_3327_sqrt_iswap - Kernel system call implementation for √iSWAP gate.
+ * SYSCALL_DEFINE2(nymya_3327_sqrt_iswap) - Kernel system call implementation for √iSWAP gate.
  * @user_q1: Pointer to the first qubit structure in user space.
  * @user_q2: Pointer to the second qubit structure in user space.
  *
- * This function copies qubit data from user space, applies the √iSWAP gate
- * using fixed-point complex arithmetic, and then copies the modified data back.
+ * This is the syscall entry point that wraps the core nymya_3327_sqrt_iswap function.
+ * It handles user-space copy operations before and after calling the core logic.
  *
  * Returns:
  * - 0 on success.
@@ -78,7 +135,7 @@ SYSCALL_DEFINE2(nymya_3327_sqrt_iswap,
     struct nymya_qubit __user *, user_q2) {
 
     struct nymya_qubit k_q1, k_q2; // Kernel-space copies of qubits
-    // int ret = 0; // Removed: unused variable
+    int ret;
 
     // 1. Validate user pointers
     if (!user_q1 || !user_q2) {
@@ -96,37 +153,11 @@ SYSCALL_DEFINE2(nymya_3327_sqrt_iswap,
         return -EFAULT;
     }
 
-    // Perform √iSWAP gate transformation using fixed-point arithmetic
-    // New amplitudes:
-    // q1_new = (a + i * b) / sqrt(2.0)
-    // q2_new = (b + i * a) / sqrt(2.0)
+    // Call the core logic function defined above
+    ret = nymya_3327_sqrt_iswap(&k_q1, &k_q2);
 
-    // Calculate (a + i * b)
-    // If X = X_re + iX_im, then iX = -X_im + iX_re
-    // So, i * b = -b.im + i * b.re
-    // (a + i * b).re = a.re - b.im
-    // (a + i * b).im = a.im + b.re
-    complex_double term1;
-    term1.re = k_q1.amplitude.re - k_q2.amplitude.im;
-    term1.im = k_q1.amplitude.im + k_q2.amplitude.re;
-
-    // Calculate (b + i * a)
-    // So, i * a = -a.im + i * a.re
-    // (b + i * a).re = b.re - a.im
-    // (b + i * a).im = b.im + a.re
-    complex_double term2;
-    term2.re = k_q2.amplitude.re - k_q1.amplitude.im;
-    term2.im = k_q2.amplitude.im + k_q1.amplitude.re;
-
-    // Divide by sqrt(2.0) by multiplying with 1/sqrt(2) in fixed-point
-    // Use complex_mul for scalar multiplication of complex numbers
-    complex_double scalar_factor = make_complex(FIXED_POINT_SQRT2_INV_FP, 0);
-
-    k_q1.amplitude = complex_mul(term1, scalar_factor);
-    k_q2.amplitude = complex_mul(term2, scalar_factor);
-
-    // Log the symbolic event
-    log_symbolic_event("√iSWAP", k_q2.id, k_q2.tag, "√iSWAP applied");
+    if (ret) // If the core function returned an error, propagate it
+        return ret;
 
     // 3. Copy modified qubit data back to user space
     if (copy_to_user(user_q1, &k_q1, sizeof(k_q1))) {

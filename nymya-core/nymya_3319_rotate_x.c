@@ -19,6 +19,7 @@
     #include <linux/uaccess.h>
     #include <linux/errno.h>
     #include <linux/types.h> // For __int128 or other kernel types
+    #include <linux/module.h> // ADDED: Required for EXPORT_SYMBOL_GPL
 #endif
 
 
@@ -45,7 +46,7 @@ int nymya_3319_rotate_x(nymya_qubit* q, double theta) {
     // Apply the rotation to the qubit's amplitude
     // For Rx(theta) gate, the transformation matrix is:
     // | cos(theta/2)   -i*sin(theta/2) |
-    // | -i*sin(theta/2)  cos(theta/2)   |
+    // | -i*sin(theta/2)  cos(theta/2)    |
     // However, the provided userland code applies a simple complex multiplication
     // which corresponds to a global phase or a Z-rotation, not an X-rotation.
     // To correctly implement Rx(theta) for a qubit state |a + ib>,
@@ -70,10 +71,60 @@ int nymya_3319_rotate_x(nymya_qubit* q, double theta) {
 
 #else // __KERNEL__
 
-// Fixed-point helper functions (fixed_point_mul, fixed_point_cos, fixed_point_sin)
-// are now defined as static inline in nymya.h and should not be redefined here.
-
 /**
+ * nymya_3319_rotate_x - Core kernel function for X-axis rotation on a qubit.
+ * @q: Pointer to the qubit to be rotated.
+ * @theta_fp: Rotation angle in fixed-point (int64_t) format.
+ *
+ * This function applies a rotation around the X axis to a qubit's amplitude
+ * using fixed-point arithmetic. This function is designed to be called directly
+ * by other kernel code.
+ *
+ * Returns 0 on success, -EINVAL if the qubit pointer is NULL.
+ */
+int nymya_3319_rotate_x(struct nymya_qubit *q, int64_t theta_fp) {
+    int64_t half_theta_fp;
+    int64_t cos_half_theta_fp;
+    int64_t sin_half_theta_fp;
+    int64_t new_real_part;
+    int64_t new_imag_part;
+
+    if (!q) {
+        pr_err("NYMYA: nymya_3319_rotate_x received NULL qubit pointer\n");
+        return -EINVAL;
+    }
+
+    // Calculate half theta in fixed-point
+    half_theta_fp = theta_fp >> 1; // Fixed-point division by 2
+
+    // Compute the fixed sine and cosine for the rotation
+    // These functions are now provided by nymya.h
+    cos_half_theta_fp = fixed_cos(half_theta_fp); // Using fixed_cos wrapper
+    sin_half_theta_fp = fixed_sin(half_theta_fp); // Using fixed_sin wrapper
+
+    // Apply the X-axis rotation to the qubit's amplitude
+    // The transformation for a single complex amplitude `A = A_re + i A_im` by `cos(phi) + i sin(phi)` is:
+    // New_A_re = A_re * cos(phi) - A_im * sin(phi)
+    // New_A_im = A_re * sin(phi) + A_im * cos(phi)
+    // All multiplications must be fixed-point multiplications using fixed_point_mul from nymya.h.
+
+    new_real_part = fixed_point_mul(q->amplitude.re, cos_half_theta_fp) -
+                    fixed_point_mul(q->amplitude.im, sin_half_theta_fp);
+    new_imag_part = fixed_point_mul(q->amplitude.re, sin_half_theta_fp) +
+                    fixed_point_mul(q->amplitude.im, cos_half_theta_fp);
+
+    // Update the qubit's amplitude
+    q->amplitude.re = new_real_part;
+    q->amplitude.im = new_imag_part;
+
+    log_symbolic_event("ROT_X", q->id, q->tag, "Applied X-axis rotation");
+    return 0;
+}
+// Export the symbol for this function so other kernel modules/code can call it directly.
+EXPORT_SYMBOL_GPL(nymya_3319_rotate_x);
+
+
+/*
  * SYSCALL_DEFINE2(nymya_3319_rotate_x) - Kernel syscall for X-axis rotation on a qubit (kernel version).
  * @user_q: User-space pointer to the qubit struct.
  * @theta_fp: Rotation angle in fixed-point (int64_t) format.
@@ -85,6 +136,7 @@ SYSCALL_DEFINE2(nymya_3319_rotate_x,
     int64_t, theta_fp) { // Renamed theta to theta_fp for clarity
 
     struct nymya_qubit k_q;
+    int ret;
 
     if (!user_q)
         return -EINVAL;
@@ -93,30 +145,11 @@ SYSCALL_DEFINE2(nymya_3319_rotate_x,
     if (copy_from_user(&k_q, user_q, sizeof(k_q)))
         return -EFAULT;
 
-    // Calculate half theta in fixed-point
-    int64_t half_theta_fp = theta_fp >> 1; // Fixed-point division by 2
+    // Call the core logic function defined above
+    ret = nymya_3319_rotate_x(&k_q, theta_fp);
 
-    // Compute the fixed sine and cosine for the rotation
-    // These functions are now provided by nymya.h
-    int64_t cos_half_theta_fp = fixed_point_cos(half_theta_fp);
-    int64_t sin_half_theta_fp = fixed_point_sin(half_theta_fp);
-
-    // Apply the X-axis rotation to the qubit's amplitude
-    // The transformation for a single complex amplitude `A = A_re + i A_im` by `cos(phi) + i sin(phi)` is:
-    // New_A_re = A_re * cos(phi) - A_im * sin(phi)
-    // New_A_im = A_re * sin(phi) + A_im * cos(phi)
-    // All multiplications must be fixed-point multiplications using fixed_point_mul from nymya.h.
-
-    int64_t new_real_part = fixed_point_mul(k_q.amplitude.re, cos_half_theta_fp) -
-                            fixed_point_mul(k_q.amplitude.im, sin_half_theta_fp);
-    int64_t new_imag_part = fixed_point_mul(k_q.amplitude.re, sin_half_theta_fp) +
-                            fixed_point_mul(k_q.amplitude.im, cos_half_theta_fp);
-
-    // Update the qubit's amplitude
-    k_q.amplitude.re = new_real_part;
-    k_q.amplitude.im = new_imag_part;
-
-    log_symbolic_event("ROT_X", k_q.id, k_q.tag, "Applied X-axis rotation");
+    if (ret) // If the core function returned an error, propagate it
+        return ret;
 
     // Copy the modified qubit struct back to user space
     if (copy_to_user(user_q, &k_q, sizeof(k_q)))
