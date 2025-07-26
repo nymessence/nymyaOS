@@ -26,41 +26,57 @@
     #include <linux/syscalls.h> // Kernel: For SYSCALL_DEFINE macros
     #include <linux/uaccess.h>  // Kernel: For copy_from_user, copy_to_user
     #include <linux/errno.h>    // Kernel: For error codes like -EINVAL, -EFAULT
+    #include <linux/module.h>   // Kernel: Required for EXPORT_SYMBOL_GPL
     // No math.h or complex.h in kernel; fixed-point math assumed for amplitude operations
-#endif
-
-#ifndef __KERNEL__
 
 /**
- * nymya_3339_magic - Applies the Magic gate to two qubits (userland).
- * @q1: Pointer to the first qubit.
- * @q2: Pointer to the second qubit.
+ * @brief Applies the Magic gate operation to two kernel-space qubits.
  *
- * This function implements the Magic gate using a decomposition into
- * Hadamard (H), S (Phase), and CNOT gates. The sequence is typically:
- * H(q1) -> S(q1) -> CNOT(q1, q2) -> H(q1).
- * This gate is known for its properties in quantum computation.
+ * This function encapsulates the core logic for the Magic gate, decomposing
+ * it into a sequence of kernel-level Hadamard, Phase (S), and CNOT gates.
+ * It operates directly on kernel-space qubit structures.
  *
- * Returns:
- * - 0 on success.
- * - -1 if any qubit pointer is NULL (invalid input).
+ * @param kq1 Pointer to the first kernel-space qubit structure.
+ * @param kq2 Pointer to the second kernel-space qubit structure.
+ * @return 0 on success, or a negative error code if any underlying gate
+ *         operation fails.
  */
-int nymya_3339_magic(nymya_qubit* q1, nymya_qubit* q2) {
-    // Basic null pointer check
-    if (!q1 || !q2) return -1;
+int nymya_3339_magic(struct nymya_qubit *kq1, struct nymya_qubit *kq2) {
+    int ret = 0;
 
-    // Apply the sequence of gates that compose the Magic gate
-    hadamard(q1);   // Apply Hadamard to q1
-    phase_s(q1);    // Apply S (Phase) gate to q1 (nymya_3306_phase_gate)
-    cnot(q1, q2);   // Apply CNOT with q1 as control, q2 as target
-    hadamard(q1);   // Apply Hadamard to q1 again
+    // Apply the Magic gate logic for kernel space
+    // Call the kernel versions of the gates
+    ret = nymya_3308_hadamard_gate(kq1); // Hadamard on q1
+    if (ret) {
+        pr_err("nymya_3339_magic: Hadamard on q1 failed, error %d\n", ret);
+        return ret;
+    }
+
+    ret = nymya_3306_phase_gate(kq1); // S (Phase) gate on q1
+    if (ret) {
+        pr_err("nymya_3339_magic: Phase (S) on q1 failed, error %d\n", ret);
+        return ret;
+    }
+
+    ret = nymya_3309_controlled_not(kq1, kq2); // CNOT with q1 as control, q2 as target
+    if (ret) {
+        pr_err("nymya_3339_magic: CNOT failed, error %d\n", ret);
+        return ret;
+    }
+
+    ret = nymya_3308_hadamard_gate(kq1); // Hadamard on q1 again
+    if (ret) {
+        pr_err("nymya_3339_magic: Second Hadamard on q1 failed, error %d\n", ret);
+        return ret;
+    }
 
     // Log the symbolic event for traceability
-    log_symbolic_event("MAGIC", q1->id, q1->tag, "Magic gate applied");
-    return 0;
-}
+    log_symbolic_event("MAGIC", kq1->id, kq1->tag, "Magic gate applied");
 
-#else // __KERNEL__
+    return 0; // Success
+}
+EXPORT_SYMBOL_GPL(nymya_3339_magic);
+
 
 /**
  * SYSCALL_DEFINE2(nymya_3339_magic) - Kernel syscall for Magic gate.
@@ -101,36 +117,14 @@ SYSCALL_DEFINE2(nymya_3339_magic,
         return -EFAULT; // Bad address
     }
 
-    // 3. Apply the Magic gate logic for kernel space
-    // Call the kernel versions of the gates
-    ret = nymya_3308_hadamard_gate(&k_q1); // Hadamard on q1
+    // 3. Apply the Magic gate logic using the new core function
+    ret = nymya_3339_magic(&k_q1, &k_q2);
     if (ret) {
-        pr_err("nymya_3339_magic: Hadamard on q1 failed, error %d\n", ret);
+        // Error already logged by the core function
         return ret;
     }
 
-    ret = nymya_3306_phase_gate(&k_q1); // S (Phase) gate on q1
-    if (ret) {
-        pr_err("nymya_3339_magic: Phase (S) on q1 failed, error %d\n", ret);
-        return ret;
-    }
-
-    ret = nymya_3309_controlled_not(&k_q1, &k_q2); // CNOT with q1 as control, q2 as target
-    if (ret) {
-        pr_err("nymya_3339_magic: CNOT failed, error %d\n", ret);
-        return ret;
-    }
-
-    ret = nymya_3308_hadamard_gate(&k_q1); // Hadamard on q1 again
-    if (ret) {
-        pr_err("nymya_3339_magic: Second Hadamard on q1 failed, error %d\n", ret);
-        return ret;
-    }
-
-    // 4. Log the symbolic event for traceability
-    log_symbolic_event("MAGIC", k_q1.id, k_q1.tag, "Magic gate applied");
-
-    // 5. Copy the modified qubits back to user space
+    // 4. Copy the modified qubits back to user space
     if (copy_to_user(user_q1, &k_q1, sizeof(k_q1))) {
         pr_err("nymya_3339_magic: Failed to copy k_q1 to user\n");
         ret = -EFAULT; // Bad address
@@ -144,4 +138,3 @@ SYSCALL_DEFINE2(nymya_3339_magic,
 }
 
 #endif
-

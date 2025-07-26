@@ -28,6 +28,7 @@
     #include <linux/uaccess.h>  // Kernel: For copy_from_user, copy_to_user
     #include <linux/errno.h>    // Kernel: For error codes like -EINVAL, -EFAULT
     #include <linux/printk.h>   // Kernel: For pr_err
+    #include <linux/module.h>   // Kernel: Required for EXPORT_SYMBOL_GPL
     // No math.h or complex.h in kernel; fixed-point math assumed for amplitude operations
 #endif
 
@@ -86,6 +87,54 @@ static inline int64_t fixed_point_magnitude_sq(complex_double c) {
 }
 
 /**
+ * nymya_3345_cf_swap - Applies a Controlled-Fredkin (CF-SWAP) gate to three qubits (kernel-space).
+ * @qc: Pointer to the control qubit (in kernel space).
+ * @q1: Pointer to the first target qubit (in kernel space).
+ * @q2: Pointer to the second target qubit (in kernel space).
+ *
+ * This function implements the core logic for the Controlled-Fredkin gate.
+ * It checks the state of the control qubit (@qc) using fixed-point arithmetic.
+ * If the control qubit's amplitude magnitude squared is above a threshold
+ * (representing a '1' state), it performs a fermionic simulation (which includes
+ * a swap and phase flip) between the two target qubits (@q1, @q2).
+ * Otherwise, no operation occurs on the target qubits.
+ *
+ * This function operates directly on kernel-space qubit structures and does not
+ * handle user-space copying.
+ *
+ * Returns:
+ * - 0 on success.
+ * - Error code from underlying gate operations (e.g., nymya_3337_fermion_sim) on failure.
+ */
+int nymya_3345_cf_swap(struct nymya_qubit *qc, struct nymya_qubit *q1, struct nymya_qubit *q2) {
+    int ret = 0;
+
+    // Define the threshold for control qubit being '1' (0.5^2 = 0.25 in floating point)
+    // Convert 0.25 to fixed-point squared value
+    const int64_t threshold_sq_fp = FIXED_POINT_SCALE / 4; // Represents 0.25 in Q32.32
+
+    // Check if the control qubit's amplitude magnitude squared is above the threshold
+    if (fixed_point_magnitude_sq(qc->amplitude) > threshold_sq_fp) {
+        // Control qubit is "on" (predominantly |1>)
+        // Call the kernel version of nymya_3337_fermion_sim
+        ret = nymya_3337_fermion_sim(q1, q2);
+        if (ret == 0) {
+            log_symbolic_event("CF_SWAP", q1->id, q1->tag, "Controlled Fermionic SWAP triggered");
+        } else {
+            pr_err("nymya_3345_cf_swap: Underlying fermionic simulation failed, error %d\n", ret);
+        }
+    } else {
+        // Control qubit is "off" (predominantly |0>)
+        log_symbolic_event("CF_SWAP", q1->id, q1->tag, "Control=0, no action");
+        ret = 0; // No error, just no action
+    }
+
+    return ret;
+}
+EXPORT_SYMBOL_GPL(nymya_3345_cf_swap);
+
+
+/**
  * SYSCALL_DEFINE3(nymya_3345_cf_swap) - Kernel syscall for Controlled-Fredkin (CF-SWAP) gate.
  * @user_qc: User-space pointer to the control qubit structure.
  * @user_q1: User-space pointer to the first target qubit structure.
@@ -131,25 +180,11 @@ SYSCALL_DEFINE3(nymya_3345_cf_swap,
         return -EFAULT; // Bad address
     }
 
-    // 3. Implement the control logic for kernel space
-    // Define the threshold for control qubit being '1' (0.5^2 = 0.25 in floating point)
-    // Convert 0.25 to fixed-point squared value
-    const int64_t threshold_sq_fp = FIXED_POINT_SCALE / 4; // Represents 0.25 in Q32.32
-
-    // Check if the control qubit's amplitude magnitude squared is above the threshold
-    if (fixed_point_magnitude_sq(k_qc.amplitude) > threshold_sq_fp) {
-        // Control qubit is "on" (predominantly |1>)
-        // Call the kernel version of nymya_3337_fermion_sim
-        ret = nymya_3337_fermion_sim(&k_q1, &k_q2);
-        if (ret == 0) {
-            log_symbolic_event("CF_SWAP", k_q1.id, k_q1.tag, "Controlled Fermionic SWAP triggered");
-        } else {
-            pr_err("nymya_3345_cf_swap: Underlying fermionic simulation failed, error %d\n", ret);
-        }
-    } else {
-        // Control qubit is "off" (predominantly |0>)
-        log_symbolic_event("CF_SWAP", k_q1.id, k_q1.tag, "Control=0, no action");
-        ret = 0; // No error, just no action
+    // 3. Call the core kernel function to apply the gate logic
+    ret = nymya_3345_cf_swap(&k_qc, &k_q1, &k_q2);
+    if (ret != 0) {
+        // If the core logic failed, propagate its error code
+        return ret;
     }
 
     // 4. Copy the modified target qubits back to user space
@@ -157,15 +192,14 @@ SYSCALL_DEFINE3(nymya_3345_cf_swap,
     // so only k_q1 and k_q2 need to be copied back.
     if (copy_to_user(user_q1, &k_q1, sizeof(k_q1))) {
         pr_err("nymya_3345_cf_swap: Failed to copy k_q1 to user\n");
-        ret = -EFAULT; // Bad address
+        return -EFAULT; // Bad address
     }
     if (copy_to_user(user_q2, &k_q2, sizeof(k_q2))) {
         pr_err("nymya_3345_cf_swap: Failed to copy k_q2 to user\n");
-        ret = -EFAULT; // Bad address
+        return -EFAULT; // Bad address
     }
 
     return ret; // Return 0 on success, or error code if any operation failed
 }
 
 #endif
-

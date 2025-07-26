@@ -20,11 +20,13 @@
     #include <linux/errno.h>
     #include <linux/types.h> // For __int128
     #include <linux/slab.h> // For kmalloc_array if needed
+    #include <linux/module.h> // Ensure this is present
     // No math.h or complex.h in kernel
 #endif
 
 // Fixed-point constants and helper functions for kernel (if not already in nymya.h)
 #ifdef __KERNEL__
+
 // Define PI and PI/2 in fixed-point for kernel calculations if not already in nymya.h
 // These are now defined in nymya.h and should not be redefined here.
 // #ifndef FIXED_POINT_PI
@@ -70,34 +72,51 @@ int nymya_3332_berkeley(nymya_qubit* q1, nymya_qubit* q2, double theta) {
 #else // __KERNEL__
 
 /**
- * nymya_3332_berkeley_kernel - Applies a Berkeley gate to two qubits (kernel-space helper).
+ * nymya_3332_berkeley - Core kernel-space logic for the Berkeley gate.
  * @q1: Pointer to the first qubit (kernel space).
  * @q2: Pointer to the second qubit (kernel space).
  * @theta_fp: The gate parameter in fixed-point format.
  *
  * This function implements the Berkeley gate logic by calling kernel-space
- * versions of CNOT and Phase gates.
+ * versions of CNOT and Phase gates. It also logs the gate application.
  *
  * Returns:
  * - 0 on success.
- * - -1 if any qubit pointer is NULL, or if a sub-gate fails.
+ * - -EINVAL if any qubit pointer is NULL, or if a sub-gate fails.
  */
-static int nymya_3332_berkeley_kernel(nymya_qubit* q1, nymya_qubit* q2, int64_t theta_fp) {
+int nymya_3332_berkeley(struct nymya_qubit* q1, struct nymya_qubit* q2, int64_t theta_fp) {
     int ret = 0;
-    if (!q1 || !q2) return -1;
+    if (!q1 || !q2) {
+        pr_err("nymya_3332_berkeley: Null qubit pointer in core logic.\n");
+        return -EINVAL; // Use kernel-style error codes
+    }
 
     // Call kernel-space versions of the sub-gates
     // These functions must exist and be callable from kernel context.
     // Their prototypes should be in nymya.h (for kernel).
     ret = nymya_3309_controlled_not(q1, q2);
-    if (ret) return ret;
+    if (ret) {
+        pr_err("nymya_3332_berkeley: CNOT failed with error %d\n", ret);
+        return ret;
+    }
     ret = nymya_3316_phase_gate(q2, theta_fp); // This now expects int64_t theta_fp
-    if (ret) return ret;
+    if (ret) {
+        pr_err("nymya_3332_berkeley: Phase gate failed with error %d\n", ret);
+        return ret;
+    }
     ret = nymya_3309_controlled_not(q1, q2);
-    if (ret) return ret;
+    if (ret) {
+        pr_err("nymya_3332_berkeley: Second CNOT failed with error %d\n", ret);
+        return ret;
+    }
+
+    // Log event after successful application
+    log_symbolic_event("BERKELEY", q1->id, q1->tag, "Berkeley entangler applied");
 
     return 0;
 }
+EXPORT_SYMBOL_GPL(nymya_3332_berkeley);
+
 
 
 /**
@@ -107,7 +126,7 @@ static int nymya_3332_berkeley_kernel(nymya_qubit* q1, nymya_qubit* q2, int64_t 
  * @theta_fp: The gate parameter in fixed-point (int64_t) format.
  *
  * This syscall copies qubit data from user space, applies the Berkeley gate
- * using kernel-space helper functions, and then copies the modified data back.
+ * using the core kernel-space helper function, and then copies the modified data back.
  *
  * Returns:
  * - 0 on success.
@@ -118,44 +137,41 @@ static int nymya_3332_berkeley_kernel(nymya_qubit* q1, nymya_qubit* q2, int64_t 
 SYSCALL_DEFINE3(nymya_3332_berkeley,
     struct nymya_qubit __user *, user_q1,
     struct nymya_qubit __user *, user_q2,
-    int64_t, theta_fp) { // Changed from double to int64_t
+    int64_t, theta_fp) {
 
     struct nymya_qubit k_q1, k_q2;
     int ret = 0;
 
     // 1. Validate user pointers
     if (!user_q1 || !user_q2) {
-        pr_err("nymya_3332_berkeley: Invalid user qubit pointers\n");
+        pr_err("nymya_3332_berkeley_syscall: Invalid user qubit pointers\n");
         return -EINVAL;
     }
 
     // 2. Copy qubit data from user space to kernel space
     if (copy_from_user(&k_q1, user_q1, sizeof(k_q1))) {
-        pr_err("nymya_3332_berkeley: Failed to copy k_q1 from user space\n");
+        pr_err("nymya_3332_berkeley_syscall: Failed to copy k_q1 from user space\n");
         return -EFAULT;
     }
     if (copy_from_user(&k_q2, user_q2, sizeof(k_q2))) {
-        pr_err("nymya_3332_berkeley: Failed to copy k_q2 from user space\n");
+        pr_err("nymya_3332_berkeley_syscall: Failed to copy k_q2 from user space\n");
         return -EFAULT;
     }
 
-    // 3. Call the kernel-space helper function
-    ret = nymya_3332_berkeley_kernel(&k_q1, &k_q2, theta_fp);
+    // 3. Call the refactored kernel-space core function
+    ret = nymya_3332_berkeley(&k_q1, &k_q2, theta_fp);
 
-    // 4. Log event and copy data back to user space if successful
+    // 4. Copy data back to user space if successful
     if (ret == 0) {
-        log_symbolic_event("BERKELEY", k_q1.id, k_q1.tag, "Berkeley entangler applied");
-
         if (copy_to_user(user_q1, &k_q1, sizeof(k_q1)))
             return -EFAULT;
 
         if (copy_to_user(user_q2, &k_q2, sizeof(k_q2)))
             return -EFAULT;
     } else {
-        pr_err("nymya_3332_berkeley: Kernel Berkeley operation failed with error %d\n", ret);
+        pr_err("nymya_3332_berkeley_syscall: Kernel Berkeley operation failed with error %d\n", ret);
     }
 
     return ret;
 }
 #endif
-

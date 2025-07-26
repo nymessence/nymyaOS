@@ -70,8 +70,11 @@ int nymya_3313_swap(struct nymya_qubit *k_q1, struct nymya_qubit *k_q2) {
     log_symbolic_event("SWAP", k_q1->id, k_q1->tag, "Swapped with pair");
     return 0;
 }
-// Export the symbol for this function so other kernel modules/code can call it directly.
 EXPORT_SYMBOL_GPL(nymya_3313_swap);
+
+
+
+// Export the symbol for this function so other kernel modules/code can call it directly.
 
 
 /**

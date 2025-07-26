@@ -1,6 +1,8 @@
 #include "nymya.h"
 
 #ifdef __KERNEL__
+    #include <linux/module.h>
+
 #include <linux/kernel.h>
 #include <linux/syscalls.h>
 #include <linux/uaccess.h>
@@ -52,6 +54,10 @@ int nymya_3303_pauli_x(nymya_qubit *q) {
     log_symbolic_event("PAULI_X", q->id, q->tag, "Polarity flipped");
     return 0;
 }
+EXPORT_SYMBOL_GPL(nymya_3303_pauli_x);
+
+
+
 
 #endif
 

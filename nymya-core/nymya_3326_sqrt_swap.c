@@ -19,6 +19,7 @@
     #include <linux/uaccess.h>
     #include <linux/slab.h> // Required for kmalloc_array if used in other syscalls
     #include <linux/types.h> // For __int128 or other kernel types
+    #include <linux/module.h> // Required for EXPORT_SYMBOL_GPL
     // No math.h or complex.h in kernel
 #endif
 
@@ -59,6 +60,63 @@ int nymya_3326_sqrt_swap(nymya_qubit* q1, nymya_qubit* q2) {
 #else // __KERNEL__
 
 /**
+ * nymya_3326_sqrt_swap - Applies the square root of SWAP gate to two qubits (kernel-side).
+ * @kq1: Pointer to the first qubit in kernel space.
+ * @kq2: Pointer to the second qubit in kernel space.
+ *
+ * This function applies the √SWAP gate using fixed-point complex arithmetic.
+ * It operates directly on kernel-space qubit structures.
+ *
+ * Returns:
+ * - 0 on success.
+ * - -EINVAL if any kernel qubit pointer is NULL.
+ */
+int nymya_3326_sqrt_swap(struct nymya_qubit *kq1, struct nymya_qubit *kq2) {
+    if (!kq1 || !kq2) {
+        pr_err("nymya_3326_sqrt_swap (core): Invalid kernel qubit pointers\n");
+        return -EINVAL; // Should not happen if called correctly from SYSCALL, but good for robustness
+    }
+
+    // Perform √SWAP gate transformation using fixed-point arithmetic
+    // Let a = kq1->amplitude and b = kq2->amplitude
+    // New amplitudes:
+    // q1_new = 0.5 * (a + b + i * (a - b))
+    // q2_new = 0.5 * (a + b - i * (a - b))
+
+    // Calculate (a + b)
+    complex_double sum_amplitude;
+    sum_amplitude.re = kq1->amplitude.re + kq2->amplitude.re;
+    sum_amplitude.im = kq1->amplitude.im + kq2->amplitude.im;
+
+    // Calculate (a - b)
+    complex_double diff_amplitude;
+    diff_amplitude.re = kq1->amplitude.re - kq2->amplitude.re;
+    diff_amplitude.im = kq1->amplitude.im - kq2->amplitude.im;
+
+    // Calculate i * (a - b)
+    // If X = X_re + iX_im, then iX = -X_im + iX_re
+    complex_double i_times_diff;
+    i_times_diff.re = -diff_amplitude.im;
+    i_times_diff.im = diff_amplitude.re;
+
+    // Calculate (a + b + i * (a - b)) and divide by 2
+    kq1->amplitude.re = (sum_amplitude.re + i_times_diff.re) >> 1;
+    kq1->amplitude.im = (sum_amplitude.im + i_times_diff.im) >> 1;
+
+    // Calculate (a + b - i * (a - b)) and divide by 2
+    kq2->amplitude.re = (sum_amplitude.re - i_times_diff.re) >> 1;
+    kq2->amplitude.im = (sum_amplitude.im - i_times_diff.im) >> 1;
+
+    // Log the symbolic event
+    log_symbolic_event("SQRT_SWAP", kq1->id, kq1->tag, "√SWAP applied");
+
+    return 0;
+}
+EXPORT_SYMBOL_GPL(nymya_3326_sqrt_swap);
+
+
+
+/**
  * __do_sys_nymya_3326_sqrt_swap - Kernel system call implementation for √SWAP gate.
  * @user_q1: Pointer to the first qubit structure in user space.
  * @user_q2: Pointer to the second qubit structure in user space.
@@ -76,7 +134,7 @@ SYSCALL_DEFINE2(nymya_3326_sqrt_swap,
     struct nymya_qubit __user *, user_q2) {
 
     struct nymya_qubit k_q1, k_q2; // Kernel-space copies of qubits
-    // int ret = 0; // Removed: unused variable
+    int ret = 0;
 
     // 1. Validate user pointers
     if (!user_q1 || !user_q2) {
@@ -94,38 +152,12 @@ SYSCALL_DEFINE2(nymya_3326_sqrt_swap,
         return -EFAULT;
     }
 
-    // Perform √SWAP gate transformation using fixed-point arithmetic
-    // Let a = k_q1.amplitude and b = k_q2.amplitude
-    // New amplitudes:
-    // q1_new = 0.5 * (a + b + i * (a - b))
-    // q2_new = 0.5 * (a + b - i * (a - b))
-
-    // Calculate (a + b)
-    complex_double sum_amplitude;
-    sum_amplitude.re = k_q1.amplitude.re + k_q2.amplitude.re;
-    sum_amplitude.im = k_q1.amplitude.im + k_q2.amplitude.im;
-
-    // Calculate (a - b)
-    complex_double diff_amplitude;
-    diff_amplitude.re = k_q1.amplitude.re - k_q2.amplitude.re;
-    diff_amplitude.im = k_q1.amplitude.im - k_q2.amplitude.im;
-
-    // Calculate i * (a - b)
-    // If X = X_re + iX_im, then iX = -X_im + iX_re
-    complex_double i_times_diff;
-    i_times_diff.re = -diff_amplitude.im;
-    i_times_diff.im = diff_amplitude.re;
-
-    // Calculate (a + b + i * (a - b)) and divide by 2
-    k_q1.amplitude.re = (sum_amplitude.re + i_times_diff.re) >> 1;
-    k_q1.amplitude.im = (sum_amplitude.im + i_times_diff.im) >> 1;
-
-    // Calculate (a + b - i * (a - b)) and divide by 2
-    k_q2.amplitude.re = (sum_amplitude.re - i_times_diff.re) >> 1;
-    k_q2.amplitude.im = (sum_amplitude.im - i_times_diff.im) >> 1;
-
-    // Log the symbolic event
-    log_symbolic_event("SQRT_SWAP", k_q1.id, k_q1.tag, "√SWAP applied");
+    // Call the core logic function
+    ret = nymya_3326_sqrt_swap(&k_q1, &k_q2);
+    if (ret) {
+        pr_err("nymya_3326_sqrt_swap: Core logic failed with error %d\n", ret);
+        return ret; // Propagate error from core function
+    }
 
     // 3. Copy modified qubit data back to user space
     if (copy_to_user(user_q1, &k_q1, sizeof(k_q1))) {
@@ -141,4 +173,3 @@ SYSCALL_DEFINE2(nymya_3326_sqrt_swap,
 }
 
 #endif
-

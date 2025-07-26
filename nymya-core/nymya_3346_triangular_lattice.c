@@ -27,6 +27,7 @@
     #include <linux/uaccess.h>  // Kernel: For copy_from_user, copy_to_user
     #include <linux/errno.h>    // Kernel: For error codes like -EINVAL, -EFAULT
     #include <linux/printk.h>   // Kernel: For pr_err
+    #include <linux/module.h>   // Kernel: Required for EXPORT_SYMBOL_GPL
     // No math.h or complex.h in kernel; fixed-point math assumed for amplitude operations
 #endif
 
@@ -62,6 +63,60 @@ int nymya_3346_triangular_lattice(nymya_qubit* q1, nymya_qubit* q2, nymya_qubit*
 }
 
 #else // __KERNEL__
+
+/**
+ * nymya_3346_triangular_lattice - Applies operations to three qubits in a triangular lattice (kernel-space).
+ * @q1: Pointer to the first kernel-space qubit structure.
+ * @q2: Pointer to the second kernel-space qubit structure.
+ * @q3: Pointer to the third kernel-space qubit structure.
+ *
+ * This function applies a sequence of gates to simulate a triangular lattice
+ * interaction: Hadamard on q1, then CNOT(q1, q2), CNOT(q2, q3), and CNOT(q3, q1).
+ * This sequence creates entanglement across the three qubits in a cyclic manner.
+ * It operates directly on kernel-space qubit structures.
+ *
+ * Returns:
+ * - 0 on success.
+ * - An error code (e.g., from nymya_3308_hadamard_gate or nymya_3309_controlled_not) on failure.
+ */
+int nymya_3346_triangular_lattice(struct nymya_qubit *q1,
+                                  struct nymya_qubit *q2,
+                                  struct nymya_qubit *q3) {
+    int ret;
+
+    // Apply the sequence of gates to simulate triangular lattice interaction
+    ret = nymya_3308_hadamard_gate(q1); // Hadamard on q1
+    if (ret) {
+        pr_err("nymya_3346_triangular_lattice: Hadamard on q1 failed, error %d\n", ret);
+        return ret;
+    }
+
+    ret = nymya_3309_controlled_not(q1, q2); // CNOT(q1, q2)
+    if (ret) {
+        pr_err("nymya_3346_triangular_lattice: CNOT(q1, q2) failed, error %d\n", ret);
+        return ret;
+    }
+
+    ret = nymya_3309_controlled_not(q2, q3); // CNOT(q2, q3)
+    if (ret) {
+        pr_err("nymya_3346_triangular_lattice: CNOT(q2, q3) failed, error %d\n", ret);
+        return ret;
+    }
+
+    ret = nymya_3309_controlled_not(q3, q1); // CNOT(q3, q1)
+    if (ret) {
+        pr_err("nymya_3346_triangular_lattice: CNOT(q3, q1) failed, error %d\n", ret);
+        return ret;
+    }
+
+    // Log the symbolic event for traceability
+    log_symbolic_event("TRI_LATTICE", q1->id, q1->tag, "Triangle lattice formed");
+
+    return 0; // Success
+}
+EXPORT_SYMBOL_GPL(nymya_3346_triangular_lattice);
+
+
 
 /**
  * SYSCALL_DEFINE3(nymya_3346_triangular_lattice) - Kernel syscall for triangular lattice operation.
@@ -108,36 +163,14 @@ SYSCALL_DEFINE3(nymya_3346_triangular_lattice,
         return -EFAULT; // Bad address
     }
 
-    // 3. Apply the triangular lattice logic for kernel space
-    // Call the kernel versions of the gates
-    ret = nymya_3308_hadamard_gate(&k_q1); // Hadamard on k_q1
+    // 3. Call the core kernel-space logic
+    ret = nymya_3346_triangular_lattice(&k_q1, &k_q2, &k_q3);
     if (ret) {
-        pr_err("nymya_3346_triangular_lattice: Hadamard on q1 failed, error %d\n", ret);
+        // Error already logged by the core function
         return ret;
     }
 
-    ret = nymya_3309_controlled_not(&k_q1, &k_q2); // CNOT(k_q1, k_q2)
-    if (ret) {
-        pr_err("nymya_3346_triangular_lattice: CNOT(q1, q2) failed, error %d\n", ret);
-        return ret;
-    }
-
-    ret = nymya_3309_controlled_not(&k_q2, &k_q3); // CNOT(k_q2, k_q3)
-    if (ret) {
-        pr_err("nymya_3346_triangular_lattice: CNOT(q2, q3) failed, error %d\n", ret);
-        return ret;
-    }
-
-    ret = nymya_3309_controlled_not(&k_q3, &k_q1); // CNOT(k_q3, k_q1)
-    if (ret) {
-        pr_err("nymya_3346_triangular_lattice: CNOT(q3, q1) failed, error %d\n", ret);
-        return ret;
-    }
-
-    // 4. Log the symbolic event for traceability
-    log_symbolic_event("TRI_LATTICE", k_q1.id, k_q1.tag, "Triangle lattice formed");
-
-    // 5. Copy the modified qubits back to user space
+    // 4. Copy the modified qubits back to user space
     // All three qubits can be modified, so all should be copied back.
     if (copy_to_user(user_q1, &k_q1, sizeof(k_q1))) {
         pr_err("nymya_3346_triangular_lattice: Failed to copy k_q1 to user\n");
@@ -156,4 +189,3 @@ SYSCALL_DEFINE3(nymya_3346_triangular_lattice,
 }
 
 #endif
-

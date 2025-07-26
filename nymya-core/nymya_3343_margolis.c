@@ -127,8 +127,11 @@ int nymya_3343_margolis(struct nymya_qubit *k_qc1, struct nymya_qubit *k_qc2, st
     }
     return 0; // Indicate success for this path
 }
-// Export the symbol for this function so other kernel modules/code can call it directly.
 EXPORT_SYMBOL_GPL(nymya_3343_margolis);
+
+
+
+// Export the symbol for this function so other kernel modules/code can call it directly.
 
 
 /**

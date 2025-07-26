@@ -16,6 +16,7 @@
     #include <linux/syscalls.h>
     #include <linux/uaccess.h>
     #include <linux/errno.h>
+    #include <linux/module.h> // Required for EXPORT_SYMBOL_GPL
 #endif
 
 #ifndef __KERNEL__
@@ -35,26 +36,54 @@ int nymya_3305_pauli_z(nymya_qubit* q) {
 
 #else
 
+/**
+ * @brief Applies the Pauli-Z gate operation to a kernel-space qubit.
+ *
+ * This function negates the fixed-point real and imaginary parts of the
+ * qubit's amplitude, effectively applying a phase shift of pi (Z gate).
+ * It also logs a symbolic event for this operation.
+ *
+ * @param kq Pointer to the kernel-space nymya_qubit structure.
+ * @return 0 on success. Currently, no specific error conditions are handled,
+ *         but returns an int for future extensibility.
+ */
+int nymya_3305_pauli_z_core(struct nymya_qubit *kq) {
+    int64_t re, im;
+
+    // No need for null check here, as syscall wrapper ensures valid kq pointer
+    // if it passed copy_from_user.
+
+    re = kq->amplitude.re;
+    im = kq->amplitude.im;
+
+    kq->amplitude.re = -re;
+    kq->amplitude.im = -im;
+
+    log_symbolic_event("PAULI_Z", kq->id, kq->tag, "Inverted inner state");
+
+    return 0; // Success
+}
+EXPORT_SYMBOL_GPL(nymya_3305_pauli_z_core);
+
 /*
  * Kernel syscall: nymya_3305_pauli_z
  * Negates the fixed-point amplitude of the qubit.
  */
 SYSCALL_DEFINE1(nymya_3305_pauli_z, struct nymya_qubit __user *, user_q) {
     struct nymya_qubit kq;
-    int64_t re, im;
+    int ret;
 
     if (!user_q)
         return -EINVAL;
     if (copy_from_user(&kq, user_q, sizeof(kq)))
         return -EFAULT;
 
-    re = kq.amplitude.re;
-    im = kq.amplitude.im;
-
-    kq.amplitude.re = -re;
-    kq.amplitude.im = -im;
-
-    log_symbolic_event("PAULI_Z", kq.id, kq.tag, "Inverted inner state");
+    // Call the core logic function
+    ret = nymya_3305_pauli_z_core(&kq);
+    if (ret) {
+        // Propagate error from the core function if it returns one
+        return ret;
+    }
 
     if (copy_to_user(user_q, &kq, sizeof(kq)))
         return -EFAULT;
@@ -63,4 +92,3 @@ SYSCALL_DEFINE1(nymya_3305_pauli_z, struct nymya_qubit __user *, user_q) {
 }
 
 #endif
-

@@ -17,6 +17,7 @@
     #include <linux/uaccess.h>
     #include <linux/slab.h> // For kmalloc, kfree
     #include <linux/random.h> // For get_random_u32
+    #include <linux/module.h> // Required for EXPORT_SYMBOL_GPL
     // No stdlib.h, time.h, math.h for kernel
 #endif
 
@@ -70,33 +71,34 @@ extern int log_symbolic_event(const char* gate, uint64_t id, const char* tag, co
 
 
 /**
- * nymya_3361_qrng_range - Kernel syscall for Quantum Random Number Generation within a range.
- * @user_out: Pointer to a user-space array of uint64_t where the generated numbers will be stored.
- * @min: The minimum value for the random numbers (inclusive).
- * @max: The maximum value for the random numbers (inclusive).
- * @count: The number of random numbers to generate.
+ * @brief Performs the core logic for Quantum Random Number Generation within a range.
  *
- * This system call simulates quantum random number generation. It performs
+ * This function simulates quantum random number generation. It performs
  * symbolic quantum operations (Hadamard, Global Phase) on a conceptual qubit
  * for each number generated, and then uses a kernel-safe pseudo-random number
  * generator to produce a bit, which is scaled to the desired range.
  *
- * Returns:
- * - 0 on success.
- * - -EINVAL if input parameters are invalid.
- * - -ENOMEM if kernel memory allocation fails.
- * - -EFAULT if copying data to user space fails.
+ * It handles the allocation of temporary kernel memory, the generation loop,
+ * and copying the results back to user space.
+ *
+ * @param user_out Pointer to a user-space array of uint64_t where the generated numbers will be stored.
+ * @param min The minimum value for the random numbers (inclusive).
+ * @param max The maximum value for the random numbers (inclusive).
+ * @param count The number of random numbers to generate.
+ *
+ * @return 0 on success.
+ * @return -EINVAL if input parameters are invalid.
+ * @return -ENOMEM if kernel memory allocation fails.
+ * @return -EFAULT if copying data to user space fails.
  */
-SYSCALL_DEFINE4(nymya_3361_qrng_range,
-    uint64_t __user *, user_out,
-    uint64_t, min,
-    uint64_t, max,
-    size_t, count) {
+int nymya_3361_qrng_range(uint64_t __user *user_out, uint64_t min, uint64_t max, size_t count) {
+    int ret = 0;
+    uint64_t* k_out = NULL;
 
     if (!user_out || min >= max || count == 0)
         return -EINVAL;
 
-    uint64_t* k_out = kmalloc(sizeof(uint64_t) * count, GFP_KERNEL);
+    k_out = kmalloc(sizeof(uint64_t) * count, GFP_KERNEL);
     if (!k_out)
         return -ENOMEM;
 
@@ -132,13 +134,41 @@ SYSCALL_DEFINE4(nymya_3361_qrng_range,
 
     // Copy generated numbers to user space
     if (copy_to_user(user_out, k_out, sizeof(uint64_t) * count)) {
-        kfree(k_out);
-        return -EFAULT;
+        ret = -EFAULT;
     }
 
     kfree(k_out);
-    return 0;
+    return ret;
+}
+EXPORT_SYMBOL_GPL(nymya_3361_qrng_range);
+
+
+
+/**
+ * nymya_3361_qrng_range - Kernel syscall for Quantum Random Number Generation within a range.
+ * @user_out: Pointer to a user-space array of uint64_t where the generated numbers will be stored.
+ * @min: The minimum value for the random numbers (inclusive).
+ * @max: The maximum value for the random numbers (inclusive).
+ * @count: The number of random numbers to generate.
+ *
+ * This system call is a wrapper around the core `nymya_3361_qrng_range` function,
+ * providing the standard syscall entry point.
+ *
+ * Returns:
+ * - 0 on success.
+ * - -EINVAL if input parameters are invalid.
+ * - -ENOMEM if kernel memory allocation fails.
+ * - -EFAULT if copying data to user space fails.
+ */
+SYSCALL_DEFINE4(nymya_3361_qrng_range,
+    uint64_t __user *, user_out,
+    uint64_t, min,
+    uint64_t, max,
+    size_t, count) {
+    // The actual logic, including input validation, memory allocation/deallocation,
+    // QRNG simulation, and copy_to_user, is now encapsulated in the
+    // nymya_3361_qrng_range function.
+    return nymya_3361_qrng_range(user_out, min, max, count);
 }
 
 #endif
-

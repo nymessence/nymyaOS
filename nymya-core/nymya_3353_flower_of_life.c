@@ -30,61 +30,112 @@
     #include <linux/errno.h>    // Kernel: For error codes like -EINVAL, -EFAULT, -ENOMEM
     #include <linux/printk.h>   // Kernel: For pr_err
     #include <linux/slab.h>     // Kernel: For kmalloc, kfree, kmalloc_array
-#endif
+    #include <linux/module.h> // Required for EXPORT_SYMBOL_GPL
 
-#ifndef __KERNEL__
 
 /**
- * nymya_3353_flower_of_life - Applies operations related to the "Flower of Life" pattern to qubits (userland).
- * @q: An array of pointers to nymya_qubit objects.
+ * nymya_3353_flower_of_life - Applies the "Flower of Life" entanglement pattern to kernel-space qubits.
+ * @k_qubits: An array of pointers to kernel-space nymya_qubit objects.
  * @count: The total number of qubits in the array.
  *
- * This function simulates entanglement patterns inspired by the "Flower of Life"
+ * This function applies entanglement patterns inspired by the "Flower of Life"
  * geometry. It expects at least 19 qubits to form a central qubit and two rings
  * of 6 and 12 qubits, respectively. The operations include:
  * 1. Applying Hadamard gates to all 19 qubits.
- * 2. Entangling the central qubit (q[0]) with all other 18 qubits using CNOTs.
- * 3. Applying CNOTs between adjacent qubits in the first ring (q[1] to q[6] cyclically).
- * 4. Applying CNOTs between adjacent qubits in the second ring (q[7] to q[18] cyclically).
- * The function only processes a full 19-qubit unit if `count` is sufficient.
+ * 2. Entangling the central qubit (k_qubits[0]) with all other 18 qubits using CNOTs.
+ * 3. Applying CNOTs between adjacent qubits in the first ring (k_qubits[1] to k_qubits[6] cyclically).
+ * 4. Applying CNOTs between adjacent qubits in the second ring (k_qubits[7] to k_qubits[18] cyclically).
+ *
+ * This function operates directly on kernel-space `nymya_qubit` structures.
+ * It does not handle user-space memory operations.
  *
  * Returns:
  * - 0 on success.
- * - -1 if the qubit array is NULL or if `count` is less than 19.
- * - -1 if any individual qubit pointer within the processed unit is NULL.
+ * - -EINVAL if `count` is less than 19, or if any required qubit index is out of bounds.
+ * - Error code from underlying gate operations (e.g., nymya_3308_hadamard_gate,
+ *   nymya_3309_controlled_not).
  */
-int nymya_3353_flower_of_life(nymya_qubit* q[], size_t count) {
-    // Basic null pointer and minimum count check
-    if (!q || count < 19) return -1;
+int nymya_3353_flower_of_life(struct nymya_qubit **k_qubits, size_t count) {
+    int ret = 0;
+    size_t i;
+    static const size_t required_qubits = 19;
+
+    // The syscall layer should ensure k_qubits is not NULL and count is sufficient
+    // before calling this function, but a defensive check is included.
+    if (!k_qubits || count < required_qubits) {
+        pr_err("nymya_3353_flower_of_life: Internal error - invalid k_qubits array or count (%zu). Expected %zu.\n", count, required_qubits);
+        return -EINVAL;
+    }
 
     // Apply Hadamard to all 19 qubits
-    for (size_t i = 0; i < 19; i++) {
-        if (!q[i]) return -1; // Check for null pointer for each qubit
-        hadamard(q[i]);
+    for (i = 0; i < required_qubits; i++) {
+        ret = nymya_3308_hadamard_gate(k_qubits[i]);
+        if (ret) {
+            pr_err("nymya_3353_flower_of_life: Hadamard on q[%zu] failed, error %d\n", i, ret);
+            return ret;
+        }
     }
 
-    // Entangle the central qubit (q[0]) with all other 18 qubits
-    for (size_t i = 1; i < 19; i++) {
-        cnot(q[0], q[i]);
+    // Entangle the central qubit (k_qubits[0]) with all other 18 qubits
+    for (i = 1; i < required_qubits; i++) {
+        ret = nymya_3309_controlled_not(k_qubits[0], k_qubits[i]);
+        if (ret) {
+            pr_err("nymya_3353_flower_of_life: CNOT(q[0], q[%zu]) failed, error %d\n", i, ret);
+            return ret;
+        }
     }
 
-    // Entangle qubits in the first ring (q[1] to q[6]) cyclically
-    for (int i = 1; i <= 6; i++) {
-        cnot(q[i], q[(i % 6) + 1]); // (i % 6) + 1 ensures cyclic connection from q[6] to q[1]
+    // Entangle qubits in the first ring (k_qubits[1] to k_qubits[6]) cyclically
+    for (int j = 1; j <= 6; j++) {
+        size_t current_idx = j;
+        size_t next_idx = (j % 6) + 1; // 1->2, 2->3, ..., 6->1
+
+        // Defensive check
+        if (current_idx >= required_qubits || next_idx >= required_qubits) {
+            pr_err("nymya_3353_flower_of_life: Ring 1 CNOT indices out of bounds: %zu, %zu (expected < %zu)\n", current_idx, next_idx, required_qubits);
+            return -EINVAL;
+        }
+        ret = nymya_3309_controlled_not(k_qubits[current_idx], k_qubits[next_idx]);
+        if (ret) {
+            pr_err("nymya_3353_flower_of_life: CNOT(q[%zu], q[%zu]) failed, error %d\n", current_idx, next_idx, ret);
+            return ret;
+        }
     }
 
-    // Entangle qubits in the second ring (q[7] to q[18]) cyclically
-    for (int i = 7; i < 18; i++) {
-        cnot(q[i], q[i + 1]);
-    }
-    cnot(q[18], q[7]); // Complete the cycle for the last connection
+    // Entangle qubits in the second ring (k_qubits[7] to k_qubits[18]) cyclically
+    for (int j = 7; j < 18; j++) {
+        size_t current_idx = j;
+        size_t next_idx = j + 1;
 
-    // Log the symbolic event for traceability, using the central qubit's ID and tag.
-    log_symbolic_event("FLOWER", q[0]->id, q[0]->tag, "Flower of Life pattern entangled");
+        // Defensive check
+        if (current_idx >= required_qubits || next_idx >= required_qubits) {
+            pr_err("nymya_3353_flower_of_life: Ring 2 CNOT indices out of bounds: %zu, %zu (expected < %zu)\n", current_idx, next_idx, required_qubits);
+            return -EINVAL;
+        }
+        ret = nymya_3309_controlled_not(k_qubits[current_idx], k_qubits[next_idx]);
+        if (ret) {
+            pr_err("nymya_3353_flower_of_life: CNOT(q[%zu], q[%zu]) failed, error %d\n", current_idx, next_idx, ret);
+            return ret;
+        }
+    }
+    // Complete the cycle for the last connection: q[18] to q[7]
+    // Defensive check
+    if (18 >= required_qubits || 7 >= required_qubits) {
+        pr_err("nymya_3353_flower_of_life: Last Ring 2 CNOT indices out of bounds: 18, 7 (expected < %zu)\n", required_qubits);
+        return -EINVAL;
+    }
+    ret = nymya_3309_controlled_not(k_qubits[18], k_qubits[7]);
+    if (ret) {
+        pr_err("nymya_3353_flower_of_life: CNOT(q[18], q[7]) failed, error %d\n", ret);
+        return ret;
+    }
+
+    // Log the symbolic event for traceability
+    log_symbolic_event("FLOWER", k_qubits[0]->id, k_qubits[0]->tag, "Flower of Life pattern entangled");
+
     return 0; // Success
 }
-
-#else // __KERNEL__
+EXPORT_SYMBOL_GPL(nymya_3353_flower_of_life);
 
 /**
  * SYSCALL_DEFINE2(nymya_3353_flower_of_life) - Kernel syscall for Flower of Life entanglement operation.
@@ -173,78 +224,16 @@ SYSCALL_DEFINE2(nymya_3353_flower_of_life,
         }
     }
 
-    // 5. Apply the Flower of Life entanglement logic for kernel space
-    // Apply Hadamard to all 19 qubits (or up to 'count' if less than 19)
-    for (i = 0; i < required_qubits; i++) {
-        ret = nymya_3308_hadamard_gate(k_qubits[i]);
-        if (ret) {
-            pr_err("nymya_3353_flower_of_life: Hadamard on q[%zu] failed, error %d\n", i, ret);
-            goto cleanup_k_qubits;
-        }
-    }
-
-    // Entangle the central qubit (k_qubits[0]) with all other 18 qubits
-    for (i = 1; i < required_qubits; i++) {
-        ret = nymya_3309_controlled_not(k_qubits[0], k_qubits[i]);
-        if (ret) {
-            pr_err("nymya_3353_flower_of_life: CNOT(q[0], q[%zu]) failed, error %d\n", i, ret);
-            goto cleanup_k_qubits;
-        }
-    }
-
-    // Entangle qubits in the first ring (k_qubits[1] to k_qubits[6]) cyclically
-    for (int j = 1; j <= 6; j++) {
-        // Ensure indices are within bounds for the ring (1 to 6)
-        size_t current_idx = j;
-        size_t next_idx = (j % 6) + 1; // 1->2, 2->3, ..., 6->1
-
-        if (current_idx >= count || next_idx >= count) { // Defensive check
-            pr_err("nymya_3353_flower_of_life: Ring 1 CNOT indices out of bounds: %zu, %zu\n", current_idx, next_idx);
-            ret = -EINVAL;
-            goto cleanup_k_qubits;
-        }
-        ret = nymya_3309_controlled_not(k_qubits[current_idx], k_qubits[next_idx]);
-        if (ret) {
-            pr_err("nymya_3353_flower_of_life: CNOT(q[%zu], q[%zu]) failed, error %d\n", current_idx, next_idx, ret);
-            goto cleanup_k_qubits;
-        }
-    }
-
-    // Entangle qubits in the second ring (k_qubits[7] to k_qubits[18]) cyclically
-    for (int j = 7; j < 18; j++) {
-        size_t current_idx = j;
-        size_t next_idx = j + 1;
-
-        if (current_idx >= count || next_idx >= count) { // Defensive check
-            pr_err("nymya_3353_flower_of_life: Ring 2 CNOT indices out of bounds: %zu, %zu\n", current_idx, next_idx);
-            ret = -EINVAL;
-            goto cleanup_k_qubits;
-        }
-        ret = nymya_3309_controlled_not(k_qubits[current_idx], k_qubits[next_idx]);
-        if (ret) {
-            pr_err("nymya_3353_flower_of_life: CNOT(q[%zu], q[%zu]) failed, error %d\n", current_idx, next_idx, ret);
-            goto cleanup_k_qubits;
-        }
-    }
-    // Complete the cycle for the last connection: q[18] to q[7]
-    if (18 >= count || 7 >= count) { // Defensive check
-        pr_err("nymya_3353_flower_of_life: Last Ring 2 CNOT indices out of bounds: 18, 7\n");
-        ret = -EINVAL;
-        goto cleanup_k_qubits;
-    }
-    ret = nymya_3309_controlled_not(k_qubits[18], k_qubits[7]);
+    // 5. Call the extracted core logic function
+    ret = nymya_3353_flower_of_life(k_qubits, count);
     if (ret) {
-        pr_err("nymya_3353_flower_of_life: CNOT(q[18], q[7]) failed, error %d\n", ret);
+        pr_err("nymya_3353_flower_of_life: Core logic failed with error %d\n", ret);
         goto cleanup_k_qubits;
     }
 
-
-    // 6. Log the symbolic event for traceability
-    log_symbolic_event("FLOWER", k_qubits[0]->id, k_qubits[0]->tag, "Flower of Life pattern entangled");
-
-    // 7. Copy the modified qubits back to user space
+    // 6. Copy the modified qubits back to user space
     // Only proceed if no errors occurred during gate applications
-    if (ret == 0) {
+    if (ret == 0) { // This check is redundant after the `if (ret)` block above, but harmless.
         for (i = 0; i < count; i++) {
             // Copy the actual qubit data from kernel memory back to user space
             if (copy_to_user(user_qubit_ptrs[i], k_qubits[i], sizeof(struct nymya_qubit))) {
@@ -256,7 +245,7 @@ SYSCALL_DEFINE2(nymya_3353_flower_of_life,
     }
 
 cleanup_k_qubits:
-    // 8. Free all allocated kernel memory for individual qubits
+    // 7. Free all allocated kernel memory for individual qubits
     for (size_t j = 0; j < count; j++) {
         if (k_qubits && k_qubits[j]) { // Check if k_qubits array pointer is valid and individual pointer is valid
             kfree(k_qubits[j]);
@@ -278,4 +267,3 @@ cleanup_user_ptrs_array:
 }
 
 #endif
-

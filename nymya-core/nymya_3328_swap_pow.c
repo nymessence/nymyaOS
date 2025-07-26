@@ -19,6 +19,7 @@
     #include <linux/uaccess.h>
     #include <linux/slab.h> // Required for kmalloc_array if used in other syscalls
     #include <linux/types.h> // For __int128 or other kernel types
+    #include <linux/module.h> // Required for EXPORT_SYMBOL_GPL
     // No math.h or complex.h in kernel
 #endif
 
@@ -74,8 +75,53 @@ int nymya_3328_swap_pow(nymya_qubit* q1, nymya_qubit* q2, double alpha) {
 
 #else // __KERNEL__
 
-// fixed_point_mul, fixed_point_cos, fixed_point_sin are now defined as static inline in nymya.h
-// and should NOT be redefined here.
+/**
+ * @brief Applies an interpolated SWAP^alpha gate to two qubits in kernel space.
+ *
+ * This function performs the core logic of the SWAP^alpha gate on two qubits
+ * using fixed-point complex arithmetic. It modifies the amplitudes of the
+ * provided kernel-space qubit structures directly.
+ *
+ * @param kq1 Pointer to the first qubit structure in kernel space.
+ * @param kq2 Pointer to the second qubit structure in kernel space.
+ * @param alpha_fp The interpolation parameter 'alpha' in fixed-point format.
+ *                 (0 for identity, FIXED_POINT_SCALE for SWAP).
+ * @return 0 on success.
+ */
+int nymya_3328_swap_pow(struct nymya_qubit *kq1, struct nymya_qubit *kq2, int64_t alpha_fp) {
+    // Calculate fixed-point angle: alpha * (PI / 2)
+    int64_t angle_fp = fixed_point_mul(alpha_fp, FIXED_POINT_PI_DIV_2);
+
+    // Calculate fixed-point cosine and sine values using wrappers from nymya.h
+    int64_t c_fp = fixed_cos(angle_fp);
+    int64_t s_fp = fixed_sin(angle_fp);
+
+    // Get current amplitudes in fixed-point complex_double format
+    complex_double a = kq1->amplitude;
+    complex_double b = kq2->amplitude;
+
+    // Apply the interpolated SWAP gate transformation using fixed-point complex arithmetic
+    // new_a = c * a + s * b
+    // new_a.re = (c.re * a.re - c.im * a.im) + (s.re * b.re - s.im * b.im)
+    // new_a.im = (c.re * a.im + c.im * a.re) + (s.re * b.im + s.im * b.re)
+    // Since c and s are real, c.im = 0 and s.im = 0
+    // new_a.re = c_fp * a.re + s_fp * b.re (scaled)
+    // new_a.im = c_fp * a.im + s_fp * b.im (scaled)
+    kq1->amplitude.re = fixed_point_mul(c_fp, a.re) + fixed_point_mul(s_fp, b.re);
+    kq1->amplitude.im = fixed_point_mul(c_fp, a.im) + fixed_point_mul(s_fp, b.im);
+
+    // new_b = c * b + s * a
+    kq2->amplitude.re = fixed_point_mul(c_fp, b.re) + fixed_point_mul(s_fp, a.re);
+    kq2->amplitude.im = fixed_point_mul(c_fp, b.im) + fixed_point_mul(s_fp, a.im);
+
+    // Log the symbolic event
+    log_symbolic_event("SWAP^α", kq1->id, kq1->tag, "Interpolated SWAP applied");
+
+    return 0; // Success
+}
+EXPORT_SYMBOL_GPL(nymya_3328_swap_pow);
+
+
 
 /**
  * __do_sys_nymya_3328_swap_pow - Kernel system call implementation for SWAP^alpha gate.
@@ -97,7 +143,6 @@ SYSCALL_DEFINE3(nymya_3328_swap_pow,
     int64_t, alpha_fp) { // alpha is now fixed-point
 
     struct nymya_qubit k_q1, k_q2; // Kernel-space copies of qubits
-    // int ret = 0; // Removed: unused variable
 
     // 1. Validate user pointers
     if (!user_q1 || !user_q2) {
@@ -115,33 +160,8 @@ SYSCALL_DEFINE3(nymya_3328_swap_pow,
         return -EFAULT;
     }
 
-    // Calculate fixed-point angle: alpha * (PI / 2)
-    int64_t angle_fp = fixed_point_mul(alpha_fp, FIXED_POINT_PI_DIV_2);
-
-    // Calculate fixed-point cosine and sine values using wrappers from nymya.h
-    int64_t c_fp = fixed_cos(angle_fp);
-    int64_t s_fp = fixed_sin(angle_fp);
-
-    // Get current amplitudes in fixed-point complex_double format
-    complex_double a = k_q1.amplitude;
-    complex_double b = k_q2.amplitude;
-
-    // Apply the interpolated SWAP gate transformation using fixed-point complex arithmetic
-    // new_a = c * a + s * b
-    // new_a.re = (c.re * a.re - c.im * a.im) + (s.re * b.re - s.im * b.im)
-    // new_a.im = (c.re * a.im + c.im * a.re) + (s.re * b.im + s.im * b.re)
-    // Since c and s are real, c.im = 0 and s.im = 0
-    // new_a.re = c_fp * a.re + s_fp * b.re (scaled)
-    // new_a.im = c_fp * a.im + s_fp * b.im (scaled)
-    k_q1.amplitude.re = fixed_point_mul(c_fp, a.re) + fixed_point_mul(s_fp, b.re);
-    k_q1.amplitude.im = fixed_point_mul(c_fp, a.im) + fixed_point_mul(s_fp, b.im);
-
-    // new_b = c * b + s * a
-    k_q2.amplitude.re = fixed_point_mul(c_fp, b.re) + fixed_point_mul(s_fp, a.re);
-    k_q2.amplitude.im = fixed_point_mul(c_fp, b.im) + fixed_point_mul(s_fp, a.im);
-
-    // Log the symbolic event
-    log_symbolic_event("SWAP^α", k_q1.id, k_q1.tag, "Interpolated SWAP applied");
+    // Call the core logic function
+    nymya_3328_swap_pow(&k_q1, &k_q2, alpha_fp);
 
     // 3. Copy modified qubit data back to user space
     if (copy_to_user(user_q1, &k_q1, sizeof(k_q1))) {
@@ -157,4 +177,3 @@ SYSCALL_DEFINE3(nymya_3328_swap_pow,
 }
 
 #endif
-

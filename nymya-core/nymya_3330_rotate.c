@@ -17,6 +17,7 @@
     #include <linux/syscalls.h>
     #include <linux/uaccess.h>
     #include <linux/slab.h> // Required for kmalloc_array if used in other syscalls
+    #include <linux/module.h> // Required for EXPORT_SYMBOL_GPL
     // No math.h in kernel; fixed-point math assumed for angle
 #endif
 
@@ -63,6 +64,62 @@ int nymya_3330_rotate(nymya_qubit* q, char axis, double theta) {
 #else // __KERNEL__
 
 /**
+ * nymya_3330_rotate - Core kernel logic for applying a rotation gate to a single qubit.
+ * @kq: Pointer to the kernel-space qubit structure to be rotated.
+ * @axis: The axis of rotation ('X', 'Y', or 'Z', case-insensitive).
+ * @theta_fp: The angle of rotation in fixed-point format.
+ *
+ * This function dispatches to the appropriate fixed-point rotation function
+ * based on the specified axis. It operates directly on a kernel-space qubit
+ * structure.
+ *
+ * Returns:
+ * - 0 on success.
+ * - -EINVAL if an unknown axis is specified.
+ * - An error code from the underlying rotation function (e.g., nymya_3319_rotate_x)
+ *   if the rotation itself encounters an issue.
+ */
+int nymya_3330_rotate(struct nymya_qubit *kq, char axis, int64_t theta_fp) {
+    int ret = 0;
+
+    // Dispatch to the appropriate fixed-point rotation function
+    switch (axis) {
+        case 'X':
+        case 'x':
+            // Call the kernel version of rotate_x with fixed-point theta
+            ret = nymya_3319_rotate_x(kq, theta_fp);
+            break;
+        case 'Y':
+        case 'y':
+            // Call the kernel version of rotate_y with fixed-point theta
+            ret = nymya_3320_rotate_y(kq, theta_fp);
+            break;
+        case 'Z':
+        case 'z':
+            // Call the kernel version of rotate_z with fixed-point theta
+            ret = nymya_3321_rotate_z(kq, theta_fp);
+            break;
+        default:
+            // Log error for unknown axis and return invalid argument error
+            log_symbolic_event("ROTATE", kq->id, kq->tag, "Unknown axis");
+            pr_err("nymya_3330_rotate_core: Unknown axis specified: %c\n", axis);
+            return -EINVAL;
+    }
+
+    // Log success or error from underlying rotation function
+    if (ret == 0) {
+        log_symbolic_event("ROTATE", kq->id, kq->tag, "Axis rotation applied");
+    } else {
+        // If an error occurred in the underlying rotation function, log it
+        pr_err("nymya_3330_rotate_core: Underlying rotation function failed with error %d\n", ret);
+    }
+
+    return ret;
+}
+EXPORT_SYMBOL_GPL(nymya_3330_rotate);
+
+
+/**
  * __do_sys_nymya_3330_rotate - Kernel system call implementation for single-qubit rotation.
  * @user_q: Pointer to the qubit structure in user space.
  * @axis: The axis of rotation ('X', 'Y', or 'Z', case-insensitive).
@@ -74,8 +131,9 @@ int nymya_3330_rotate(nymya_qubit* q, char axis, double theta) {
  *
  * Returns:
  * - 0 on success.
- * - -EINVAL if the user qubit pointer is invalid or an unknown axis is specified.
+ * - -EINVAL if the user qubit pointer is invalid.
  * - -EFAULT if copying data to/from user space fails.
+ * - Error code from the core rotation function (e.g., -EINVAL for unknown axis).
  */
 SYSCALL_DEFINE3(nymya_3330_rotate,
     struct nymya_qubit __user *, user_q,
@@ -83,7 +141,7 @@ SYSCALL_DEFINE3(nymya_3330_rotate,
     int64_t, theta_fp) { // Changed theta to fixed-point (int64_t)
 
     struct nymya_qubit k_q; // Kernel-space copy of the qubit
-    int ret = 0; // Return value for the rotation function calls
+    int ret = 0; // Return value for the core rotation function
 
     // 1. Validate user pointer
     if (!user_q) {
@@ -97,46 +155,16 @@ SYSCALL_DEFINE3(nymya_3330_rotate,
         return -EFAULT;
     }
 
-    // 3. Dispatch to the appropriate fixed-point rotation function
-    switch (axis) {
-        case 'X':
-        case 'x':
-            // Call the kernel version of rotate_x with fixed-point theta
-            ret = nymya_3319_rotate_x(&k_q, theta_fp);
-            break;
-        case 'Y':
-        case 'y':
-            // Call the kernel version of rotate_y with fixed-point theta
-            ret = nymya_3320_rotate_y(&k_q, theta_fp);
-            break;
-        case 'Z':
-        case 'z':
-            // Call the kernel version of rotate_z with fixed-point theta
-            ret = nymya_3321_rotate_z(&k_q, theta_fp);
-            break;
-        default:
-            // Log error for unknown axis and return invalid argument error
-            log_symbolic_event("ROTATE", k_q.id, k_q.tag, "Unknown axis");
-            return -EINVAL;
-    }
+    // 3. Call the core rotation logic
+    ret = nymya_3330_rotate(&k_q, axis, theta_fp);
 
-    // 4. Log success if rotation was applied
-    if (ret == 0) {
-        log_symbolic_event("ROTATE", k_q.id, k_q.tag, "Axis rotation applied");
-    } else {
-        // If an error occurred in the underlying rotation function, log it
-        pr_err("nymya_3330_rotate: Underlying rotation function failed with error %d\n", ret);
-    }
-
-
-    // 5. Copy modified qubit data back to user space
+    // 4. Copy modified qubit data back to user space
     if (copy_to_user(user_q, &k_q, sizeof(k_q))) {
         pr_err("nymya_3330_rotate: Failed to copy k_q to user space\n");
         return -EFAULT;
     }
 
-    return ret; // Return the result of the rotation function
+    return ret; // Return the result of the core rotation function
 }
 
 #endif
-

@@ -29,6 +29,7 @@
     #include <linux/errno.h>    // Kernel: For error codes like -EINVAL, -EFAULT, -ENOMEM
     #include <linux/printk.h>   // Kernel: For pr_err
     #include <linux/slab.h>     // Kernel: For kmalloc, kfree, kmalloc_array
+    #include <linux/module.h>
 #endif
 
 #ifndef __KERNEL__
@@ -83,6 +84,75 @@ int nymya_3349_tessellated_triangles(nymya_qubit* q[], size_t count) {
 #else // __KERNEL__
 
 /**
+ * @brief Applies tessellated triangle operations to kernel-space qubits.
+ *
+ * This function processes an array of kernel-space nymya_qubit structures
+ * in groups of three, forming "triangles". For each complete triangle,
+ * it applies a sequence of gates: Hadamard on the first qubit, then CNOT(a, b),
+ * CNOT(b, c), and CNOT(c, a), where a, b, c are the qubits in the triangle.
+ *
+ * This function operates purely on kernel-space qubit structures and
+ * does not handle user-space memory operations. It expects `k_qubits`
+ * to be an array of valid kernel-allocated `struct nymya_qubit *`.
+ *
+ * @param k_qubits A pointer to an array of kernel-space nymya_qubit pointers.
+ * @param count The total number of qubits in the `k_qubits` array.
+ * @return 0 on success, or a negative kernel error code on failure.
+ *         Possible errors include those from underlying gate operations
+ *         (e.g., nymya_3308_hadamard_gate, nymya_3309_controlled_not).
+ */
+int nymya_3349_tessellated_triangles(struct nymya_qubit **k_qubits, size_t count) {
+    int ret = 0; // Return value for gate operations
+    size_t groups; // Number of complete triangles
+    size_t g; // Loop counter for groups
+
+    // The syscall wrapper handles initial validation of `count < 3`.
+    // This function assumes `k_qubits` is a valid kernel array.
+    groups = count / 3;
+
+    // Iterate through each triangle group
+    for (g = 0; g < groups; g++) {
+        // Get pointers to the three qubits in the current triangle (kernel-space copies)
+        struct nymya_qubit *a = k_qubits[3 * g];
+        struct nymya_qubit *b = k_qubits[3 * g + 1];
+        struct nymya_qubit *c = k_qubits[3 * g + 2];
+
+        // Apply the gate sequence for a triangular entanglement using kernel functions
+        ret = nymya_3308_hadamard_gate(a); // Hadamard on qubit 'a'
+        if (ret) {
+            pr_err("nymya_3349_tessellated_triangles: Hadamard on triangle %zu, qubit 'a' failed, error %d\n", g, ret);
+            return ret; // Propagate error
+        }
+
+        ret = nymya_3309_controlled_not(a, b); // CNOT(a, b)
+        if (ret) {
+            pr_err("nymya_3349_tessellated_triangles: CNOT(a, b) on triangle %zu failed, error %d\n", g, ret);
+            return ret; // Propagate error
+        }
+
+        ret = nymya_3309_controlled_not(b, c); // CNOT(b, c)
+        if (ret) {
+            pr_err("nymya_3349_tessellated_triangles: CNOT(b, c) on triangle %zu failed, error %d\n", g, ret);
+            return ret; // Propagate error
+        }
+
+        ret = nymya_3309_controlled_not(c, a); // CNOT(c, a)
+        if (ret) {
+            pr_err("nymya_3349_tessellated_triangles: CNOT(c, a) on triangle %zu failed, error %d\n", g, ret);
+            return ret; // Propagate error
+        }
+
+        // Log the symbolic event for traceability
+        log_symbolic_event("TRI_TESS", a->id, a->tag, "Triangle entangle");
+    }
+
+    return 0; // Success
+}
+EXPORT_SYMBOL_GPL(nymya_3349_tessellated_triangles);
+
+
+
+/**
  * SYSCALL_DEFINE2(nymya_3349_tessellated_triangles) - Kernel syscall for tessellated triangles operation.
  * @user_q_array: User-space pointer to an array of user-space qubit pointers.
  * (i.e., `struct nymya_qubit __user *[]`)
@@ -110,16 +180,12 @@ SYSCALL_DEFINE2(nymya_3349_tessellated_triangles,
     struct nymya_qubit __user **user_qubit_ptrs = NULL; // Array to hold user-space pointers
     int ret = 0; // Return value for syscall and gate operations
     size_t i; // Loop counter
-    size_t groups; // Number of complete triangles
 
     // 1. Basic validation: Check for null array pointer and minimum count
     if (!user_q_array || count < 3) {
         pr_err("nymya_3349_tessellated_triangles: Invalid user_q_array or count (%zu)\n", count);
         return -EINVAL;
     }
-
-    // Calculate the number of complete triangles
-    groups = count / 3;
 
     // 2. Allocate kernel memory for the array of user-space qubit pointers
     user_qubit_ptrs = kmalloc_array(count, sizeof(struct nymya_qubit __user *), GFP_KERNEL);
@@ -173,53 +239,21 @@ SYSCALL_DEFINE2(nymya_3349_tessellated_triangles,
         }
     }
 
-    // 5. Apply the tessellated triangles logic for kernel space
-    // Iterate through each triangle group
-    for (size_t g = 0; g < groups; g++) {
-        // Get pointers to the three qubits in the current triangle (kernel-space copies)
-        struct nymya_qubit *a = k_qubits[3 * g];
-        struct nymya_qubit *b = k_qubits[3 * g + 1];
-        struct nymya_qubit *c = k_qubits[3 * g + 2];
-
-        // Apply the gate sequence for a triangular entanglement using kernel functions
-        ret = nymya_3308_hadamard_gate(a); // Hadamard on qubit 'a'
-        if (ret) {
-            pr_err("nymya_3349_tessellated_triangles: Hadamard on triangle %zu, qubit 'a' failed, error %d\n", g, ret);
-            goto cleanup_k_qubits;
-        }
-
-        ret = nymya_3309_controlled_not(a, b); // CNOT(a, b)
-        if (ret) {
-            pr_err("nymya_3349_tessellated_triangles: CNOT(a, b) on triangle %zu failed, error %d\n", g, ret);
-            goto cleanup_k_qubits;
-        }
-
-        ret = nymya_3309_controlled_not(b, c); // CNOT(b, c)
-        if (ret) {
-            pr_err("nymya_3349_tessellated_triangles: CNOT(b, c) on triangle %zu failed, error %d\n", g, ret);
-            goto cleanup_k_qubits;
-        }
-
-        ret = nymya_3309_controlled_not(c, a); // CNOT(c, a)
-        if (ret) {
-            pr_err("nymya_3349_tessellated_triangles: CNOT(c, a) on triangle %zu failed, error %d\n", g, ret);
-            goto cleanup_k_qubits;
-        }
-
-        // Log the symbolic event for traceability
-        log_symbolic_event("TRI_TESS", a->id, a->tag, "Triangle entangle");
+    // 5. Call the extracted core logic function
+    ret = nymya_3349_tessellated_triangles(k_qubits, count);
+    if (ret) {
+        // Error already logged by the core function if it was a gate error.
+        goto cleanup_k_qubits;
     }
 
     // 6. Copy the modified qubits back to user space
-    // Only proceed if no errors occurred during gate applications
-    if (ret == 0) {
-        for (i = 0; i < count; i++) {
-            // Copy the actual qubit data from kernel memory back to user space
-            if (copy_to_user(user_qubit_ptrs[i], k_qubits[i], sizeof(struct nymya_qubit))) {
-                pr_err("nymya_3349_tessellated_triangles: Failed to copy k_qubit[%zu] to user\n", i);
-                // Set ret to -EFAULT if any copy fails, but continue to free memory
-                if (ret == 0) ret = -EFAULT;
-            }
+    // Only proceed if no errors occurred during core function execution (ret is 0 here)
+    for (i = 0; i < count; i++) {
+        // Copy the actual qubit data from kernel memory back to user space
+        if (copy_to_user(user_qubit_ptrs[i], k_qubits[i], sizeof(struct nymya_qubit))) {
+            pr_err("nymya_3349_tessellated_triangles: Failed to copy k_qubit[%zu] to user\n", i);
+            // Set ret to -EFAULT if any copy fails, but continue to free memory
+            if (ret == 0) ret = -EFAULT;
         }
     }
 
@@ -246,4 +280,3 @@ cleanup_user_ptrs_array:
 }
 
 #endif
-

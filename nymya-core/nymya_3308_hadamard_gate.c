@@ -86,6 +86,7 @@ int nymya_3308_hadamard_gate(struct nymya_qubit *q) {
     log_symbolic_event("HADAMARD", q->id, q->tag, "Applied H gate (superposition)");
     return 0;
 }
+
 // Export the symbol for this function so other kernel modules/code can call it directly.
 EXPORT_SYMBOL_GPL(nymya_3308_hadamard_gate);
 

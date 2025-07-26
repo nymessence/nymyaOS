@@ -106,8 +106,11 @@ int nymya_3337_fermion_sim(struct nymya_qubit *k_q1, struct nymya_qubit *k_q2) {
 
     return 0; // Success
 }
-// Export the symbol for this function so other kernel modules/code can call it directly.
 EXPORT_SYMBOL_GPL(nymya_3337_fermion_sim);
+
+
+
+// Export the symbol for this function so other kernel modules/code can call it directly.
 
 
 /**

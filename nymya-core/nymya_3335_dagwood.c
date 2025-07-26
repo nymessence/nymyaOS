@@ -18,6 +18,7 @@
     #include <linux/syscalls.h>
     #include <linux/uaccess.h>
     #include <linux/errno.h> // For -EINVAL, -EFAULT
+    #include <linux/module.h> // Required for EXPORT_SYMBOL_GPL
     // No math.h or complex.h in kernel; fixed-point math assumed for amplitude operations
 #endif
 
@@ -73,6 +74,51 @@ static inline int64_t fixed_point_magnitude_sq(complex_double c) {
 }
 
 /**
+ * nymya_3335_dagwood - Applies a Dagwood gate to three qubits (kernel-side core logic).
+ * @k_q1: Pointer to the kernel-space copy of the control qubit.
+ * @k_q2: Pointer to the kernel-space copy of the first target qubit.
+ * @k_q3: Pointer to the kernel-space copy of the second target qubit.
+ *
+ * This function implements the core Dagwood gate logic in kernel space.
+ * If the control qubit's fixed-point amplitude magnitude squared is above
+ * a predefined threshold (representing a '1' state), it performs a swap
+ * between the amplitudes of the two target qubits (k_q2 and k_q3) using
+ * the kernel's nymya_3313_swap function. Otherwise, no action is taken.
+ *
+ * This function operates on kernel-space qubit structures directly.
+ *
+ * Returns:
+ * - 0 on success.
+ * - Error code from underlying gate operations (e.g., from nymya_3313_swap),
+ *   if the swap was attempted and failed.
+ */
+int nymya_3335_dagwood(struct nymya_qubit *k_q1, struct nymya_qubit *k_q2, struct nymya_qubit *k_q3) {
+    int ret = 0; // Initialize to success (no operation or successful operation)
+
+    // Threshold for control qubit being '1' (0.5^2 = 0.25 in floating point)
+    // Convert 0.25 to fixed-point squared value
+    const int64_t threshold_sq_fp = FIXED_POINT_SCALE / 4; // Represents 0.25 in Q32.32
+
+    if (fixed_point_magnitude_sq(k_q1->amplitude) > threshold_sq_fp) {
+        // Control qubit is "on" (predominantly |1>)
+        // Call the kernel version of nymya_3313_swap
+        ret = nymya_3313_swap(k_q2, k_q3);
+        if (ret == 0) { // Only log success or failure of SWAP, not gate itself
+            log_symbolic_event("DAGWOOD", k_q1->id, k_q1->tag, "Dagwood swap applied");
+        }
+        // If ret != 0, it means nymya_3313_swap failed, and we propagate that error.
+    } else {
+        // Control qubit is "off" (predominantly |0>)
+        log_symbolic_event("DAGWOOD", k_q1->id, k_q1->tag, "Control=0, no swap");
+    }
+
+    return ret;
+}
+EXPORT_SYMBOL_GPL(nymya_3335_dagwood);
+
+
+
+/**
  * SYSCALL_DEFINE3(nymya_3335_dagwood) - Kernel syscall for Dagwood gate.
  * @user_q1: User-space pointer to the control qubit.
  * @user_q2: User-space pointer to the first target qubit.
@@ -86,7 +132,8 @@ static inline int64_t fixed_point_magnitude_sq(complex_double c) {
  * - 0 on success.
  * - -EINVAL if any user pointer is invalid.
  * - -EFAULT if copying data to/from user space fails.
- * - Error code from underlying gate operations (e.g., nymya_3313_swap).
+ * - Error code from underlying gate operations (e.g., nymya_3313_swap),
+ *   if the core logic was executed and failed.
  */
 SYSCALL_DEFINE3(nymya_3335_dagwood,
     struct nymya_qubit __user *, user_q1,
@@ -94,7 +141,7 @@ SYSCALL_DEFINE3(nymya_3335_dagwood,
     struct nymya_qubit __user *, user_q3) {
 
     struct nymya_qubit k_q1, k_q2, k_q3; // Kernel-space copies
-    int ret = 0;
+    int ret = 0; // Initialize return value for syscall
 
     // 1. Validate user pointers
     if (!user_q1 || !user_q2 || !user_q3) {
@@ -116,23 +163,13 @@ SYSCALL_DEFINE3(nymya_3335_dagwood,
         return -EFAULT;
     }
 
-    // 3. Implement the control logic for kernel space
-    // Threshold for control qubit being '1' (0.5^2 = 0.25 in floating point)
-    // Convert 0.25 to fixed-point squared value
-    const int64_t threshold_sq_fp = FIXED_POINT_SCALE / 4; // Represents 0.25 in Q32.32
+    // 3. Call the newly created core function
+    ret = nymya_3335_dagwood(&k_q1, &k_q2, &k_q3);
 
-    if (fixed_point_magnitude_sq(k_q1.amplitude) > threshold_sq_fp) {
-        // Control qubit is "on" (predominantly |1>)
-        // Call the kernel version of nymya_3313_swap
-        ret = nymya_3313_swap(&k_q2, &k_q3);
-        if (ret == 0) {
-            log_symbolic_event("DAGWOOD", k_q1.id, k_q1.tag, "Dagwood swap applied");
-        } else {
-            pr_err("nymya_3335_dagwood: Failed to apply SWAP gate, error %d\n", ret);
-        }
-    } else {
-        // Control qubit is "off" (predominantly |0>)
-        log_symbolic_event("DAGWOOD", k_q1.id, k_q1.tag, "Control=0, no swap");
+    // Check if the core logic (specifically, the swap if performed) returned an error
+    if (ret != 0) {
+        pr_err("nymya_3335_dagwood: Core logic (swap) failed with error %d\n", ret);
+        return ret; // Propagate the error from the core function
     }
 
     // 4. Copy modified qubit data back to user space
@@ -152,8 +189,7 @@ SYSCALL_DEFINE3(nymya_3335_dagwood,
         return -EFAULT;
     }
 
-    return ret; // Return the result of the operation (0 for success, error code otherwise)
+    return 0; // Success
 }
 
 #endif
-

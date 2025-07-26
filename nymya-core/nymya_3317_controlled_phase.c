@@ -107,8 +107,11 @@ int nymya_3317_controlled_phase(struct nymya_qubit *k_qc, struct nymya_qubit *k_
 
     return 0;
 }
-// Export the symbol for this function so other kernel modules/code can call it directly.
 EXPORT_SYMBOL_GPL(nymya_3317_controlled_phase);
+
+
+
+// Export the symbol for this function so other kernel modules/code can call it directly.
 
 
 /**

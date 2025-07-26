@@ -27,6 +27,7 @@
     #include <linux/uaccess.h>  // Kernel: For copy_from_user, copy_to_user
     #include <linux/errno.h>    // Kernel: For error codes like -EINVAL, -EFAULT
     #include <linux/printk.h>   // Kernel: For pr_err
+    #include <linux/module.h>   // Required for EXPORT_SYMBOL_GPL
     // No math.h or complex.h in kernel; fixed-point math assumed for amplitude operations
 #endif
 
@@ -61,20 +62,63 @@ int nymya_3340_sycamore(nymya_qubit* q1, nymya_qubit* q2) {
 #else // __KERNEL__
 
 /**
+ * nymya_3340_sycamore - Applies the Sycamore gate logic to kernel-space qubits.
+ * @k_q1: Pointer to the first qubit in kernel space.
+ * @k_q2: Pointer to the second qubit in kernel space.
+ *
+ * This function implements the core Sycamore gate logic using kernel-level
+ * operations and fixed-point arithmetic. It decomposes the Sycamore gate
+ * into a square root of iSWAP gate followed by a Controlled-Phase gate
+ * with an angle of PI/6 (converted to fixed-point).
+ *
+ * Returns:
+ * - 0 on success.
+ * - Negative error code if any underlying gate operation fails.
+ */
+int nymya_3340_sycamore(struct nymya_qubit *k_q1, struct nymya_qubit *k_q2) {
+    int ret = 0;
+
+    // Apply the sequence of gates that compose the Sycamore gate
+    ret = nymya_3327_sqrt_iswap(k_q1, k_q2); // Apply square root of iSWAP gate
+    if (ret) {
+        pr_err("nymya_3340_sycamore: sqrt_iswap failed, error %d\n", ret);
+        return ret;
+    }
+
+    // Convert M_PI / 6.0 to fixed-point for nymya_3317_controlled_phase
+    // M_PI / 6.0 is approximately 0.5235987756 radians
+    // Convert to fixed-point: (int64_t)(0.5235987756 * FIXED_POINT_SCALE)
+    int64_t phase_angle_fp = (int64_t)(0.5235987756 * FIXED_POINT_SCALE);
+    ret = nymya_3317_controlled_phase(k_q1, k_q2, phase_angle_fp); // Apply Controlled-Phase gate
+    if (ret) {
+        pr_err("nymya_3340_sycamore: controlled_phase failed, error %d\n", ret);
+        return ret;
+    }
+
+    // Log the symbolic event for traceability
+    log_symbolic_event("SYCAMORE", k_q1->id, k_q1->tag, "Sycamore gate applied");
+
+    return 0;
+}
+EXPORT_SYMBOL_GPL(nymya_3340_sycamore);
+
+
+
+/**
  * SYSCALL_DEFINE2(nymya_3340_sycamore) - Kernel syscall for Sycamore gate.
  * @user_q1: User-space pointer to the first qubit structure.
  * @user_q2: User-space pointer to the second qubit structure.
  *
  * This syscall copies qubit data from user space to kernel space, applies the
- * Sycamore gate logic using kernel-space functions and fixed-point arithmetic,
- * and then copies the modified data back to user space. The Sycamore gate is
- * decomposed into kernel-level square root of iSWAP and Controlled-Phase gates.
+ * Sycamore gate logic using kernel-space functions and fixed-point arithmetic
+ * via the `nymya_3340_sycamore` helper function, and then copies the modified
+ * data back to user space.
  *
  * Returns:
  * - 0 on success.
  * - -EINVAL if any user qubit pointer is NULL.
  * - -EFAULT if copying data to/from user space fails.
- * - Error code from underlying gate operations (e.g., nymya_3327_sqrt_iswap).
+ * - Error code from underlying core logic (e.g., nymya_3340_sycamore).
  */
 SYSCALL_DEFINE2(nymya_3340_sycamore,
     struct nymya_qubit __user *, user_q1,
@@ -99,28 +143,14 @@ SYSCALL_DEFINE2(nymya_3340_sycamore,
         return -EFAULT; // Bad address
     }
 
-    // 3. Apply the Sycamore gate logic for kernel space
-    // Call the kernel versions of the gates
-    ret = nymya_3327_sqrt_iswap(&k_q1, &k_q2); // Apply square root of iSWAP gate
+    // 3. Apply the Sycamore gate logic using the extracted kernel function
+    ret = nymya_3340_sycamore(&k_q1, &k_q2);
     if (ret) {
-        pr_err("nymya_3340_sycamore: sqrt_iswap failed, error %d\n", ret);
+        pr_err("nymya_3340_sycamore: Core logic failed with error %d\n", ret);
         return ret;
     }
 
-    // Convert M_PI / 6.0 to fixed-point for nymya_3317_controlled_phase
-    // M_PI / 6.0 is approximately 0.5235987756 radians
-    // Convert to fixed-point: (int64_t)(0.5235987756 * FIXED_POINT_SCALE)
-    int64_t phase_angle_fp = (int64_t)(0.5235987756 * FIXED_POINT_SCALE);
-    ret = nymya_3317_controlled_phase(&k_q1, &k_q2, phase_angle_fp); // Apply Controlled-Phase gate
-    if (ret) {
-        pr_err("nymya_3340_sycamore: controlled_phase failed, error %d\n", ret);
-        return ret;
-    }
-
-    // 4. Log the symbolic event for traceability
-    log_symbolic_event("SYCAMORE", k_q1.id, k_q1.tag, "Sycamore gate applied");
-
-    // 5. Copy the modified qubits back to user space
+    // 4. Copy the modified qubits back to user space
     if (copy_to_user(user_q1, &k_q1, sizeof(k_q1))) {
         pr_err("nymya_3340_sycamore: Failed to copy k_q1 to user\n");
         ret = -EFAULT; // Bad address
@@ -134,4 +164,3 @@ SYSCALL_DEFINE2(nymya_3340_sycamore,
 }
 
 #endif
-

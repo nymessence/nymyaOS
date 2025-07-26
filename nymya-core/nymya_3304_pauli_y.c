@@ -16,6 +16,7 @@
     #include <linux/syscalls.h>
     #include <linux/uaccess.h>
     #include <linux/errno.h>
+    #include <linux/module.h> // Required for EXPORT_SYMBOL_GPL
 #endif
 
 #ifndef __KERNEL__
@@ -37,6 +38,39 @@ int nymya_3304_pauli_y(nymya_qubit* q) {
 
 #else
 
+/**
+ * @brief Applies the Pauli-Y gate logic to a kernel-space qubit.
+ *
+ * This function performs the core operation of the Pauli-Y gate,
+ * multiplying the qubit's amplitude by the imaginary unit 'i'.
+ * In the fixed-point complex representation, this involves swapping
+ * the real and imaginary parts and negating the new real part.
+ *
+ * @param kq A pointer to the kernel-space nymya_qubit structure to operate on.
+ * @return 0 on success, or a negative error code if an internal issue occurs.
+ */
+int nymya_3304_pauli_y(struct nymya_qubit *kq) {
+    int64_t re, im;
+
+    // A defensive check, though kq should be valid from the syscall wrapper
+    if (!kq) {
+        return -EINVAL;
+    }
+
+    // Extract fixed-point real and imaginary parts
+    re = kq->amplitude.re;
+    im = kq->amplitude.im;
+
+    // Multiply amplitude by i: (a + bi)*i = -b + ai
+    kq->amplitude.re = -im;
+    kq->amplitude.im = re;
+
+    log_symbolic_event("PAULI_Y", kq->id, kq->tag, "Dream vector rotated");
+
+    return 0; // Success
+}
+EXPORT_SYMBOL_GPL(nymya_3304_pauli_y);
+
 /*
  * Kernel syscall: nymya_3304_pauli_y
  * Multiplies the qubit amplitude by i.
@@ -44,22 +78,19 @@ int nymya_3304_pauli_y(nymya_qubit* q) {
  */
 SYSCALL_DEFINE1(nymya_3304_pauli_y, struct nymya_qubit __user *, user_q) {
     struct nymya_qubit kq;
-    int64_t re, im;
+    int ret;
 
     if (!user_q)
         return -EINVAL;
     if (copy_from_user(&kq, user_q, sizeof(kq)))
         return -EFAULT;
 
-    // Extract fixed-point real and imaginary parts
-    re = kq.amplitude.re;
-    im = kq.amplitude.im;
-
-    // Multiply amplitude by i: (a + bi)*i = -b + ai
-    kq.amplitude.re = -im;
-    kq.amplitude.im = re;
-
-    log_symbolic_event("PAULI_Y", kq.id, kq.tag, "Dream vector rotated");
+    // Call the extracted core logic function
+    ret = nymya_3304_pauli_y(&kq);
+    if (ret) {
+        // Propagate any error from the core logic
+        return ret;
+    }
 
     if (copy_to_user(user_q, &kq, sizeof(kq)))
         return -EFAULT;
@@ -68,4 +99,3 @@ SYSCALL_DEFINE1(nymya_3304_pauli_y, struct nymya_qubit __user *, user_q) {
 }
 
 #endif
-

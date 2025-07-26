@@ -29,6 +29,7 @@
     #include <linux/errno.h>    // Kernel: For error codes like -EINVAL, -EFAULT, -ENOMEM
     #include <linux/printk.h>   // Kernel: For pr_err
     #include <linux/slab.h>     // Kernel: For kmalloc, kfree, kmalloc_array
+    #include <linux/module.h>   // Kernel: For EXPORT_SYMBOL_GPL
 #endif
 
 #ifndef __KERNEL__
@@ -82,6 +83,59 @@ int nymya_3350_tessellated_hexagons(nymya_qubit* q[], size_t count) {
 #else // __KERNEL__
 
 /**
+ * @brief Applies operations across a tessellated pattern of hexagons (kernel core logic).
+ *
+ * This function contains the core quantum gate logic for applying operations
+ * to qubits arranged in a tessellated hexagonal pattern. It operates on
+ * kernel-space qubit structures. It processes qubits in groups of six,
+ * applying a specific entangling sequence (Hadamard and CNOTs) to each hexagon.
+ * The function only processes full hexagons; any remaining qubits (if count
+ * is not a multiple of 6) are ignored.
+ *
+ * @param k_qubits An array of pointers to kernel-space `nymya_qubit` objects.
+ * @param count The total number of qubits in the `k_qubits` array.
+ * @return 0 on success, or a negative errno on failure.
+ */
+int nymya_3350_tessellated_hexagons(struct nymya_qubit **k_qubits, size_t count) {
+    int ret = 0;
+    size_t groups; // Number of complete hexagons
+
+    // We assume basic validation (count >= 6, k_qubits and its elements valid)
+    // has been done by the caller (the syscall wrapper).
+    groups = count / 6;
+
+    // Iterate through each hexagon group
+    for (size_t g = 0; g < groups; g++) {
+        size_t base = 6 * g; // Base index for the current hexagon's qubits
+
+        // Apply Hadamard gate to each qubit in the hexagon
+        for (int j = 0; j < 6; j++) {
+            ret = nymya_3308_hadamard_gate(k_qubits[base + j]);
+            if (ret) {
+                pr_err("nymya_3350_tessellated_hexagons: Hadamard on hexagon %zu, qubit %d failed, error %d\n", g, j, ret);
+                return ret; // Propagate error immediately
+            }
+        }
+
+        // Apply CNOT gates between adjacent qubits in a cyclic manner
+        for (int j = 0; j < 6; j++) {
+            ret = nymya_3309_controlled_not(k_qubits[base + j], k_qubits[base + (j + 1) % 6]);
+            if (ret) {
+                pr_err("nymya_3350_tessellated_hexagons: CNOT(q[%zu+%d], q[%zu+%d]) on hexagon %zu failed, error %d\n", base, j, base, (j + 1) % 6, g, ret);
+                return ret; // Propagate error immediately
+            }
+        }
+
+        // Log the symbolic event for traceability
+        log_symbolic_event("HEX_TESS", k_qubits[base]->id, k_qubits[base]->tag, "Hexagon ring entangle");
+    }
+    return 0; // Success
+}
+EXPORT_SYMBOL_GPL(nymya_3350_tessellated_hexagons);
+
+
+
+/**
  * SYSCALL_DEFINE2(nymya_3350_tessellated_hexagons) - Kernel syscall for tessellated hexagons operation.
  * @user_q_array: User-space pointer to an array of user-space qubit pointers.
  * (i.e., `struct nymya_qubit __user *[]`)
@@ -89,8 +143,8 @@ int nymya_3350_tessellated_hexagons(nymya_qubit* q[], size_t count) {
  *
  * This syscall copies the array of user-space qubit pointers, then copies each
  * individual qubit structure from user space to kernel space. It applies the
- * tessellated hexagonal lattice gate logic using kernel-space functions
- * (Hadamard and CNOT) to groups of six qubits, and finally copies the
+ * tessellated hexagonal lattice gate logic using the kernel-space
+ * `nymya_3350_tessellated_hexagons` function, and finally copies the
  * modified qubit data back to user space.
  *
  * Returns:
@@ -99,7 +153,7 @@ int nymya_3350_tessellated_hexagons(nymya_qubit* q[], size_t count) {
  * or if any individual user qubit pointer within a hexagon is NULL.
  * - -EFAULT if copying data to/from user space fails for any qubit or pointer.
  * - -ENOMEM if kernel memory allocation fails.
- * - Error code from underlying gate operations (e.g., nymya_3308_hadamard_gate).
+ * - Error code from underlying gate operations (propagated from `nymya_3350_tessellated_hexagons`).
  */
 SYSCALL_DEFINE2(nymya_3350_tessellated_hexagons,
     struct nymya_qubit __user * __user *, user_q_array,
@@ -109,27 +163,27 @@ SYSCALL_DEFINE2(nymya_3350_tessellated_hexagons,
     struct nymya_qubit __user **user_qubit_ptrs = NULL; // Array to hold user-space pointers
     int ret = 0; // Return value for syscall and gate operations
     size_t i; // Loop counter
-    size_t groups; // Number of complete hexagons
+    // size_t groups; // No longer needed here, calculated by core function
 
     // 1. Basic validation: Check for null array pointer and minimum count
     if (!user_q_array || count < 6) {
-        pr_err("nymya_3350_tessellated_hexagons: Invalid user_q_array or count (%zu)\n", count);
+        pr_err("sys_nymya_3350_tessellated_hexagons: Invalid user_q_array or count (%zu)\n", count);
         return -EINVAL;
     }
 
     // Calculate the number of complete hexagons
-    groups = count / 6;
+    // groups = count / 6; // Moved calculation to core function
 
     // 2. Allocate kernel memory for the array of user-space qubit pointers
     user_qubit_ptrs = kmalloc_array(count, sizeof(struct nymya_qubit __user *), GFP_KERNEL);
     if (!user_qubit_ptrs) {
-        pr_err("nymya_3350_tessellated_hexagons: Failed to allocate memory for user_qubit_ptrs array\n");
+        pr_err("sys_nymya_3350_tessellated_hexagons: Failed to allocate memory for user_qubit_ptrs array\n");
         return -ENOMEM;
     }
 
     // Copy the array of user-space qubit pointers from user space
     if (copy_from_user(user_qubit_ptrs, user_q_array, count * sizeof(struct nymya_qubit __user *))) {
-        pr_err("nymya_3350_tessellated_hexagons: Failed to copy user qubit pointers array\n");
+        pr_err("sys_nymya_3350_tessellated_hexagons: Failed to copy user qubit pointers array\n");
         ret = -EFAULT;
         goto cleanup_user_ptrs_array;
     }
@@ -137,7 +191,7 @@ SYSCALL_DEFINE2(nymya_3350_tessellated_hexagons,
     // 3. Allocate kernel memory for the array of kernel-space qubit structures
     k_qubits = kmalloc_array(count, sizeof(struct nymya_qubit *), GFP_KERNEL);
     if (!k_qubits) {
-        pr_err("nymya_3350_tessellated_hexagons: Failed to allocate memory for k_qubits array\n");
+        pr_err("sys_nymya_3350_tessellated_hexagons: Failed to allocate memory for k_qubits array\n");
         ret = -ENOMEM;
         goto cleanup_user_ptrs_array;
     }
@@ -151,7 +205,7 @@ SYSCALL_DEFINE2(nymya_3350_tessellated_hexagons,
     for (i = 0; i < count; i++) {
         // Check if individual user-space qubit pointer is NULL
         if (!user_qubit_ptrs[i]) {
-            pr_err("nymya_3350_tessellated_hexagons: Null individual user qubit pointer at index %zu\n", i);
+            pr_err("sys_nymya_3350_tessellated_hexagons: Null individual user qubit pointer at index %zu\n", i);
             ret = -EINVAL;
             goto cleanup_k_qubits; // Jump to cleanup allocated memory
         }
@@ -159,56 +213,35 @@ SYSCALL_DEFINE2(nymya_3350_tessellated_hexagons,
         // Allocate memory for the kernel-space copy of the qubit
         k_qubits[i] = kmalloc(sizeof(struct nymya_qubit), GFP_KERNEL);
         if (!k_qubits[i]) {
-            pr_err("nymya_3350_tessellated_hexagons: Failed to allocate memory for k_qubit[%zu]\n", i);
+            pr_err("sys_nymya_3350_tessellated_hexagons: Failed to allocate memory for k_qubit[%zu]\n", i);
             ret = -ENOMEM; // Out of memory
             goto cleanup_k_qubits; // Jump to cleanup allocated memory
         }
 
         // Copy the actual qubit data from user space into the allocated kernel memory
         if (copy_from_user(k_qubits[i], user_qubit_ptrs[i], sizeof(struct nymya_qubit))) {
-            pr_err("nymya_3350_tessellated_hexagons: Failed to copy k_qubit[%zu] data from user\n", i);
+            pr_err("sys_nymya_3350_tessellated_hexagons: Failed to copy k_qubit[%zu] data from user\n", i);
             ret = -EFAULT; // Bad address
             goto cleanup_k_qubits; // Jump to cleanup allocated memory
         }
     }
 
-    // 5. Apply the tessellated hexagons logic for kernel space
-    // Iterate through each hexagon group
-    for (size_t g = 0; g < groups; g++) {
-        size_t base = 6 * g; // Base index for the current hexagon's qubits
-
-        // Apply Hadamard gate to each qubit in the hexagon
-        for (int j = 0; j < 6; j++) {
-            ret = nymya_3308_hadamard_gate(k_qubits[base + j]);
-            if (ret) {
-                pr_err("nymya_3350_tessellated_hexagons: Hadamard on hexagon %zu, qubit %d failed, error %d\n", g, j, ret);
-                goto cleanup_k_qubits;
-            }
-        }
-
-        // Apply CNOT gates between adjacent qubits in a cyclic manner
-        for (int j = 0; j < 6; j++) {
-            ret = nymya_3309_controlled_not(k_qubits[base + j], k_qubits[base + (j + 1) % 6]);
-            if (ret) {
-                pr_err("nymya_3350_tessellated_hexagons: CNOT(q[%zu+%d], q[%zu+%d]) on hexagon %zu failed, error %d\n", base, j, base, (j + 1) % 6, g, ret);
-                goto cleanup_k_qubits;
-            }
-        }
-
-        // Log the symbolic event for traceability
-        log_symbolic_event("HEX_TESS", k_qubits[base]->id, k_qubits[base]->tag, "Hexagon ring entangle");
+    // 5. Call the extracted core logic function for kernel space
+    ret = nymya_3350_tessellated_hexagons(k_qubits, count);
+    if (ret) {
+        // Error already logged by the core function
+        goto cleanup_k_qubits;
     }
 
     // 6. Copy the modified qubits back to user space
-    // Only proceed if no errors occurred during gate applications
-    if (ret == 0) {
-        for (i = 0; i < count; i++) {
-            // Copy the actual qubit data from kernel memory back to user space
-            if (copy_to_user(user_qubit_ptrs[i], k_qubits[i], sizeof(struct nymya_qubit))) {
-                pr_err("nymya_3350_tessellated_hexagons: Failed to copy k_qubit[%zu] to user\n", i);
-                // Set ret to -EFAULT if any copy fails, but continue to free memory
-                if (ret == 0) ret = -EFAULT;
-            }
+    // Only proceed if no errors occurred during gate applications (ret == 0)
+    for (i = 0; i < count; i++) {
+        // Copy the actual qubit data from kernel memory back to user space
+        if (copy_to_user(user_qubit_ptrs[i], k_qubits[i], sizeof(struct nymya_qubit))) {
+            pr_err("sys_nymya_3350_tessellated_hexagons: Failed to copy k_qubit[%zu] to user\n", i);
+            // If previous operations were successful (ret is 0), set ret to -EFAULT for copy_to_user failure.
+            // If ret was already an error from core logic, preserve that error.
+            if (ret == 0) ret = -EFAULT;
         }
     }
 
@@ -235,4 +268,3 @@ cleanup_user_ptrs_array:
 }
 
 #endif
-

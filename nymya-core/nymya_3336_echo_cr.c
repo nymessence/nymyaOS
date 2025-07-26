@@ -19,6 +19,7 @@
     #include <linux/uaccess.h>
     #include <linux/errno.h> // For -EINVAL, -EFAULT
     #include <linux/printk.h> // For pr_err
+    #include <linux/module.h> // Required for EXPORT_SYMBOL_GPL
     // No math.h or complex.h in kernel; fixed-point math assumed for amplitude operations
 #endif
 
@@ -59,13 +60,49 @@ int nymya_3336_echo_cr(nymya_qubit* q1, nymya_qubit* q2, double theta) {
 #else // __KERNEL__
 
 /**
+ * @brief Applies an Echo Cross-Resonance (CR) gate to kernel-space qubits.
+ * @param kq1 Pointer to the first qubit structure in kernel space.
+ * @param kq2 Pointer to the second qubit structure in kernel space.
+ * @param theta_fp The gate parameter (angle) in fixed-point format.
+ *
+ * This function implements the core logic for the Echo Cross-Resonance (CR)
+ * gate. It applies a sequence of complex phase rotations to the provided
+ * kernel-space qubit amplitudes using fixed-point complex arithmetic.
+ *
+ * This function is intended to be called by the `sys_nymya_3336_echo_cr`
+ * syscall after user-space data has been copied to kernel space, or by
+ * other kernel modules directly.
+ *
+ * @return 0 on success. Currently, no specific failure conditions are
+ *         handled within this core logic that would result in a non-zero
+ *         return, assuming valid input pointers.
+ */
+int nymya_3336_echo_cr(struct nymya_qubit *kq1, struct nymya_qubit *kq2, int64_t theta_fp) {
+    // Use complex_exp_i for e^(i*theta_fp) and complex_mul for multiplications.
+    complex_double p_fp = complex_exp_i(theta_fp);
+    complex_double conj_p_fp = complex_conj(p_fp);
+
+    // Apply the sequence of complex multiplications
+    kq1->amplitude = complex_mul(kq1->amplitude, p_fp);
+    kq2->amplitude = complex_mul(kq2->amplitude, conj_p_fp);
+    kq1->amplitude = complex_mul(kq1->amplitude, conj_p_fp);
+    kq2->amplitude = complex_mul(kq2->amplitude, p_fp);
+
+    log_symbolic_event("ECHO_CR", kq1->id, kq1->tag, "ECR interaction applied");
+    return 0;
+}
+EXPORT_SYMBOL_GPL(nymya_3336_echo_cr);
+
+
+
+/**
  * SYSCALL_DEFINE3(nymya_3336_echo_cr) - Kernel syscall for Echo Cross-Resonance (CR) gate.
  * @user_q1: User-space pointer to the first qubit.
  * @user_q2: User-space pointer to the second qubit.
  * @theta_fp: The gate parameter (angle) in fixed-point (int64_t) format.
  *
  * This syscall copies qubit data from user space, applies the Echo CR gate
- * logic using kernel-space fixed-point complex arithmetic, and then copies
+ * logic by calling the `nymya_3336_echo_cr` core function, and then copies
  * the modified data back.
  *
  * Returns:
@@ -97,18 +134,13 @@ SYSCALL_DEFINE3(nymya_3336_echo_cr,
         return -EFAULT;
     }
 
-    // 3. Implement the Echo CR logic for kernel space using fixed-point arithmetic.
-    // Use complex_exp_i for e^(i*theta_fp) and complex_mul for multiplications.
-    complex_double p_fp = complex_exp_i(theta_fp);
-    complex_double conj_p_fp = complex_conj(p_fp);
-
-    // Apply the sequence of complex multiplications
-    k_q1.amplitude = complex_mul(k_q1.amplitude, p_fp);
-    k_q2.amplitude = complex_mul(k_q2.amplitude, conj_p_fp);
-    k_q1.amplitude = complex_mul(k_q1.amplitude, conj_p_fp);
-    k_q2.amplitude = complex_mul(k_q2.amplitude, p_fp);
-
-    log_symbolic_event("ECHO_CR", k_q1.id, k_q1.tag, "ECR interaction applied");
+    // 3. Call the core Echo CR logic function with kernel-space copies
+    ret = nymya_3336_echo_cr(&k_q1, &k_q2, theta_fp);
+    if (ret) {
+        // Propagate error from core function if it ever returns one
+        pr_err("nymya_3336_echo_cr: Core logic failed with error %d\n", ret);
+        return ret;
+    }
 
     // 4. Copy modified qubit data back to user space
     if (copy_to_user(user_q1, &k_q1, sizeof(k_q1))) {
@@ -120,8 +152,7 @@ SYSCALL_DEFINE3(nymya_3336_echo_cr,
         return -EFAULT;
     }
 
-    return ret; // Return 0 for success
+    return 0; // Return 0 for success
 }
 
 #endif
-

@@ -111,6 +111,7 @@ int nymya_3309_controlled_not(struct nymya_qubit *q_ctrl, struct nymya_qubit *q_
 
     return 0;
 }
+
 // Export the symbol for this function so other kernel modules/code can call it directly.
 EXPORT_SYMBOL_GPL(nymya_3309_controlled_not);
 

@@ -19,6 +19,7 @@
     #include <linux/uaccess.h>
     #include <linux/errno.h> // For -EINVAL, -EFAULT
     #include <linux/printk.h> // For pr_err
+    #include <linux/module.h> // Ensure this is present for EXPORT_SYMBOL_GPL
     // No math.h or complex.h in kernel; fixed-point math assumed for amplitude operations
 #endif
 
@@ -62,6 +63,57 @@ int nymya_3338_givens(nymya_qubit* q1, nymya_qubit* q2, double theta) {
 #else // __KERNEL__
 
 /**
+ * nymya_3338_givens - Core kernel logic for applying a Givens rotation.
+ * @kq1: Pointer to the first qubit in kernel space.
+ * @kq2: Pointer to the second qubit in kernel space.
+ * @theta_fp: The rotation angle in fixed-point (int64_t) format.
+ *
+ * This function performs the Givens rotation on the provided kernel-space
+ * qubit structures using fixed-point arithmetic. It modifies the amplitudes
+ * of the qubits directly.
+ *
+ * Returns:
+ * - 0 on success.
+ * - (Currently, no specific error conditions are handled internally by this function,
+ *    but a non-zero return value could be used for future error propagation.)
+ */
+int nymya_3338_givens(struct nymya_qubit *kq1, struct nymya_qubit *kq2, int64_t theta_fp) {
+    // Get fixed-point cosine and sine values from nymya.h wrappers
+    int64_t cos_theta_fp = fixed_cos(theta_fp);
+    int64_t sin_theta_fp = fixed_sin(theta_fp);
+
+    // Let a = kq1->amplitude and b = kq2->amplitude
+    // new_a = a * cos(theta) - b * sin(theta)
+    // new_b = a * sin(theta) + b * cos(theta)
+
+    // Calculate new_a.re = a.re * cos_theta_fp - b.re * sin_theta_fp
+    // Calculate new_a.im = a.im * cos_theta_fp - b.im * sin_theta_fp
+    complex_double new_a_amplitude;
+    new_a_amplitude.re = fixed_point_mul(kq1->amplitude.re, cos_theta_fp) -
+                         fixed_point_mul(kq2->amplitude.re, sin_theta_fp);
+    new_a_amplitude.im = fixed_point_mul(kq1->amplitude.im, cos_theta_fp) -
+                         fixed_point_mul(kq2->amplitude.im, sin_theta_fp);
+
+    // Calculate new_b.re = a.re * sin_theta_fp + b.re * cos_theta_fp
+    // Calculate new_b.im = a.im * sin_theta_fp + b.im * cos_theta_fp
+    complex_double new_b_amplitude;
+    new_b_amplitude.re = fixed_point_mul(kq1->amplitude.re, sin_theta_fp) +
+                         fixed_point_mul(kq2->amplitude.re, cos_theta_fp);
+    new_b_amplitude.im = fixed_point_mul(kq1->amplitude.im, sin_theta_fp) +
+                         fixed_point_mul(kq2->amplitude.im, cos_theta_fp);
+
+    kq1->amplitude = new_a_amplitude;
+    kq2->amplitude = new_b_amplitude;
+
+    log_symbolic_event("GIVENS", kq1->id, kq1->tag, "Givens rotation applied");
+
+    return 0; // Success
+}
+EXPORT_SYMBOL_GPL(nymya_3338_givens);
+
+
+
+/**
  * SYSCALL_DEFINE3(nymya_3338_givens) - Kernel syscall for Givens rotation gate.
  * @user_q1: User-space pointer to the first qubit.
  * @user_q2: User-space pointer to the second qubit.
@@ -82,6 +134,7 @@ SYSCALL_DEFINE3(nymya_3338_givens,
     int64_t, theta_fp) { // Theta is now fixed-point
 
     struct nymya_qubit k_q1, k_q2; // Kernel-space copies
+    int ret; // For return value from core function
 
     // 1. Validate user pointers
     if (!user_q1 || !user_q2) {
@@ -99,35 +152,13 @@ SYSCALL_DEFINE3(nymya_3338_givens,
         return -EFAULT;
     }
 
-    // 3. Implement the Givens rotation logic for kernel space using fixed-point arithmetic.
-    // Get fixed-point cosine and sine values from nymya.h wrappers
-    int64_t cos_theta_fp = fixed_cos(theta_fp);
-    int64_t sin_theta_fp = fixed_sin(theta_fp);
-
-    // Let a = k_q1.amplitude and b = k_q2.amplitude
-    // new_a = a * cos(theta) - b * sin(theta)
-    // new_b = a * sin(theta) + b * cos(theta)
-
-    // Calculate new_a.re = a.re * cos_theta_fp - b.re * sin_theta_fp
-    // Calculate new_a.im = a.im * cos_theta_fp - b.im * sin_theta_fp
-    complex_double new_a_amplitude;
-    new_a_amplitude.re = fixed_point_mul(k_q1.amplitude.re, cos_theta_fp) -
-                         fixed_point_mul(k_q2.amplitude.re, sin_theta_fp);
-    new_a_amplitude.im = fixed_point_mul(k_q1.amplitude.im, cos_theta_fp) -
-                         fixed_point_mul(k_q2.amplitude.im, sin_theta_fp);
-
-    // Calculate new_b.re = a.re * sin_theta_fp + b.re * cos_theta_fp
-    // Calculate new_b.im = a.im * sin_theta_fp + b.im * cos_theta_fp
-    complex_double new_b_amplitude;
-    new_b_amplitude.re = fixed_point_mul(k_q1.amplitude.re, sin_theta_fp) +
-                         fixed_point_mul(k_q2.amplitude.re, cos_theta_fp);
-    new_b_amplitude.im = fixed_point_mul(k_q1.amplitude.im, sin_theta_fp) +
-                         fixed_point_mul(k_q2.amplitude.im, cos_theta_fp);
-
-    k_q1.amplitude = new_a_amplitude;
-    k_q2.amplitude = new_b_amplitude;
-
-    log_symbolic_event("GIVENS", k_q1.id, k_q1.tag, "Givens rotation applied");
+    // 3. Call the core Givens rotation logic
+    ret = nymya_3338_givens(&k_q1, &k_q2, theta_fp);
+    if (ret) {
+        // Propagate any error from the core logic if it ever returns one
+        pr_err("nymya_3338_givens: Core logic failed with error %d\n", ret);
+        return ret;
+    }
 
     // 4. Copy modified qubit data back to user space
     if (copy_to_user(user_q1, &k_q1, sizeof(k_q1))) {
@@ -143,4 +174,3 @@ SYSCALL_DEFINE3(nymya_3338_givens,
 }
 
 #endif
-

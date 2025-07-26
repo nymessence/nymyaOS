@@ -3,40 +3,16 @@
 #include "nymya.h" // Defines: nymya_qubit, nymya_qpos5d, nymya_qpos5d_k, FIXED_POINT_SCALE, fixed_point_square, NYMYA_E5_PROJECTED_CODE
 
 #ifndef __KERNEL__
-    #include <stdio.h>
-    #include <stdlib.h> // For malloc, free in userland
-    #include <math.h>   // Include math.h for userspace for sqrt and pow
-    #include <unistd.h> // For syscall
-    #include <sys/syscall.h> // For syscall() function prototype
-    #include <errno.h>  // For ENOMEM and other errno values in userland
-#else
-    #include <linux/kernel.h>
-    #include <linux/syscalls.h>
-    #include <linux/uaccess.h>
-    #include <linux/slab.h> // For kmalloc_array, kfree
-    // No math.h for kernel, fixed-point math assumed or implemented via nymya.h
-#endif
-
-#ifndef __KERNEL__
-
-// Define the syscall number for userland, using the code from nymya.h.
-// This is necessary because syscall() expects the __NR_ prefix.
+#include <stdio.h>
+#include <stdlib.h> // For malloc, free
+#include <math.h>   // For sqrt, pow
+#include <unistd.h> // For syscall
+#include <sys/syscall.h>
+#include <errno.h>
 #define __NR_nymya_3360_e5_projected_lattice NYMYA_E5_PROJECTED_CODE
 
-// Forward declarations for userland functions.
-// hadamard, cnot, and log_symbolic_event are assumed to be declared in nymya.h.
-
-
 /**
- * dist5d - Calculates the Euclidean distance between two nymya_qpos5d points (userland version).
- * @a: The first 5D qubit position.
- * @b: The second 5D qubit position.
- *
- * This function computes the standard Euclidean distance between two points
- * in 5D space using floating-point arithmetic.
- *
- * Returns:
- * The distance as a double.
+ * dist5d - Calculates the Euclidean distance between two nymya_qpos5d points (userland).
  */
 double dist5d(nymya_qpos5d a, nymya_qpos5d b) {
     return sqrt(pow(a.x - b.x, 2) +
@@ -47,46 +23,24 @@ double dist5d(nymya_qpos5d a, nymya_qpos5d b) {
 }
 
 /**
- * nymya_3360_e5_projected_lattice - Userland wrapper for the E5 projected lattice syscall.
- * @q: An array of nymya_qpos5d structures, representing qubits with their 5D positions.
- * @count: The number of qubits in the array.
- *
- * This function converts userland double-precision coordinates to kernel-friendly
- * fixed-point representation, invokes the kernel syscall, and then converts
- * the results back to double-precision if the kernel modified positions.
- *
- * Returns:
- * - 0 on success.
- * - -1 if the qubits array is NULL or count is less than 40.
- * - -ENOMEM if memory allocation fails.
- * - Other negative values from the kernel syscall.
+ * nymya_3360_e5_projected_lattice - Userland wrapper for E5 projected lattice syscall.
  */
 int nymya_3360_e5_projected_lattice(nymya_qpos5d q[], size_t count) {
-    // Check for valid input array and minimum count for E5 projected lattice
     if (!q || count < 40) return -1;
-    const double epsilon = 1.05; // Userland epsilon
-
-    // Allocate buffer for fixed-point kernel structures
     nymya_qpos5d_k *buf = malloc(count * sizeof(*buf));
     if (!buf) return -ENOMEM;
-
-    // Scale to fixed-point for kernel
     for (size_t i = 0; i < count; i++) {
-        buf[i].q = q[i].q; // Copy the qubit structure
+        buf[i].q = q[i].q;
         buf[i].x = (int64_t)(q[i].x * FIXED_POINT_SCALE);
         buf[i].y = (int64_t)(q[i].y * FIXED_POINT_SCALE);
         buf[i].z = (int64_t)(q[i].z * FIXED_POINT_SCALE);
         buf[i].w = (int64_t)(q[i].w * FIXED_POINT_SCALE);
         buf[i].v = (int64_t)(q[i].v * FIXED_POINT_SCALE);
     }
-
-    // Perform the syscall directly
     long ret = syscall(__NR_nymya_3360_e5_projected_lattice, (unsigned long)buf, count);
-
     if (ret == 0) {
-        // Rescale back to doubles if kernel modified positions
         for (size_t i = 0; i < count; i++) {
-            q[i].q = buf[i].q; // Copy the qubit structure back
+            q[i].q = buf[i].q;
             q[i].x = (double)buf[i].x / FIXED_POINT_SCALE;
             q[i].y = (double)buf[i].y / FIXED_POINT_SCALE;
             q[i].z = (double)buf[i].z / FIXED_POINT_SCALE;
@@ -94,141 +48,75 @@ int nymya_3360_e5_projected_lattice(nymya_qpos5d q[], size_t count) {
             q[i].v = (double)buf[i].v / FIXED_POINT_SCALE;
         }
     }
-
     free(buf);
     return (int)ret;
 }
 
 #else // __KERNEL__
+#include <linux/kernel.h>
+#include <linux/syscalls.h>
+#include <linux/uaccess.h>
+#include <linux/slab.h>
+#include <linux/module.h>
 
-// External kernel functions for qubit operations and logging.
-// These are assumed to be defined elsewhere in the kernel and linked,
-// and their declarations are now expected to be in nymya.h.
-
-
-/**
- * dist5d_squared_k - Calculates the squared Euclidean distance between two
- * 5D fixed-point positions in kernel space.
- * @a: Pointer to the first 5D fixed-point position (nymya_qpos5d_k).
- * @b: Pointer to the second 5D fixed-point position (nymya_qpos5d_k).
- *
- * This function computes the squared Euclidean distance between two points
- * in 5D space using fixed-point arithmetic directly on the fixed-point coordinates.
- *
- * Returns:
- * The squared distance as an int64_t (fixed-point).
- */
 static int64_t dist5d_squared_k(const nymya_qpos5d_k *a, const nymya_qpos5d_k *b) {
-    // Calculate differences in fixed-point.
-    // The 'x', 'y', 'z', 'w', 'v' members of nymya_qpos5d_k are already fixed-point integers.
     int64_t dx = a->x - b->x;
     int64_t dy = a->y - b->y;
     int64_t dz = a->z - b->z;
     int64_t dw = a->w - b->w;
     int64_t dv = a->v - b->v;
-
-    // Calculate squared differences in fixed-point using fixed_point_square from nymya.h
-    int64_t dx_sq = fixed_point_square(dx);
-    int64_t dy_sq = fixed_point_square(dy);
-    int64_t dz_sq = fixed_point_square(dz);
-    int64_t dw_sq = fixed_point_square(dw);
-    int64_t dv_sq = fixed_point_square(dv);
-
-    // Sum the squared differences.
-    return dx_sq + dy_sq + dz_sq + dw_sq + dv_sq;
+    return fixed_point_square(dx) +
+           fixed_point_square(dy) +
+           fixed_point_square(dz) +
+           fixed_point_square(dw) +
+           fixed_point_square(dv);
 }
 
 /**
- * nymya_3360_e5_projected_lattice - Applies quantum operations on qubits in an E5 projected lattice (kernel version).
- * @user_ptr: Userland pointer to an array of nymya_qpos5d_k structures.
- * @count: The number of qubits in the array.
- *
- * This system call simulates quantum operations on qubits arranged in a 5D projection
- * of an E5 lattice structure. It copies qubit data from user space to kernel space
- * (converting to fixed-point if necessary, handled by userland wrapper),
- * applies Hadamard gates to each qubit, and then applies CNOT gates between qubits
- * that are within a certain interaction distance (using fixed-point squared distance).
- * Finally, it copies the modified qubit data back to user space.
- *
- * Returns:
- * - 0 on success.
- * - -EINVAL if user_ptr is NULL or count is less than 40.
- * - -ENOMEM if kernel memory allocation fails.
- * - -EFAULT if copying data between user and kernel space fails.
+ * nymya_3360_e5_projected_lattice_core - Kernel core logic for E5 projected lattice.
  */
-SYSCALL_DEFINE2(nymya_3360_e5_projected_lattice,
-    unsigned long, user_ptr, // Changed to unsigned long to match syscall signature
-    size_t, count) {
-
-    int ret = 0; // Return value for syscall
-    nymya_qpos5d_k *k_q = NULL; // Kernel-space copy of qubits (fixed-point)
-    nymya_qpos5d_k __user *u_q = (nymya_qpos5d_k __user *)user_ptr; // Cast user_ptr
-
-    // 1. Validate input arguments
-    if (!u_q || count < 40) {
-        pr_err("nymya_3360_e5_projected_lattice: Invalid user_ptr or count (%zu < 40)\n", count);
-        return -EINVAL;
-    }
-
-    // 2. Allocate kernel memory for qubit data
-    k_q = kmalloc_array(count, sizeof(nymya_qpos5d_k), GFP_KERNEL); // Allocate for fixed-point type
-    if (!k_q) {
-        pr_err("nymya_3360_e5_projected_lattice: Failed to allocate kernel memory for qubits\n");
-        return -ENOMEM;
-    }
-
-    // 3. Copy qubit data from user space to kernel space
-    if (copy_from_user(k_q, u_q, count * sizeof(nymya_qpos5d_k))) { // Copy fixed-point type
-        pr_err("nymya_3360_e5_projected_lattice: Failed to copy qubits from user space\n");
-        ret = -EFAULT;
-        goto free_k_q; // Jump to cleanup
-    }
-
-    // Define the squared epsilon for fixed-point comparison
-    // (1.05)^2 = 1.1025. Convert this to fixed-point.
-    const int64_t EPSILON_FP = (int64_t)(1.05 * FIXED_POINT_SCALE);
-    const int64_t fixed_epsilon_squared = fixed_point_square(EPSILON_FP);
-
-    // 4. Apply Hadamard gate to each qubit
+int nymya_3360_e5_projected_lattice_core(nymya_qpos5d_k *k_q, size_t count) {
+    int ret;
+    const int64_t EPS_FP = (int64_t)(1.05 * FIXED_POINT_SCALE);
+    const int64_t EPS2 = fixed_point_square(EPS_FP);
     for (size_t i = 0; i < count; i++) {
-        // Pass the address of the nymya_qubit struct to the hadamard function
-        ret = hadamard(&k_q[i].q); // Assuming hadamard returns int
-        if (ret) {
-            pr_err("nymya_3360_e5_projected_lattice: Hadamard gate failed for qubit %llu\n", k_q[i].q.id);
-            goto free_k_q;
-        }
+        ret = hadamard(&k_q[i].q);
+        if (ret) return ret;
     }
-
-    // 5. Apply CNOT gates between neighboring qubits based on fixed-point squared distance
     for (size_t i = 0; i < count; i++) {
         for (size_t j = i + 1; j < count; j++) {
-            // Calculate squared distance in fixed-point
-            if (dist5d_squared_k(&k_q[i], &k_q[j]) <= fixed_epsilon_squared) {
-                // Apply CNOT gate, passing addresses of the qubit structs
-                ret = cnot(&k_q[i].q, &k_q[j].q); // Assuming cnot returns int
-                if (ret) {
-                    pr_err("nymya_3360_e5_projected_lattice: CNOT gate failed between qubits %llu and %llu\n",
-                           k_q[i].q.id, k_q[j].q.id);
-                    goto free_k_q;
-                }
+            if (dist5d_squared_k(&k_q[i], &k_q[j]) <= EPS2) {
+                ret = cnot(&k_q[i].q, &k_q[j].q);
+                if (ret) return ret;
             }
         }
     }
-
-    // 6. Log the symbolic event for the E5 projected lattice entanglement
     log_symbolic_event("E5_PROJECTED", k_q[0].q.id, k_q[0].q.tag,
-        "Projected E5 root lattice entanglement");
+                       "Projected E5 root lattice entanglement");
+    return 0;
+}
+EXPORT_SYMBOL_GPL(nymya_3360_e5_projected_lattice_core);
 
-    // 7. Copy the modified qubits back to user space
-    if (copy_to_user(u_q, k_q, count * sizeof(nymya_qpos5d_k))) { // Copy fixed-point type
-        pr_err("nymya_3360_e5_projected_lattice: Failed to copy qubits to user space\n");
+SYSCALL_DEFINE2(nymya_3360_e5_projected_lattice,
+    unsigned long, user_ptr,
+    size_t, count) {
+
+    nymya_qpos5d_k *k_q;
+    nymya_qpos5d_k __user *u_q = (nymya_qpos5d_k __user *)user_ptr;
+    int ret;
+
+    if (!u_q || count < 40)
+        return -EINVAL;
+    k_q = kmalloc_array(count, sizeof(*k_q), GFP_KERNEL);
+    if (!k_q)
+        return -ENOMEM;
+    if (copy_from_user(k_q, u_q, count * sizeof(*k_q))) { ret = -EFAULT; goto out; }
+    ret = nymya_3360_e5_projected_lattice_core(k_q, count);
+    if (!ret && copy_to_user(u_q, k_q, count * sizeof(*k_q)))
         ret = -EFAULT;
-    }
-
-free_k_q:
-    kfree(k_q); // Free allocated kernel memory
+out:
+    kfree(k_q);
     return ret;
 }
-
 #endif
 

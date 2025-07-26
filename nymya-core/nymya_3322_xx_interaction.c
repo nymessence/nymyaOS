@@ -17,6 +17,7 @@
     #include <linux/syscalls.h>
     #include <linux/uaccess.h>
     #include <linux/errno.h>
+    #include <linux/module.h> // Required for EXPORT_SYMBOL_GPL
 #endif
 
 /**
@@ -58,7 +59,56 @@ int nymya_3322_xx_interaction(nymya_qubit* q1, nymya_qubit* q2, double theta) {
     return 0;  // Return success
 }
 
-#else
+#else // __KERNEL__
+
+/**
+ * nymya_3322_xx_interaction - Core kernel function to apply an XX interaction.
+ * @kq1: Pointer to the first qubit struct in kernel space.
+ * @kq2: Pointer to the second qubit struct in kernel space.
+ * @theta: Rotation angle in radians (fixed-point representation).
+ *
+ * This function implements the core logic for the XX interaction between two qubits.
+ * It calculates the e^(i * theta) phase using fixed-point trigonometric functions
+ * and applies this phase to the complex amplitudes of both qubits. The amplitudes
+ * are updated directly within the provided kernel-space qubit structs.
+ * A symbolic event is logged to record the interaction.
+ *
+ * Returns:
+ * - 0 on success.
+ * - Negative error code on failure (currently always returns 0 for valid inputs).
+ */
+int nymya_3322_xx_interaction(struct nymya_qubit *kq1, struct nymya_qubit *kq2, int64_t theta) {
+    // Calculate the fixed-point cos and sin values for the phase
+    int64_t cos_val = fixed_cos(theta);  // Real part of the phase
+    int64_t sin_val = fixed_sin(theta);  // Imaginary part of the phase
+
+    // Calculate the real and imaginary components for the phase
+    int64_t real_phase = cos_val;  // Real part
+    int64_t imag_phase = sin_val;  // Imaginary part
+
+    // Apply the XX interaction phase to the first qubit's amplitude
+    // (A + Bi) * (C + Di) = (AC - BD) + (AD + BC)i
+    int64_t new_re1 = (kq1->amplitude.re * real_phase - kq1->amplitude.im * imag_phase);
+    int64_t new_im1 = (kq1->amplitude.re * imag_phase + kq1->amplitude.im * real_phase);
+
+    // Apply the XX interaction phase to the second qubit's amplitude
+    int64_t new_re2 = (kq2->amplitude.re * real_phase - kq2->amplitude.im * imag_phase);
+    int64_t new_im2 = (kq2->amplitude.re * imag_phase + kq2->amplitude.im * real_phase);
+
+    // Update the amplitudes for both qubits
+    kq1->amplitude.re = new_re1;
+    kq1->amplitude.im = new_im1;
+
+    kq2->amplitude.re = new_re2;
+    kq2->amplitude.im = new_im2;
+
+    // Log the symbolic event indicating the XX interaction has been applied
+    log_symbolic_event("XX", kq1->id, kq1->tag, "Applied XX interaction with partner");
+
+    return 0; // Success
+}
+EXPORT_SYMBOL_GPL(nymya_3322_xx_interaction);
+
 
 /**
  * SYSCALL_DEFINE3(nymya_3322_xx_interaction) - Kernel syscall for XX interaction between two qubits.
@@ -88,6 +138,7 @@ SYSCALL_DEFINE3(nymya_3322_xx_interaction,
     int64_t, theta) {
 
     struct nymya_qubit k_q1, k_q2;  // Kernel space qubits
+    int ret;
 
     // Validate the user-space pointers
     if (!user_q1 || !user_q2)
@@ -100,31 +151,10 @@ SYSCALL_DEFINE3(nymya_3322_xx_interaction,
     if (copy_from_user(&k_q2, user_q2, sizeof(k_q2)))
         return -EFAULT;  // Return error if memory copy fails
 
-    // Calculate the fixed-point cos and sin values for the phase
-    int64_t cos_val = fixed_cos(theta);  // Real part of the phase
-    int64_t sin_val = fixed_sin(theta);  // Imaginary part of the phase
-
-    // Calculate the real and imaginary components for the phase
-    int64_t real_phase = cos_val;  // Real part
-    int64_t imag_phase = sin_val;  // Imaginary part
-
-    // Apply the XX interaction phase to the first qubit's amplitude
-    int64_t new_re1 = k_q1.amplitude.re * real_phase - k_q1.amplitude.im * imag_phase;
-    int64_t new_im1 = k_q1.amplitude.re * imag_phase + k_q1.amplitude.im * real_phase;
-
-    // Apply the XX interaction phase to the second qubit's amplitude
-    int64_t new_re2 = k_q2.amplitude.re * real_phase - k_q2.amplitude.im * imag_phase;
-    int64_t new_im2 = k_q2.amplitude.re * imag_phase + k_q2.amplitude.im * real_phase;
-
-    // Update the amplitudes for both qubits
-    k_q1.amplitude.re = new_re1;
-    k_q1.amplitude.im = new_im1;
-
-    k_q2.amplitude.re = new_re2;
-    k_q2.amplitude.im = new_im2;
-
-    // Log the symbolic event indicating the XX interaction has been applied
-    log_symbolic_event("XX", k_q1.id, k_q1.tag, "Applied XX interaction with partner");
+    // Call the newly created core function with kernel-space variables
+    ret = nymya_3322_xx_interaction(&k_q1, &k_q2, theta);
+    if (ret)
+        return ret; // Propagate error from core function, if any
 
     // Copy the modified qubits back to user space
     if (copy_to_user(user_q1, &k_q1, sizeof(k_q1)))
@@ -136,4 +166,3 @@ SYSCALL_DEFINE3(nymya_3322_xx_interaction,
 }
 
 #endif
-

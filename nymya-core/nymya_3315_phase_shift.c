@@ -18,6 +18,7 @@
     #include <linux/syscalls.h>
     #include <linux/uaccess.h>
     #include <linux/errno.h>
+    #include <linux/module.h> // Required for EXPORT_SYMBOL_GPL
 #endif
 
 /**
@@ -46,6 +47,37 @@ int nymya_3315_phase_shift(nymya_qubit* q, double theta)
 #else
 
 /**
+ * nymya_3315_phase_shift - Applies a variable phase shift to a kernel-space qubit's amplitude.
+ * @kq: Pointer to the kernel-space target nymya_qubit struct.
+ * @theta_fixed: Phase shift angle in Q32.32 fixed-point format (int64_t).
+ *
+ * This function encapsulates the core logic for the phase shift operation
+ * within the kernel. It computes the fixed-point cosine and sine of the
+ * given angle, constructs a fixed-point complex phase factor, multiplies
+ * the qubit's amplitude by this factor, and logs the operation.
+ *
+ * Returns:
+ *   0 on success.
+ */
+int nymya_3315_phase_shift(struct nymya_qubit *kq, int64_t theta_fixed)
+{
+    complex_double phase;
+
+    /* Build the fixed-point phase factor using Q32.32 fixed-point trig */
+    phase.re = fixed_cos(theta_fixed);
+    phase.im = fixed_sin(theta_fixed);
+
+    /* Multiply amplitude by phase factor in fixed-point */
+    kq->amplitude = complex_mul(kq->amplitude, phase);
+
+    /* Log the event */
+    log_symbolic_event("PHASE_SHIFT", kq->id, kq->tag, "Applied variable phase shift");
+
+    return 0; // Currently, this function does not have an explicit failure mode.
+}
+EXPORT_SYMBOL_GPL(nymya_3315_phase_shift);
+
+/**
  * SYSCALL_DEFINE2(nymya_3315_phase_shift) - Kernel syscall to apply a phase shift.
  * @user_q: User-space pointer to the nymya_qubit struct.
  * @theta_fixed: Phase shift angle in Q32.32 fixed-point format (int64_t).
@@ -65,27 +97,24 @@ SYSCALL_DEFINE2(nymya_3315_phase_shift,
                int64_t, theta_fixed)
 {
     struct nymya_qubit k_q;
-    complex_double phase;
+    int ret;
 
     /* Validate user pointer */
     if (!user_q)
         return -EINVAL;
 
-    /* Copy in the qubit struct */
+    /* Copy in the qubit struct from user space */
     if (copy_from_user(&k_q, user_q, sizeof(k_q)))
         return -EFAULT;
 
-    /* Build the fixed-point phase factor using Q32.32 fixed-point trig */
-    phase.re = fixed_cos(theta_fixed);
-    phase.im = fixed_sin(theta_fixed);
+    /* Call the newly extracted core logic function with kernel-space variables */
+    ret = nymya_3315_phase_shift(&k_q, theta_fixed);
+    if (ret) {
+        /* Propagate error from the core function if it ever fails */
+        return ret;
+    }
 
-    /* Multiply amplitude by phase factor in fixed-point */
-    k_q.amplitude = complex_mul(k_q.amplitude, phase);
-
-    /* Log the event */
-    log_symbolic_event("PHASE_SHIFT", k_q.id, k_q.tag, "Applied variable phase shift");
-
-    /* Copy back to user space */
+    /* Copy back the modified qubit struct to user space */
     if (copy_to_user(user_q, &k_q, sizeof(k_q)))
         return -EFAULT;
 
@@ -93,4 +122,3 @@ SYSCALL_DEFINE2(nymya_3315_phase_shift,
 }
 
 #endif
-

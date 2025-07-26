@@ -105,8 +105,11 @@ int nymya_3321_rotate_z(struct nymya_qubit *q, int64_t theta_fp) {
     log_symbolic_event("ROT_Z", q->id, q->tag, "Applied Z-axis rotation");
     return 0;
 }
-// Export the symbol for this function so other kernel modules/code can call it directly.
 EXPORT_SYMBOL_GPL(nymya_3321_rotate_z);
+
+
+
+// Export the symbol for this function so other kernel modules/code can call it directly.
 
 
 /**

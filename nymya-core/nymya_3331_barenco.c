@@ -20,6 +20,7 @@
     #include <linux/errno.h>
     #include <linux/types.h> // For __int128 or other kernel types
     #include <linux/slab.h> // For kmalloc_array if needed by other functions
+    #include <linux/module.h> // Required for EXPORT_SYMBOL_GPL
 #endif
 
 #ifndef __KERNEL__
@@ -65,21 +66,25 @@ int nymya_3331_barenco(nymya_qubit* q1, nymya_qubit* q2, nymya_qubit* q3) {
 // For the purpose of this fix, we assume they are available and correctly implemented.
 
 /**
- * nymya_3331_barenco_kernel - Applies a Barenco gate to three qubits (kernel-space helper).
+ * nymya_3331_barenco - Applies a Barenco gate to three qubits (kernel-space core logic).
  * @q1: Pointer to the first control qubit (kernel space).
  * @q2: Pointer to the second control qubit (kernel space).
  * @q3: Pointer to the third target qubit (kernel space).
  *
- * This function implements the Barenco gate logic by calling kernel-space
- * versions of Hadamard, CNOT, and Phase gates.
+ * This function encapsulates the core logic for applying the Barenco gate by
+ * calling kernel-space versions of Hadamard, CNOT, and Phase gates.
  *
  * Returns:
  * - 0 on success.
- * - -1 if any qubit pointer is NULL, or if a sub-gate fails.
+ * - -EINVAL if any qubit pointer is NULL.
+ * - Error code from underlying gate operations if they fail.
  */
-static int nymya_3331_barenco_kernel(nymya_qubit* q1, nymya_qubit* q2, nymya_qubit* q3) {
+int nymya_3331_barenco(nymya_qubit* q1, nymya_qubit* q2, nymya_qubit* q3) {
     int ret = 0;
-    if (!q1 || !q2 || !q3) return -1;
+    if (!q1 || !q2 || !q3) {
+        pr_err("nymya_3331_barenco: NULL qubit pointer passed to kernel core function\n");
+        return -EINVAL; // More specific kernel error
+    }
 
     // Call kernel-space versions of the sub-gates
     // These functions must exist and be callable from kernel context.
@@ -97,6 +102,7 @@ static int nymya_3331_barenco_kernel(nymya_qubit* q1, nymya_qubit* q2, nymya_qub
 
     return 0;
 }
+EXPORT_SYMBOL_GPL(nymya_3331_barenco);
 
 
 /**
@@ -106,7 +112,8 @@ static int nymya_3331_barenco_kernel(nymya_qubit* q1, nymya_qubit* q2, nymya_qub
  * @user_q3: User-space pointer to the target qubit.
  *
  * This syscall copies qubit data from user space, applies the Barenco gate
- * using kernel-space helper functions, and then copies the modified data back.
+ * using the shared kernel-space core function, and then copies the modified
+ * data back.
  *
  * Returns:
  * - 0 on success.
@@ -142,8 +149,8 @@ SYSCALL_DEFINE3(nymya_3331_barenco,
         return -EFAULT;
     }
 
-    // 3. Apply the Barenco gate using the kernel-space helper
-    ret = nymya_3331_barenco_kernel(&k_q1, &k_q2, &k_q3);
+    // 3. Apply the Barenco gate using the kernel-space core function
+    ret = nymya_3331_barenco(&k_q1, &k_q2, &k_q3);
 
     // 4. Log event and copy data back to user space if successful
     if (ret == 0) {
@@ -163,4 +170,3 @@ SYSCALL_DEFINE3(nymya_3331_barenco,
 }
 
 #endif
-

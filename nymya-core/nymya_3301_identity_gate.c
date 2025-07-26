@@ -3,6 +3,8 @@
 #include "nymya.h"
 
 #ifdef __KERNEL__
+    #include <linux/module.h>
+
 #include <linux/kernel.h>
 #include <linux/syscalls.h>
 #include <linux/uaccess.h>
@@ -59,5 +61,9 @@ int nymya_3301_identity_gate(nymya_qubit* q)
     log_symbolic_event("ID_GATE", q->id, q->tag, "State preserved");
     return 0;
 }
+EXPORT_SYMBOL_GPL(nymya_3301_identity_gate);
+
+
+
 #endif
 

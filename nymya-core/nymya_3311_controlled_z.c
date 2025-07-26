@@ -102,8 +102,11 @@ int nymya_3311_controlled_z(struct nymya_qubit *k_ctrl, struct nymya_qubit *k_ta
 
     return 0;
 }
-// Export the symbol for this function so other kernel modules/code can call it directly.
 EXPORT_SYMBOL_GPL(nymya_3311_controlled_z);
+
+
+
+// Export the symbol for this function so other kernel modules/code can call it directly.
 
 
 /**

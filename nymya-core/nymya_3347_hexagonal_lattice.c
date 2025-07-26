@@ -27,6 +27,7 @@
     #include <linux/errno.h>    // Kernel: For error codes like -EINVAL, -EFAULT
     #include <linux/printk.h>   // Kernel: For pr_err
     #include <linux/slab.h>     // Kernel: For kmalloc, kfree
+    #include <linux/module.h> // Required for EXPORT_SYMBOL_GPL
 #endif
 
 #ifndef __KERNEL__
@@ -69,6 +70,49 @@ int nymya_3347_hexagonal_lattice(nymya_qubit* q[6]) {
 #else // __KERNEL__
 
 /**
+ * @brief Applies hexagonal lattice operations to an array of six kernel-space qubits.
+ *
+ * This function encapsulates the core quantum gate logic for the hexagonal lattice
+ * operation. It applies Hadamard gates to each qubit, followed by cyclic CNOT
+ * gates between adjacent qubits (q[i] to q[(i+1)%6]).
+ *
+ * @param k_qubits An array of pointers to six kernel-space nymya_qubit structures.
+ *                 These structures are expected to be valid and allocated.
+ * @return 0 on success, or a negative kernel error code if any underlying gate
+ *         operation fails (e.g., from nymya_3308_hadamard_gate or nymya_3309_controlled_not).
+ */
+int nymya_3347_hexagonal_lattice(struct nymya_qubit *k_qubits[6]) {
+    int ret = 0;
+    int i;
+
+    // Apply Hadamard gate to each qubit
+    for (i = 0; i < 6; i++) {
+        ret = nymya_3308_hadamard_gate(k_qubits[i]);
+        if (ret) {
+            pr_err("nymya_3347_hexagonal_lattice: Hadamard on q[%d] failed, error %d\n", i, ret);
+            return ret;
+        }
+    }
+
+    // Apply CNOT gates between adjacent qubits in a cyclic manner
+    for (i = 0; i < 6; i++) {
+        ret = nymya_3309_controlled_not(k_qubits[i], k_qubits[(i + 1) % 6]);
+        if (ret) {
+            pr_err("nymya_3347_hexagonal_lattice: CNOT(q[%d], q[%d]) failed, error %d\n", i, (i + 1) % 6, ret);
+            return ret;
+        }
+    }
+
+    // Log the symbolic event for traceability
+    // Using the ID and tag of the first qubit for logging purposes.
+    log_symbolic_event("HEX_LATTICE", k_qubits[0]->id, k_qubits[0]->tag, "Hexagonal ring lattice formed");
+
+    return 0;
+}
+
+EXPORT_SYMBOL_GPL(nymya_3347_hexagonal_lattice); // Export the core function
+
+/**
  * SYSCALL_DEFINE1(nymya_3347_hexagonal_lattice) - Kernel syscall for hexagonal lattice operation.
  * @user_q_array: User-space pointer to an array of 6 user-space qubit pointers.
  * (i.e., `struct nymya_qubit __user *[6]`)
@@ -83,7 +127,7 @@ int nymya_3347_hexagonal_lattice(nymya_qubit* q[6]) {
  * - -EINVAL if the user_q_array pointer is NULL or any individual user qubit pointer is NULL.
  * - -EFAULT if copying data to/from user space fails for any qubit or pointer.
  * - -ENOMEM if kernel memory allocation fails.
- * - Error code from underlying gate operations (e.g., nymya_3308_hadamard_gate).
+ * - Error code from underlying gate operations (now propagated from nymya_3347_hexagonal_lattice).
  */
 SYSCALL_DEFINE1(nymya_3347_hexagonal_lattice,
     struct nymya_qubit __user * __user *, user_q_array) {
@@ -137,35 +181,23 @@ SYSCALL_DEFINE1(nymya_3347_hexagonal_lattice,
         }
     }
 
-    // 4. Apply the hexagonal lattice logic for kernel space
-    // Apply Hadamard gate to each qubit
-    for (i = 0; i < 6; i++) {
-        ret = nymya_3308_hadamard_gate(k_qubits[i]);
-        if (ret) {
-            pr_err("nymya_3347_hexagonal_lattice: Hadamard on q[%d] failed, error %d\n", i, ret);
-            goto cleanup_k_qubits; // Jump to cleanup allocated memory
-        }
+    // Call the newly extracted core logic function
+    ret = nymya_3347_hexagonal_lattice(k_qubits);
+    if (ret) {
+        // Error from core logic, propagate it
+        goto cleanup_k_qubits;
     }
-
-    // Apply CNOT gates between adjacent qubits in a cyclic manner
-    for (i = 0; i < 6; i++) {
-        ret = nymya_3309_controlled_not(k_qubits[i], k_qubits[(i + 1) % 6]);
-        if (ret) {
-            pr_err("nymya_3347_hexagonal_lattice: CNOT(q[%d], q[%d]) failed, error %d\n", i, (i + 1) % 6, ret);
-            goto cleanup_k_qubits; // Jump to cleanup allocated memory
-        }
-    }
-
-    // 5. Log the symbolic event for traceability
-    // Using the ID and tag of the first qubit for logging purposes.
-    log_symbolic_event("HEX_LATTICE", k_qubits[0]->id, k_qubits[0]->tag, "Hexagonal ring lattice formed");
 
     // 6. Copy the modified qubits back to user space
     // All six qubits can be modified, so all should be copied back.
     for (i = 0; i < 6; i++) {
         if (copy_to_user(user_qubit_ptrs[i], k_qubits[i], sizeof(struct nymya_qubit))) {
             pr_err("nymya_3347_hexagonal_lattice: Failed to copy k_qubit[%d] to user\n", i);
-            ret = -EFAULT; // Bad address, but continue to free memory
+            // If previous ret was 0 (success), set it to -EFAULT.
+            // If it was already an error from the core logic, we keep that error.
+            if (ret == 0) {
+                ret = -EFAULT;
+            }
         }
     }
 
@@ -182,4 +214,3 @@ cleanup_k_qubits:
 }
 
 #endif
-

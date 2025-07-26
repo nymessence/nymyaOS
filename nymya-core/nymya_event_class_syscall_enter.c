@@ -28,6 +28,10 @@
         pr_info("NYMYA_SYSCALL_ENTER: SyscallID=%llu, QubitID=%llu\n", syscall_id, qubit_id);
         return 0;
     }
+EXPORT_SYMBOL_GPL(event_class_syscall_enter);
+
+
+
     // Export the symbol so other kernel modules/code can call it directly.
     EXPORT_SYMBOL_GPL(event_class_syscall_enter);
 

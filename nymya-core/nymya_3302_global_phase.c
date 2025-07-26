@@ -83,6 +83,7 @@ int nymya_3302_global_phase(struct nymya_qubit *q, int64_t theta_fixed) {
     // log_symbolic_event will be called in the syscall wrapper with formatted message
     return 0;
 }
+
 // Export the symbol for this function so other kernel modules/code can call it directly.
 EXPORT_SYMBOL_GPL(nymya_3302_global_phase);
 

@@ -28,6 +28,7 @@
     #include <linux/uaccess.h>  // Kernel: For copy_from_user, copy_to_user
     #include <linux/errno.h>    // Kernel: For error codes like -EINVAL, -EFAULT
     #include <linux/printk.h>   // Kernel: For pr_err
+    #include <linux/module.h>   // Kernel: For EXPORT_SYMBOL_GPL
     // No math.h or complex.h in kernel; fixed-point math assumed for amplitude operations
 #endif
 
@@ -61,6 +62,51 @@ int nymya_3344_peres(nymya_qubit* q1, nymya_qubit* q2, nymya_qubit* q3) {
 }
 
 #else // __KERNEL__
+
+/**
+ * nymya_3344_peres_kernel_logic - Applies the Peres gate to three qubits (kernel-space core logic).
+ * @q1: Pointer to the first qubit (often a control for the CNOT).
+ * @q2: Pointer to the second qubit (often a control for the Margolis/Toffoli part).
+ * @q3: Pointer to the third qubit (often the target for both CNOT and Margolis/Toffoli).
+ *
+ * This function implements the Peres gate using a decomposition into kernel-level
+ * CNOT and Margolis (Controlled-Controlled-NOT/Toffoli-like) gates.
+ * Specifically, it applies CNOT(q1, q3) and then Margolis(q1, q2, q3).
+ *
+ * This function operates on kernel-space qubit structures and is intended to be
+ * called by the `nymya_3344_peres` syscall implementation after copying data
+ * from user space.
+ *
+ * Returns:
+ * - 0 on success.
+ * - Error code from underlying gate operations (e.g., nymya_3309_controlled_not).
+ */
+int nymya_3344_peres_kernel_logic(struct nymya_qubit *q1,
+                                  struct nymya_qubit *q2,
+                                  struct nymya_qubit *q3)
+{
+    int ret = 0;
+
+    // Apply the Peres gate logic for kernel space
+    ret = nymya_3309_controlled_not(q1, q3); // CNOT with q1 as control, q3 as target
+    if (ret) {
+        pr_err("nymya_3344_peres_kernel_logic: CNOT failed, error %d\n", ret);
+        return ret;
+    }
+
+    ret = nymya_3343_margolis(q1, q2, q3); // Margolis with q1, q2 as controls, q3 as target
+    if (ret) {
+        pr_err("nymya_3344_peres_kernel_logic: Margolis failed, error %d\n", ret);
+        return ret;
+    }
+
+    // Log the symbolic event for traceability
+    log_symbolic_event("PERES", q1->id, q1->tag, "Peres gate applied");
+
+    return 0;
+}
+EXPORT_SYMBOL_GPL(nymya_3344_peres_kernel_logic);
+
 
 /**
  * SYSCALL_DEFINE3(nymya_3344_peres) - Kernel syscall for Peres gate.
@@ -107,22 +153,12 @@ SYSCALL_DEFINE3(nymya_3344_peres,
         return -EFAULT; // Bad address
     }
 
-    // 3. Apply the Peres gate logic for kernel space
-    // Call the kernel versions of the gates
-    ret = nymya_3309_controlled_not(&k_q1, &k_q3); // CNOT with k_q1 as control, k_q3 as target
+    // 3. Apply the Peres gate logic for kernel space using the new helper function
+    ret = nymya_3344_peres_kernel_logic(&k_q1, &k_q2, &k_q3);
     if (ret) {
-        pr_err("nymya_3344_peres: CNOT failed, error %d\n", ret);
+        pr_err("nymya_3344_peres: Core logic failed, error %d\n", ret);
         return ret;
     }
-
-    ret = nymya_3343_margolis(&k_q1, &k_q2, &k_q3); // Margolis with k_q1, k_q2 as controls, k_q3 as target
-    if (ret) {
-        pr_err("nymya_3344_peres: Margolis failed, error %d\n", ret);
-        return ret;
-    }
-
-    // 4. Log the symbolic event for traceability
-    log_symbolic_event("PERES", k_q1.id, k_q1.tag, "Peres gate applied");
 
     // 5. Copy the modified qubits back to user space
     // Note: All three qubits can be modified by the composite gate, so all should be copied back.
@@ -143,4 +179,3 @@ SYSCALL_DEFINE3(nymya_3344_peres,
 }
 
 #endif
-

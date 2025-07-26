@@ -120,8 +120,11 @@ int nymya_3319_rotate_x(struct nymya_qubit *q, int64_t theta_fp) {
     log_symbolic_event("ROT_X", q->id, q->tag, "Applied X-axis rotation");
     return 0;
 }
-// Export the symbol for this function so other kernel modules/code can call it directly.
 EXPORT_SYMBOL_GPL(nymya_3319_rotate_x);
+
+
+
+// Export the symbol for this function so other kernel modules/code can call it directly.
 
 
 /*

@@ -25,6 +25,10 @@
         pr_info("NYMYA_SYSCALL_EXIT: SyscallID=%llu, ReturnCode=%d\n", syscall_id, return_code);
         return 0;
     }
+EXPORT_SYMBOL_GPL(event_class_syscall_exit);
+
+
+
     // Export the symbol so other kernel modules/code can call it directly.
     EXPORT_SYMBOL_GPL(event_class_syscall_exit);
 

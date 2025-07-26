@@ -113,8 +113,11 @@ int nymya_3327_sqrt_iswap(struct nymya_qubit *q1, struct nymya_qubit *q2) {
 
     return 0; // Success
 }
-// Export the symbol for this function so other kernel modules/code can call it directly.
 EXPORT_SYMBOL_GPL(nymya_3327_sqrt_iswap);
+
+
+
+// Export the symbol for this function so other kernel modules/code can call it directly.
 
 
 /**
