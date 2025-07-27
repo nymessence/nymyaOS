@@ -69,6 +69,13 @@ int nymya_3352_e8_group(nymya_qubit* q[8]) {
 }
 EXPORT_SYMBOL_GPL(nymya_3352_e8_group);
 
+/**
+ * SYSCALL_DEFINE1 - Kernel entry point for syscall
+ * @user_q: User-space array of 8 pointers to nymya_qubit
+ *
+ * This syscall copies the array of qubit pointers and each qubit struct
+ * into kernel space, runs the entanglement logic, then copies them back.
+ */
 SYSCALL_DEFINE1(nymya_3352_e8_group,
     nymya_qubit* __user *, user_q)
 {
@@ -92,11 +99,12 @@ SYSCALL_DEFINE1(nymya_3352_e8_group,
 
     // Copy back modified qubits
     for (int i = 0; i < 8; i++) {
-        copy_to_user(k_q[i], &k_q[i][0], sizeof(nymya_qubit));
+        if (copy_to_user(k_q[i], &k_q[i][0], sizeof(nymya_qubit)))
+            return -EFAULT;
     }
 
     return ret;
 }
 
-#endif // __KERNEL__ // __KERNEL__
+#endif // __KERNEL__
 

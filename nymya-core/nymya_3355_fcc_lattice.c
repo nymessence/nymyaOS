@@ -55,6 +55,9 @@ int nymya_3355_fcc_lattice(nymya_qpos3d qubits[], size_t count) {
 }
 
 #else // __KERNEL__
+    int nymya_3355_fcc_lattice_core(nymya_qpos3d_k *k_qubits, size_t count);
+
+
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/syscalls.h>
@@ -143,4 +146,3 @@ out:
 }
 
 #endif // __KERNEL__
-

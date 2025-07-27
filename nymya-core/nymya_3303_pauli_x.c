@@ -2,10 +2,9 @@
 
 #ifdef __KERNEL__
     #include <linux/module.h>
-
-#include <linux/kernel.h>
-#include <linux/syscalls.h>
-#include <linux/uaccess.h>
+    #include <linux/kernel.h>
+    #include <linux/syscalls.h>
+    #include <linux/uaccess.h>
 
 /*
  * Flip imaginary part sign in fixed-point amplitude
@@ -33,6 +32,9 @@ SYSCALL_DEFINE1(nymya_3303_pauli_x, struct nymya_qubit __user *, user_q) {
     return 0;
 }
 
+// Export the symbol for use by other kernel modules/code
+EXPORT_SYMBOL_GPL(nymya_3303_pauli_x);
+
 #else
 
 #include <stdio.h>
@@ -46,6 +48,15 @@ static inline void flip_imag_part(nymya_qubit *q) {
     q->amplitude = make_complex(re, -im);
 }
 
+/*
+ * Userland implementation of the Pauli-X gate
+ * @q: pointer to symbolic qubit
+ *
+ * Flips the sign of the imaginary part of the amplitude.
+ * Logs the symbolic event with qubit ID and tag.
+ *
+ * Returns 0 on success, -1 if input is null.
+ */
 int nymya_3303_pauli_x(nymya_qubit *q) {
     if (!q) return -1;
 
@@ -54,10 +65,6 @@ int nymya_3303_pauli_x(nymya_qubit *q) {
     log_symbolic_event("PAULI_X", q->id, q->tag, "Polarity flipped");
     return 0;
 }
-EXPORT_SYMBOL_GPL(nymya_3303_pauli_x);
-
-
-
 
 #endif
 

@@ -12,6 +12,9 @@
     #include <stdio.h>
     #include <stdlib.h>
 #else
+    int nymya_3305_pauli_z_core(struct nymya_qubit *kq);
+
+
     #include <linux/kernel.h>
     #include <linux/syscalls.h>
     #include <linux/uaccess.h>

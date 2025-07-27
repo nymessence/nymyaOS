@@ -14,6 +14,9 @@
     #include <math.h>
     #include <complex.h>
 #else
+    int nymya_3318_controlled_phase_s_core(struct nymya_qubit *k_qc, struct nymya_qubit *k_qt);
+
+
     #include <linux/kernel.h>
     #include <linux/syscalls.h>
     #include <linux/uaccess.h>

@@ -13,6 +13,9 @@
     #include <stdlib.h>
     #include <complex.h>
 #else
+    int nymya_3312_double_controlled_not_core(struct nymya_qubit *qc1, struct nymya_qubit *qc2, struct nymya_qubit *qt);
+
+
     #include <linux/kernel.h>
     #include <linux/syscalls.h>
     #include <linux/uaccess.h>

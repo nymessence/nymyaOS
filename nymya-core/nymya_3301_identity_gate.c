@@ -3,8 +3,8 @@
 #include "nymya.h"
 
 #ifdef __KERNEL__
-    #include <linux/module.h>
 
+#include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/syscalls.h>
 #include <linux/uaccess.h>
@@ -38,7 +38,12 @@ SYSCALL_DEFINE1(nymya_3301_identity_gate, struct nymya_qubit __user *, user_q)
     return 0;
 }
 
+// Only needed if other kernel modules will call this function directly.
+// Uncomment this if a non-syscall kernel symbol is defined elsewhere.
+// EXPORT_SYMBOL_GPL(nymya_3301_identity_gate);
+
 #else
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -61,9 +66,6 @@ int nymya_3301_identity_gate(nymya_qubit* q)
     log_symbolic_event("ID_GATE", q->id, q->tag, "State preserved");
     return 0;
 }
-EXPORT_SYMBOL_GPL(nymya_3301_identity_gate);
-
-
 
 #endif
 

@@ -22,7 +22,12 @@
     #include <stdlib.h>  // Userland: For general utilities
     #include <math.h>    // Userland: For complex math functions (if needed by sub-gates)
     #include <complex.h> // Userland: For _Complex double type (if needed by sub-gates)
-#else
+#else // __KERNEL__
+    int nymya_3344_peres_kernel_logic(struct nymya_qubit *q1,
+                                      struct nymya_qubit *q2,
+                                      struct nymya_qubit *q3);
+
+
     #include <linux/kernel.h>   // Kernel: For pr_err and general kernel functions
     #include <linux/syscalls.h> // Kernel: For SYSCALL_DEFINE macros
     #include <linux/uaccess.h>  // Kernel: For copy_from_user, copy_to_user

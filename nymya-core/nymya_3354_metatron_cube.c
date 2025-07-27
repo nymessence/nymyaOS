@@ -57,6 +57,9 @@ int nymya_3354_metatron_cube(nymya_qubit* q[], size_t count) {
 
 #else  // __KERNEL__
 
+    int nymya_3354_metatron_cube_core(struct nymya_qubit **k_qubits, size_t count);
+
+
 #include <linux/kernel.h>
 #include <linux/syscalls.h>
 #include <linux/uaccess.h>
@@ -189,4 +192,3 @@ cleanup_user_ptrs_array:
 }
 
 #endif  // __KERNEL__
-

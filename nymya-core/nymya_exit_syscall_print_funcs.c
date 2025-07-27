@@ -20,17 +20,21 @@
      *
      * Returns: 0 on success.
      */
+#ifndef EXIT_SYSCALL_PRINT_FUNCS_DEFINED
+#define EXIT_SYSCALL_PRINT_FUNCS_DEFINED
     int exit_syscall_print_funcs(uint64_t syscall_id, int return_code) {
         // For kernel logging (pr_info), %llu is generally correct for uint64_t
         pr_info("NYMYA_SYSCALL_EXIT: SyscallID=%llu, ReturnCode=%d\n", syscall_id, return_code);
         return 0;
     }
-EXPORT_SYMBOL_GPL(exit_syscall_print_funcs);
+    EXPORT_SYMBOL(exit_syscall_print_funcs);
+#endif // EXIT_SYSCALL_PRINT_FUNCS_DEFINED
+EXPORT_SYMBOL_GPL(nymya_exit_syscall_print_funcs);
 
 
 
     // Export the symbol so other kernel modules/code can call it directly.
-    EXPORT_SYMBOL_GPL(exit_syscall_print_funcs);
+    EXPORT_SYMBOL_GPL(nymya_exit_syscall_print_funcs);
 
 #else // Userland implementation
 
@@ -56,4 +60,3 @@ EXPORT_SYMBOL_GPL(exit_syscall_print_funcs);
     }
 
 #endif // __KERNEL__
-

@@ -46,6 +46,9 @@ int nymya_3356_hcp_lattice(nymya_qpos3d qubits[], size_t count) {
 }
 
 #else // __KERNEL__
+    int nymya_3356_hcp_lattice_core(nymya_qpos3d_k *k_qubits, size_t count);
+
+
 #include <linux/kernel.h>
 #include <linux/syscalls.h>
 #include <linux/uaccess.h>
@@ -107,4 +110,3 @@ out:
     return ret;
 }
 #endif // __KERNEL__
-

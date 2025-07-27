@@ -7,23 +7,29 @@
 #include <unistd.h>
 #define __NR_nymya_3302_global_phase NYMYA_GLOBAL_PHASE_CODE
 
-    #include <stdio.h>
-    #include <stdlib.h>
-    #include <math.h>
-#else
-    #include <linux/kernel.h>
-    #include <linux/syscalls.h>
-    #include <linux/uaccess.h>
-    #include <linux/errno.h>
-    #include <linux/module.h> // Required for EXPORT_SYMBOL_GPL
-    #include <linux/string.h> // For snprintf
-#endif
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <complex.h>
 
-// These macros are for userland only, where complex.h is available.
-// In kernel, fixed-point complex operations are used directly.
-#ifndef __KERNEL__
+// Safely override complex math macros only in userland simulation
+#ifdef nymya_cexp
+#undef nymya_cexp
+#endif
 #define nymya_cexp(theta) cexp(I * (theta))
-#define nymya_cmul(a, b)  ((a) * (b))
+
+#ifdef nymya_cmul
+#undef nymya_cmul
+#endif
+#define nymya_cmul(a, b) ((a) * (b))
+
+#else
+#include <linux/kernel.h>
+#include <linux/syscalls.h>
+#include <linux/uaccess.h>
+#include <linux/errno.h>
+#include <linux/module.h>  // Required for EXPORT_SYMBOL_GPL
+#include <linux/string.h>  // For snprintf
 #endif
 
 /**
@@ -42,7 +48,6 @@
 int nymya_3302_global_phase(nymya_qubit* q, double theta) {
     if (!q) return -1;
 
-    // In userland, we directly apply the complex multiplication.
     complex_double phase = nymya_cexp(theta);
     q->amplitude = nymya_cmul(q->amplitude, phase);
 
@@ -73,20 +78,15 @@ int nymya_3302_global_phase(struct nymya_qubit *q, int64_t theta_fixed) {
         return -EINVAL;
     }
 
-    // Calculate the complex phase factor e^(i*theta_fixed) using fixed-point trig functions
     phase_factor.re = fixed_cos(theta_fixed);
     phase_factor.im = fixed_sin(theta_fixed);
 
-    // Apply the phase shift by complex multiplication
     q->amplitude = complex_mul(q->amplitude, phase_factor);
 
-    // log_symbolic_event will be called in the syscall wrapper with formatted message
     return 0;
 }
 
-// Export the symbol for this function so other kernel modules/code can call it directly.
 EXPORT_SYMBOL_GPL(nymya_3302_global_phase);
-
 
 /**
  * SYSCALL_DEFINE2(nymya_3302_global_phase) - Kernel system call for global phase shift.
@@ -101,32 +101,25 @@ EXPORT_SYMBOL_GPL(nymya_3302_global_phase);
  */
 SYSCALL_DEFINE2(nymya_3302_global_phase,
     struct nymya_qubit __user *, user_q,
-    int64_t, theta_fixed) { // CHANGED: Directly take fixed-point theta
-
+    int64_t, theta_fixed)
+{
     struct nymya_qubit kq;
     int ret;
-    char log_msg[128]; // For formatted log message
+    char log_msg[128];
 
     if (!user_q)
         return -EINVAL;
 
-    // Copy qubit from user space
     if (copy_from_user(&kq, user_q, sizeof(kq)))
         return -EFAULT;
 
-    // No need to copy theta_double or convert, as theta_fixed is passed directly.
-
-    // Call the core logic function
     ret = nymya_3302_global_phase(&kq, theta_fixed);
-
-    if (ret) // Propagate error from core function
+    if (ret)
         return ret;
 
-    // Format log message with the fixed-point value.
     snprintf(log_msg, sizeof(log_msg), "Applied phase shift (fixed-point)=%lld", (long long)theta_fixed);
     log_symbolic_event("GPHASE", kq.id, kq.tag, log_msg);
 
-    // Copy modified qubit back to user space
     if (copy_to_user(user_q, &kq, sizeof(kq)))
         return -EFAULT;
 

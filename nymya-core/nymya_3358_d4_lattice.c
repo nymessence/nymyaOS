@@ -48,6 +48,9 @@ int nymya_3358_d4_lattice(nymya_qpos4d q[], size_t count) {
 }
 
 #else // __KERNEL__
+    int nymya_3358_d4_lattice_core(nymya_qpos4d_k *k_q, size_t count);
+
+
 #include <linux/kernel.h>
 #include <linux/syscalls.h>
 #include <linux/uaccess.h>
@@ -102,4 +105,3 @@ out:
     return ret;
 }
 #endif
-

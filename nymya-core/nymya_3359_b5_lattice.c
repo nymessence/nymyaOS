@@ -51,6 +51,9 @@ int nymya_3359_b5_lattice(nymya_qpos5d q[], size_t count) {
 }
 
 #else // __KERNEL__
+    int nymya_3359_b5_lattice_core(nymya_qpos5d_k *k_q, size_t count);
+
+
 #include <linux/kernel.h>
 #include <linux/syscalls.h>
 #include <linux/uaccess.h>
@@ -107,4 +110,3 @@ out:
     return ret;
 }
 #endif
-

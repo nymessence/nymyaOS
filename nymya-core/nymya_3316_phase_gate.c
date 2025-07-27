@@ -55,10 +55,6 @@ int nymya_3316_phase_gate(nymya_qubit* q, double phi) {
     log_symbolic_event("PHASE_GATE", q->id, q->tag, "Applied symbolic phase gate");
     return 0;
 }
-EXPORT_SYMBOL_GPL(nymya_3316_phase_gate);
-
-
-
 
 #else // __KERNEL__
 
@@ -93,8 +89,9 @@ int nymya_3316_phase_gate(struct nymya_qubit *q, int64_t phi_fixed) {
     log_symbolic_event("PHASE_GATE", q->id, q->tag, "Applied symbolic phase gate");
     return 0;
 }
-// Export the symbol for this function so other kernel modules/code can call it directly.
 
+// Export the symbol for this function so other kernel modules/code can call it directly.
+EXPORT_SYMBOL_GPL(nymya_3316_phase_gate);
 
 SYSCALL_DEFINE2(nymya_3316_phase_gate,
     struct nymya_qubit __user *, user_q,

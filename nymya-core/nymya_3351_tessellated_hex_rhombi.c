@@ -23,7 +23,10 @@
 #include <stdlib.h>  // Userland: For general utilities (e.g., size_t)
 #include <math.h>    // Userland: For complex math functions (if needed by sub-gates)
 #include <complex.h> // Userland: For _Complex double type (if needed by sub-gates)
-#else
+#else // __KERNEL__
+    int nymya_3351_tessellated_hex_rhombi_core(struct nymya_qubit **k_qubits, size_t count);
+
+
 #include <linux/kernel.h>   // Kernel: For pr_err and general kernel functions
 #include <linux/syscalls.h> // Kernel: For SYSCALL_DEFINE macros
 #include <linux/uaccess.h>  // Kernel: For copy_from_user, copy_to_user

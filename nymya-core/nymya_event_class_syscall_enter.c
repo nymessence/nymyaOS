@@ -6,6 +6,9 @@
 #include "nymya.h" // Assumed to define common types like uint64_t
 
 #ifdef __KERNEL__
+    int event_class_syscall_enter(uint64_t syscall_id, uint64_t qubit_id);
+
+
     #include <linux/kernel.h> // For pr_info
     #include <linux/types.h>  // For uint64_t if not already in nymya.h
     #include <linux/module.h> // ADDED: For MODULE_LICENSE and EXPORT_SYMBOL_GPL
@@ -13,6 +16,8 @@
     // MODULE_LICENSE is mandatory for all kernel modules
     MODULE_LICENSE("GPL");
 
+    #ifndef EVENT_CLASS_SYSCALL_ENTER_DEFINED
+    #define EVENT_CLASS_SYSCALL_ENTER_DEFINED
     /**
      * event_class_syscall_enter - Kernel-side implementation for syscall entry event logging.
      * @syscall_id: The ID of the syscall being entered.
@@ -28,12 +33,14 @@
         pr_info("NYMYA_SYSCALL_ENTER: SyscallID=%llu, QubitID=%llu\n", syscall_id, qubit_id);
         return 0;
     }
-EXPORT_SYMBOL_GPL(event_class_syscall_enter);
+    EXPORT_SYMBOL(event_class_syscall_enter);
+    #endif // EVENT_CLASS_SYSCALL_ENTER_DEFINED
+EXPORT_SYMBOL_GPL(nymya_event_class_syscall_enter);
 
 
 
     // Export the symbol so other kernel modules/code can call it directly.
-    EXPORT_SYMBOL_GPL(event_class_syscall_enter);
+    EXPORT_SYMBOL_GPL(nymya_event_class_syscall_enter);
 
 #else // Userland implementation
 
@@ -59,4 +66,3 @@ EXPORT_SYMBOL_GPL(event_class_syscall_enter);
     }
 
 #endif // __KERNEL__
-
