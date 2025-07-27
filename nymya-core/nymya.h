@@ -3,217 +3,45 @@
 
 // Fixed-point scale for Q32.32 format.
 // 1 unit = 2^-32 in real value.
-// Allows representing fractional numbers without floating-point.
 #define FIXED_POINT_SCALE (1ULL << 32)
 
 // Maximum length for qubit tags (labels)
 #define NYMYA_TAG_MAXLEN 32
 
-// Conditional definition of complex_double and related functions based on compilation environment
+// Fixed-point constants for kernel calculations
+#define FIXED_POINT_PI (int64_t)(3.141592653589793 * FIXED_POINT_SCALE)
+#define FIXED_POINT_PI_DIV_2 (int64_t)(1.5707963267948966 * FIXED_POINT_SCALE)
+#define FIXED_POINT_SQRT2_INV_FP (int64_t)(0.7071067811865476 * FIXED_POINT_SCALE)
+
 #ifdef __KERNEL__
 
-    #include <linux/types.h> // Provides __s64, __u64, etc.
+    #include <linux/types.h>
     #include <linux/string.h>
-    // #include <stdint.h> // Removed: Relying on linux/types.h and explicit typedefs below
 
-    // Define int64_t and uint64_t for kernel if not already provided by linux/types.h
-    // This provides a fallback if the compiler doesn't automatically map __s64/__u64
-    // to int64_t/uint64_t, or if stdint.h is truly unavailable.
     typedef __s64 int64_t;
     typedef __u64 uint64_t;
 
-
-    // Fixed-point constants for kernel calculations
-    #define FIXED_POINT_PI (int64_t)(3.141592653589793 * FIXED_POINT_SCALE)
-    #define FIXED_POINT_PI_DIV_2 (int64_t)(1.5707963267948966 * FIXED_POINT_SCALE)
-    #define FIXED_POINT_SQRT2_INV_FP (int64_t)(0.7071067811865476 * FIXED_POINT_SCALE)
-
     /**
      * complex_double - Fixed-point complex number type for kernel space.
-     * @re: Real part in Q32.32 fixed-point.
-     * @im: Imaginary part in Q32.32 fixed-point.
-     *
-     * Used instead of native floating-point complex types,
-     * since kernel code generally avoids floating-point arithmetic.
      */
     typedef struct {
-        int64_t re;  // Fixed-point real component
-        int64_t im;  // Fixed-point imaginary component
+        int64_t re;
+        int64_t im;
     } complex_double;
 
-    /**
-     * fixed_point_mul - Performs fixed-point multiplication.
-     * @val1: The first fixed-point value.
-     * @val2: The second fixed-point value.
-     *
-     * Multiplies two fixed-point numbers and scales the result back to fixed-point.
-     * Uses 128-bit intermediate to prevent overflow during multiplication,
-     * then shifts right by 32 bits to maintain fixed-point format.
-     *
-     * Returns:
-     * The product as an int64_t (fixed-point).
-     */
-    static inline int64_t fixed_point_mul(int64_t val1, int64_t val2) {
-        // Corrected: Removed extra closing parenthesis. This syntax is correct.
-        return (int64_t)(((__int128)val1 * val2) >> 32);
-    }
-
-    /**
-     * fixed_point_cos - Calculates the cosine of a fixed-point angle.
-     * @angle_fp: The angle in fixed-point format.
-     *
-     * This is a simplified fixed-point cosine approximation for kernel use.
-     * For production, consider a more robust implementation (e.g., CORDIC or lookup table).
-     *
-     * Returns:
-     * The cosine value in fixed-point format.
-     */
-    static inline int64_t fixed_point_cos(int64_t angle_fp) {
-        // Normalize angle to [-PI, PI] for better approximation range
-        while (angle_fp > FIXED_POINT_PI) angle_fp -= (FIXED_POINT_PI << 1);
-        while (angle_fp < -FIXED_POINT_PI) angle_fp += (FIXED_POINT_PI << 1);
-        // Simple Taylor series approximation for cos(x) = 1 - x^2/2!
-        int64_t term1 = FIXED_POINT_SCALE; // 1
-        int64_t term2 = fixed_point_mul(angle_fp, angle_fp); // x^2
-        term2 = fixed_point_mul(term2, (int64_t)(0.5 * FIXED_POINT_SCALE)); // x^2 / 2
-        return term1 - term2;
-    }
-
-    /**
-     * fixed_point_sin - Calculates the sine of a fixed-point angle.
-     * @angle_fp: The angle in fixed-point format.
-     *
-     * This is a simplified fixed-point sine approximation for kernel use.
-     * For production, consider a more robust implementation (e.g., CORDIC or lookup table).
-     *
-     * Returns:
-     * The sine value in fixed-point format.
-     */
-    static inline int64_t fixed_point_sin(int64_t angle_fp) {
-        // Normalize angle to [-PI, PI] for better approximation range
-        while (angle_fp > FIXED_POINT_PI) angle_fp -= (FIXED_POINT_PI << 1);
-        while (angle_fp < -FIXED_POINT_PI) angle_fp += (FIXED_POINT_PI << 1);
-        // Simple Taylor series approximation for sin(x) = x - x^3/3!
-        int64_t term1 = angle_fp; // x
-        int64_t term2_numerator = fixed_point_mul(fixed_point_mul(angle_fp, angle_fp), angle_fp); // x^3
-        int64_t term2 = fixed_point_mul(term2_numerator, (int64_t)(1.0/6.0 * FIXED_POINT_SCALE)); // x^3 / 6
-        return term1 - term2;
-    }
-
-    /**
-     * fixed_point_square - Calculates the square of a fixed-point number.
-     * @val: The fixed-point number.
-     *
-     * Returns:
-     * The square of the fixed-point number, adjusted for the fixed-point scale.
-     */
-    static inline int64_t fixed_point_square(int64_t val) {
-        // Perform multiplication using __int128 to prevent overflow, then shift.
-        return (int64_t)((__int128)val * val >> 32);
-    }
-
-    /**
-     * make_complex - Creates a fixed-point complex_double from fixed-point real and imaginary parts.
-     * @re_fp: Real part in Q32.32 fixed-point.
-     * @im_fp: Imaginary part in Q32.32 fixed-point.
-     *
-     * Returns:
-     * complex_double with components directly assigned from fixed-point inputs.
-     */
-    static inline complex_double make_complex(int64_t re_fp, int64_t im_fp) {
-        complex_double c;
-        c.re = re_fp;
-        c.im = im_fp;
-        return c;
-    }
-
-    /**
-     * complex_mul - Multiplies two fixed-point complex_double values.
-     * @a: First operand.
-     * @b: Second operand.
-     *
-     * Uses 128-bit intermediate to prevent overflow during multiplication,
-     * then shifts right by 32 bits to maintain fixed-point format.
-     *
-     * Returns:
-     * The product as a complex_double.
-     */
-    static inline complex_double complex_mul(complex_double a, complex_double b) {
-        __int128 re_part = (__int128)a.re * b.re - (__int128)a.im * b.im;
-        __int128 im_part = (__int128)a.re * b.im + (__int128)a.im * b.re;
-
-        complex_double result;
-        result.re = (int64_t)(re_part >> 32);
-        result.im = (int64_t)(im_part >> 32);
-        return result;
-    }
-
-    /**
-     * complex_exp_i - Kernel stub for complex exponential of imaginary number.
-     * @theta_fp: Angle in fixed-point radians.
-     *
-     * This function now takes fixed-point input and uses fixed-point sine/cosine.
-     *
-     * Returns:
-     * complex_double representing e^(i * theta_fp).
-     */
-    static inline complex_double complex_exp_i(int64_t theta_fp) {
-        complex_double result = { .re = fixed_point_cos(theta_fp), .im = fixed_point_sin(theta_fp) };
-        return result;
-    }
-
-    /**
-     * complex_re - Returns the real part of fixed-point complex_double.
-     * @c: complex_double value.
-     *
-     * Returns:
-     * Fixed-point real component.
-     */
-    static inline int64_t complex_re(complex_double c) { return c.re; }
-
-    /**
-     * complex_im - Returns the imaginary part of fixed-point complex_double.
-     * @c: complex_double value.
-     *
-     * Returns:
-     * Fixed-point imaginary component.
-     */
-    static inline int64_t complex_im(complex_double c) { return c.im; }
-
-    /**
-     * complex_conj - Returns the complex conjugate of a fixed-point complex_double.
-     * @c: complex_double value.
-     *
-     * Returns:
-     * The conjugate with imaginary part negated.
-     */
-    static inline complex_double complex_conj(complex_double c) {
-        complex_double conj = { c.re, -c.im };
-        return conj;
-    }
-
-    /**
-     * fixed_sin - Wrapper for fixed_point_sin to maintain existing API usage.
-     * @theta: The angle in fixed-point format.
-     *
-     * Returns:
-     * The sine value in fixed-point format.
-     */
-    static inline int64_t fixed_sin(int64_t theta) {
-        return fixed_point_sin(theta);
-    }
-
-    /**
-     * fixed_cos - Wrapper for fixed_point_cos to maintain existing API usage.
-     * @theta: The angle in fixed-point format.
-     *
-     * Returns:
-     * The cosine value in fixed-point format.
-     */
-    static inline int64_t fixed_cos(int64_t theta) {
-        return fixed_point_cos(theta);
-    }
-
+    /* Fixed-point math function prototypes */
+    int64_t fixed_point_mul(int64_t val1, int64_t val2);
+    int64_t fixed_point_cos(int64_t angle_fp);
+    int64_t fixed_point_sin(int64_t angle_fp);
+    int64_t fixed_point_square(int64_t val);
+    complex_double make_complex(int64_t re_fp, int64_t im_fp);
+    complex_double complex_mul(complex_double a, complex_double b);
+    complex_double complex_exp_i(int64_t theta_fp);
+    int64_t complex_re(complex_double c);
+    int64_t complex_im(complex_double c);
+    complex_double complex_conj(complex_double c);
+    int64_t fixed_sin(int64_t theta);
+    int64_t fixed_cos(int64_t theta);
 
 #else // userspace
 
@@ -225,73 +53,20 @@
     #include <math.h>
 
     /**
-     * complex_double - Userspace native complex double type (_Complex double).
+     * complex_double - Userspace native complex double type.
      */
     typedef _Complex double complex_double;
 
-    /**
-     * make_complex - Create a complex_double from real and imaginary doubles.
-     * @re: Real part.
-     * @im: Imaginary part.
-     *
-     * Returns:
-     * Native complex double.
-     */
-    static inline complex_double make_complex(double re, double im) {
-        return re + im * I;
-    }
-
-    /**
-     * complex_mul - Multiply two complex_double numbers.
-     * @a: First operand.
-     * @b: Second operand.
-     *
-     * Returns:
-     * The product (a * b).
-     */
-    static inline complex_double complex_mul(complex_double a, complex_double b) {
-        return a * b;
-    }
-
-    /**
-     * complex_exp_i - Computes e^(i * theta).
-     * @theta: Angle in radians.
-     *
-     * Returns:
-     * Complex exponential with imaginary exponent.
-     */
-    static inline complex_double complex_exp_i(double theta) {
-        return cexp(I * theta);
-    }
-
-    /**
-     * complex_re - Returns real part of complex_double.
-     * @c: complex_double value.
-     *
-     * Returns:
-     * Real part.
-     */
-    static inline double complex_re(complex_double c) { return creal(c); }
-
-    /**
-     * complex_im - Returns imaginary part of complex_double.
-     * @c: complex_double value.
-     *
-     * Returns:
-     * Imaginary part.
-     */
-    static inline double complex_im(complex_double c) { return cimag(c); }
-
-    /**
-     * complex_conj - Returns complex conjugate.
-     * @c: complex_double value.
-     *
-     * Returns:
-     * Conjugated complex_double.
-     */
-    static inline complex_double complex_conj(complex_double c) { return conj(c); }
+    /* Userspace complex math function prototypes */
+    complex_double make_complex(double re, double im);
+    complex_double complex_mul(complex_double a, complex_double b);
+    complex_double complex_exp_i(double theta);
+    double complex_re(complex_double c);
+    double complex_im(complex_double c);
+    complex_double complex_conj(complex_double c);
 
 #endif // __KERNEL__
+
 
 // Common structure definitions, visible to both kernel and userspace
 /**
