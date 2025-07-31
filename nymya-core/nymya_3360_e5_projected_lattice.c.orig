@@ -14,7 +14,7 @@
 /**
  * dist5d - Calculates the Euclidean distance between two nymya_qpos5d points (userland).
  */
-static double dist5d(nymya_qpos5d a, nymya_qpos5d b) {
+double dist5d(nymya_qpos5d a, nymya_qpos5d b) {
     return sqrt(pow(a.x - b.x, 2) +
                 pow(a.y - b.y, 2) +
                 pow(a.z - b.z, 2) +

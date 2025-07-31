@@ -1,14 +1,11 @@
-// Syscall entry/exit logging
-#define log_syscall_enter(syscall_id, qubit_id) nymya_event_class_syscall_enter(syscall_id, qubit_id)
-#define log_syscall_exit(syscall_id, return_code) nymya_exit_syscall_print_funcs(syscall_id, return_code)
---- a/complex_exp_i.c
-+++ b/complex_exp_i.c
-@@ -8,8 +8,8 @@
-  * @theta: The angle in radians, as a Q32.32 fixed-point value.
-  * Returns the complex number representing e^(i*theta).
+--- a/nymya_3360_e5_projected_lattice.c
++++ b/nymya_3360_e5_projected_lattice.c
+@@ -13,7 +13,7 @@
+ /**
+  * dist5d - Calculates the Euclidean distance between two nymya_qpos5d points (userland).
   */
--complex_double complex_exp_i(int64_t theta) {
--    return make_complex(fixed_cos(theta), fixed_sin(theta));
-+complex_double complex_exp_i(double theta) {
-+    return make_complex(cos(theta), sin(theta));
- }
+-double dist5d(nymya_qpos5d a, nymya_qpos5d b) {
++static double dist5d(nymya_qpos5d a, nymya_qpos5d b) {
+     return sqrt(pow(a.x - b.x, 2) +
+                 pow(a.y - b.y, 2) +
+                 pow(a.z - b.z, 2) +
