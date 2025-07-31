@@ -1,22 +1,17 @@
 gcc -Wall -fPIC -O2 -I. -c complex_conj.c -o build/complex_conj.o
 gcc -Wall -fPIC -O2 -I. -c complex_exp_i.c -o build/complex_exp_i.o
+complex_exp_i.c:11:16: error: conflicting types for ‘complex_exp_i’; have ‘_Complex double(int64_t)’ {aka ‘_Complex double(long int)’}
+   11 | complex_double complex_exp_i(int64_t theta) {
+      |                ^~~~~~~~~~~~~
+In file included from complex_exp_i.c:3:
+nymya.h:63:20: note: previous declaration of ‘complex_exp_i’ with type ‘_Complex double(double)’
+   63 |     complex_double complex_exp_i(double theta);
+      |                    ^~~~~~~~~~~~~
 complex_exp_i.c: In function ‘complex_exp_i’:
-complex_exp_i.c:12:12: warning: implicit declaration of function ‘complex_add’; did you mean ‘complex_im’? [-Wimplicit-function-declaration]
-   12 |     return complex_add(complex_from_real(cos(theta)),
-      |            ^~~~~~~~~~~
-      |            complex_im
-complex_exp_i.c:12:24: warning: implicit declaration of function ‘complex_from_real’ [-Wimplicit-function-declaration]
-   12 |     return complex_add(complex_from_real(cos(theta)),
-      |                        ^~~~~~~~~~~~~~~~~
-complex_exp_i.c:13:24: warning: implicit declaration of function ‘complex_mul_real’; did you mean ‘complex_mul’? [-Wimplicit-function-declaration]
-   13 |                        complex_mul_real(I_val, sin(theta)));
-      |                        ^~~~~~~~~~~~~~~~
-      |                        complex_mul
-complex_exp_i.c:13:41: error: ‘I_val’ undeclared (first use in this function)
-   13 |                        complex_mul_real(I_val, sin(theta)));
-      |                                         ^~~~~
-complex_exp_i.c:13:41: note: each undeclared identifier is reported only once for each function it appears in
-complex_exp_i.c:14:1: warning: control reaches end of non-void function [-Wreturn-type]
-   14 | }
-      | ^
+complex_exp_i.c:12:25: warning: implicit declaration of function ‘fixed_cos’ [-Wimplicit-function-declaration]
+   12 |     return make_complex(fixed_cos(theta), fixed_sin(theta));
+      |                         ^~~~~~~~~
+complex_exp_i.c:12:43: warning: implicit declaration of function ‘fixed_sin’ [-Wimplicit-function-declaration]
+   12 |     return make_complex(fixed_cos(theta), fixed_sin(theta));
+      |                                           ^~~~~~~~~
 make: *** [Makefile:53: build/complex_exp_i.o] Error 1
