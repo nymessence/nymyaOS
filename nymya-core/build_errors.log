@@ -1,3 +1,4 @@
+make: *** No rule to make target 'prepare'.  Stop.
 gcc -Wall -fPIC -O2 -I. -c complex_conj.c -o build/complex_conj.o
 gcc -Wall -fPIC -O2 -I. -c complex_exp_i.c -o build/complex_exp_i.o
 gcc -Wall -fPIC -O2 -I. -c complex_im.c -o build/complex_im.o
@@ -90,3 +91,114 @@ gcc -Wall -fPIC -O2 -I. -c nymya_event_class_syscall_enter.c -o build/nymya_even
 gcc -Wall -fPIC -O2 -I. -c nymya_event_class_syscall_exit.c -o build/nymya_event_class_syscall_exit.o
 gcc -Wall -fPIC -O2 -I. -c nymya_exit_syscall_print_funcs.c -o build/nymya_exit_syscall_print_funcs.o
 gcc -shared -o libnymya.so build/complex_conj.o build/complex_exp_i.o build/complex_im.o build/complex_mul.o build/complex_re.o build/fixed_complex_multiply.o build/fixed_conj.o build/fixed_cos.o build/fixed_point_cos.o build/fixed_point_sin.o build/fixed_sin.o build/log.o build/nymya_3301_identity_gate.o build/nymya_3302_global_phase.o build/nymya_3303_pauli_x.o build/nymya_3304_pauli_y.o build/nymya_3305_pauli_z.o build/nymya_3306_phase_gate.o build/nymya_3307_sqrt_x_gate.o build/nymya_3308_hadamard_gate.o build/nymya_3309_controlled_not.o build/nymya_3310_anticontrol_not.o build/nymya_3311_controlled_z.o build/nymya_3312_double_controlled_not.o build/nymya_3313_swap.o build/nymya_3314_imaginary_swap.o build/nymya_3315_phase_shift.o build/nymya_3316_phase_gate.o build/nymya_3317_controlled_phase.o build/nymya_3318_controlled_phase_s.o build/nymya_3319_rotate_x.o build/nymya_3320_rotate_y.o build/nymya_3321_rotate_z.o build/nymya_3322_xx_interaction.o build/nymya_3323_yy_interaction.o build/nymya_3324_zz_interaction.o build/nymya_3325_xyz_entangle.o build/nymya_3326_sqrt_swap.o build/nymya_3327_sqrt_iswap.o build/nymya_3328_swap_pow.o build/nymya_3329_fredkin.o build/nymya_3330_rotate.o build/nymya_3331_barenco.o build/nymya_3332_berkeley.o build/nymya_3333_c_v.o build/nymya_3334_core_entangle.o build/nymya_3335_dagwood.o build/nymya_3336_echo_cr.o build/nymya_3337_fermion_sim.o build/nymya_3338_givens.o build/nymya_3339_magic.o build/nymya_3340_sycamore.o build/nymya_3341_cz_swap.o build/nymya_3342_deutsch.o build/nymya_3343_margolis.o build/nymya_3344_peres.o build/nymya_3345_cf_swap.o build/nymya_3346_triangular_lattice.o build/nymya_3347_hexagonal_lattice.o build/nymya_3348_hex_rhombi_lattice.o build/nymya_3349_tessellated_triangles.o build/nymya_3350_tessellated_hexagons.o build/nymya_3351_tessellated_hex_rhombi.o build/nymya_3352_e8_group.o build/nymya_3353_flower_of_life.o build/nymya_3354_metatron_cube.o build/nymya_3355_fcc_lattice.o build/nymya_3356_hcp_lattice.o build/nymya_3357_e8_projected_lattice.o build/nymya_3358_d4_lattice.o build/nymya_3359_b5_lattice.o build/nymya_3360_e5_projected_lattice.o build/nymya_3361_qrng_range.o build/nymya_complex_math.o build/nymya_enter_syscall_print_funcs.o build/nymya_event_class_syscall_enter.o build/nymya_event_class_syscall_exit.o build/nymya_exit_syscall_print_funcs.o
+make: Nothing to be done for 'all'.
+Building kernel module for arm64 with CROSS_COMPILE='aarch64-linux-gnu-'
+# Link all nymya_*.c files and log.c into the architecture-specific kernel source directory
+make[1]: Entering directory '/usr/src/linux-headers-6.8.0-1031-raspi'
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/log.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3301_identity_gate.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3302_global_phase.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3303_pauli_x.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3304_pauli_y.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3305_pauli_z.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3306_phase_gate.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3307_sqrt_x_gate.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3308_hadamard_gate.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3309_controlled_not.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3310_anticontrol_not.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3311_controlled_z.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3312_double_controlled_not.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3313_swap.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3314_imaginary_swap.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3315_phase_shift.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3316_phase_gate.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3317_controlled_phase.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3318_controlled_phase_s.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3319_rotate_x.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3320_rotate_y.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3321_rotate_z.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3322_xx_interaction.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3323_yy_interaction.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3324_zz_interaction.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3325_xyz_entangle.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3326_sqrt_swap.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3327_sqrt_iswap.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3328_swap_pow.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3329_fredkin.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3330_rotate.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3331_barenco.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3332_berkeley.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3333_c_v.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3334_core_entangle.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3335_dagwood.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3336_echo_cr.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3337_fermion_sim.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3338_givens.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3339_magic.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3340_sycamore.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3341_cz_swap.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3342_deutsch.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3343_margolis.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3344_peres.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3345_cf_swap.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3346_triangular_lattice.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3347_hexagonal_lattice.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3348_hex_rhombi_lattice.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3349_tessellated_triangles.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3350_tessellated_hexagons.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3351_tessellated_hex_rhombi.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3352_e8_group.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3353_flower_of_life.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3354_metatron_cube.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3355_fcc_lattice.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3356_hcp_lattice.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3357_e8_projected_lattice.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3358_d4_lattice.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3359_b5_lattice.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3360_e5_projected_lattice.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_3361_qrng_range.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_complex_math.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_enter_syscall_print_funcs.o
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_event_class_syscall_enter.o
+/tmp/cccSJY10.s: Assembler messages:
+/tmp/cccSJY10.s:10: Error: symbol `__export_symbol_nymya_event_class_syscall_enter' is already defined
+make[3]: *** [scripts/Makefile.build:243: /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_event_class_syscall_enter.o] Error 1
+make[2]: *** [/usr/src/linux-headers-6.8.0-1031-raspi/Makefile:1925: /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64] Error 2
+make[1]: *** [Makefile:240: __sub-make] Error 2
+make[1]: Leaving directory '/usr/src/linux-headers-6.8.0-1031-raspi'
+make: *** [Makefile:78: arm64] Error 2
+Building kernel module for arm64 with CROSS_COMPILE='aarch64-linux-gnu-'
+# Link all nymya_*.c files and log.c into the architecture-specific kernel source directory
+make[1]: Entering directory '/usr/src/linux-headers-6.8.0-1031-raspi'
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_event_class_syscall_enter.o
+/tmp/ccIv8QRT.s: Assembler messages:
+/tmp/ccIv8QRT.s:10: Error: symbol `__export_symbol_nymya_event_class_syscall_enter' is already defined
+make[3]: *** [scripts/Makefile.build:243: /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_event_class_syscall_enter.o] Error 1
+make[2]: *** [/usr/src/linux-headers-6.8.0-1031-raspi/Makefile:1925: /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64] Error 2
+make[1]: *** [Makefile:240: __sub-make] Error 2
+make[1]: Leaving directory '/usr/src/linux-headers-6.8.0-1031-raspi'
+make: *** [Makefile:78: arm64] Error 2
+>> Creating userland .deb
+dpkg-deb: building package 'nymya-core-userland' in 'nymya-core-userland_0.1.0_amd64.deb'.
+✅ Built nymya-core-userland_0.1.0_amd64.deb
+Building kernel module for arm64 with CROSS_COMPILE='aarch64-linux-gnu-'
+# Link all nymya_*.c files and log.c into the architecture-specific kernel source directory
+make[1]: Entering directory '/usr/src/linux-headers-6.8.0-1031-raspi'
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_event_class_syscall_enter.o
+/tmp/ccBoErT8.s: Assembler messages:
+/tmp/ccBoErT8.s:10: Error: symbol `__export_symbol_nymya_event_class_syscall_enter' is already defined
+make[3]: *** [scripts/Makefile.build:243: /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_event_class_syscall_enter.o] Error 1
+make[2]: *** [/usr/src/linux-headers-6.8.0-1031-raspi/Makefile:1925: /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64] Error 2
+make[1]: *** [Makefile:240: __sub-make] Error 2
+make[1]: Leaving directory '/usr/src/linux-headers-6.8.0-1031-raspi'
+make: *** [Makefile:78: arm64] Error 2
+>> Cleaning userland artifacts
+>> Cleaning kernel build artifacts
+make[1]: Entering directory '/usr/src/linux-headers-6.8.0-1031-raspi'
+make[1]: Leaving directory '/usr/src/linux-headers-6.8.0-1031-raspi'
+make[1]: Entering directory '/usr/src/linux-headers-6.8.0-1031-raspi'
+scripts/Makefile.clean:12: /home/erick/nymyaOS/nymya-core/kernel_syscalls/x86_64/Makefile: No such file or directory
+make[3]: *** No rule to make target '/home/erick/nymyaOS/nymya-core/kernel_syscalls/x86_64/Makefile'.  Stop.
+make[2]: *** [/usr/src/linux-headers-6.8.0-1031-raspi/Makefile:1930: _clean_/home/erick/nymyaOS/nymya-core/kernel_syscalls/x86_64] Error 2
+make[1]: *** [Makefile:240: __sub-make] Error 2
+make[1]: Leaving directory '/usr/src/linux-headers-6.8.0-1031-raspi'

@@ -1,0 +1,20 @@
+```diff
+--- a/nymya_event_class_syscall_enter.c
++++ b/nymya_event_class_syscall_enter.c
+@@ -30,13 +30,7 @@
+     }
+     EXPORT_SYMBOL(event_class_syscall_enter);
+     #endif // EVENT_CLASS_SYSCALL_ENTER_DEFINED
+-EXPORT_SYMBOL_GPL(nymya_event_class_syscall_enter);
+-
+-
+-
+-    // Export the symbol so other kernel modules/code can call it directly.
+-    EXPORT_SYMBOL_GPL(nymya_event_class_syscall_enter);
+-
++    // EXPORT_SYMBOL_GPL(nymya_event_class_syscall_enter); // This line is duplicated and causes a build error.
+ #else // Userland implementation
+ 
+     #include <stdio.h>    // For printf
+
+```
