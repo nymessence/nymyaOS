@@ -160,9 +160,32 @@ make[1]: Entering directory '/usr/src/linux-headers-6.8.0-1031-raspi'
   CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_complex_math.o
   CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_enter_syscall_print_funcs.o
   CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_event_class_syscall_enter.o
-/tmp/cccSJY10.s: Assembler messages:
-/tmp/cccSJY10.s:10: Error: symbol `__export_symbol_nymya_event_class_syscall_enter' is already defined
-make[3]: *** [scripts/Makefile.build:243: /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_event_class_syscall_enter.o] Error 1
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_event_class_syscall_exit.o
+/home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_event_class_syscall_exit.c:23:9: warning: no previous prototype for ‘event_class_syscall_exit’ [-Wmissing-prototypes]
+   23 |     int event_class_syscall_exit(uint64_t syscall_id, int return_code) {
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+In file included from ./include/linux/linkage.h:7,
+                 from ./include/linux/printk.h:8,
+                 from ./include/asm-generic/bug.h:22,
+                 from ./arch/arm64/include/asm/bug.h:26,
+                 from ./include/linux/bug.h:5,
+                 from ./include/linux/fortify-string.h:5,
+                 from ./include/linux/string.h:292,
+                 from /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya.h:19,
+                 from /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_event_class_syscall_exit.c:6:
+/home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_event_class_syscall_exit.c:28:19: error: ‘nymya_event_class_syscall_exit’ undeclared here (not in a function); did you mean ‘nymya_event_class_syscall_enter’?
+   28 | EXPORT_SYMBOL_GPL(nymya_event_class_syscall_exit);
+      |                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+./include/linux/export.h:56:23: note: in definition of macro ‘__EXPORT_SYMBOL’
+   56 |         extern typeof(sym) sym;                                 \
+      |                       ^~~
+./include/linux/export.h:69:41: note: in expansion of macro ‘_EXPORT_SYMBOL’
+   69 | #define EXPORT_SYMBOL_GPL(sym)          _EXPORT_SYMBOL(sym, "GPL")
+      |                                         ^~~~~~~~~~~~~~
+/home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_event_class_syscall_exit.c:28:1: note: in expansion of macro ‘EXPORT_SYMBOL_GPL’
+   28 | EXPORT_SYMBOL_GPL(nymya_event_class_syscall_exit);
+      | ^~~~~~~~~~~~~~~~~
+make[3]: *** [scripts/Makefile.build:243: /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_event_class_syscall_exit.o] Error 1
 make[2]: *** [/usr/src/linux-headers-6.8.0-1031-raspi/Makefile:1925: /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64] Error 2
 make[1]: *** [Makefile:240: __sub-make] Error 2
 make[1]: Leaving directory '/usr/src/linux-headers-6.8.0-1031-raspi'
@@ -170,10 +193,32 @@ make: *** [Makefile:78: arm64] Error 2
 Building kernel module for arm64 with CROSS_COMPILE='aarch64-linux-gnu-'
 # Link all nymya_*.c files and log.c into the architecture-specific kernel source directory
 make[1]: Entering directory '/usr/src/linux-headers-6.8.0-1031-raspi'
-  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_event_class_syscall_enter.o
-/tmp/ccIv8QRT.s: Assembler messages:
-/tmp/ccIv8QRT.s:10: Error: symbol `__export_symbol_nymya_event_class_syscall_enter' is already defined
-make[3]: *** [scripts/Makefile.build:243: /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_event_class_syscall_enter.o] Error 1
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_event_class_syscall_exit.o
+/home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_event_class_syscall_exit.c:23:9: warning: no previous prototype for ‘event_class_syscall_exit’ [-Wmissing-prototypes]
+   23 |     int event_class_syscall_exit(uint64_t syscall_id, int return_code) {
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+In file included from ./include/linux/linkage.h:7,
+                 from ./include/linux/printk.h:8,
+                 from ./include/asm-generic/bug.h:22,
+                 from ./arch/arm64/include/asm/bug.h:26,
+                 from ./include/linux/bug.h:5,
+                 from ./include/linux/fortify-string.h:5,
+                 from ./include/linux/string.h:292,
+                 from /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya.h:19,
+                 from /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_event_class_syscall_exit.c:6:
+/home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_event_class_syscall_exit.c:28:19: error: ‘nymya_event_class_syscall_exit’ undeclared here (not in a function); did you mean ‘nymya_event_class_syscall_enter’?
+   28 | EXPORT_SYMBOL_GPL(nymya_event_class_syscall_exit);
+      |                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+./include/linux/export.h:56:23: note: in definition of macro ‘__EXPORT_SYMBOL’
+   56 |         extern typeof(sym) sym;                                 \
+      |                       ^~~
+./include/linux/export.h:69:41: note: in expansion of macro ‘_EXPORT_SYMBOL’
+   69 | #define EXPORT_SYMBOL_GPL(sym)          _EXPORT_SYMBOL(sym, "GPL")
+      |                                         ^~~~~~~~~~~~~~
+/home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_event_class_syscall_exit.c:28:1: note: in expansion of macro ‘EXPORT_SYMBOL_GPL’
+   28 | EXPORT_SYMBOL_GPL(nymya_event_class_syscall_exit);
+      | ^~~~~~~~~~~~~~~~~
+make[3]: *** [scripts/Makefile.build:243: /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_event_class_syscall_exit.o] Error 1
 make[2]: *** [/usr/src/linux-headers-6.8.0-1031-raspi/Makefile:1925: /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64] Error 2
 make[1]: *** [Makefile:240: __sub-make] Error 2
 make[1]: Leaving directory '/usr/src/linux-headers-6.8.0-1031-raspi'
@@ -184,10 +229,32 @@ dpkg-deb: building package 'nymya-core-userland' in 'nymya-core-userland_0.1.0_a
 Building kernel module for arm64 with CROSS_COMPILE='aarch64-linux-gnu-'
 # Link all nymya_*.c files and log.c into the architecture-specific kernel source directory
 make[1]: Entering directory '/usr/src/linux-headers-6.8.0-1031-raspi'
-  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_event_class_syscall_enter.o
-/tmp/ccBoErT8.s: Assembler messages:
-/tmp/ccBoErT8.s:10: Error: symbol `__export_symbol_nymya_event_class_syscall_enter' is already defined
-make[3]: *** [scripts/Makefile.build:243: /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_event_class_syscall_enter.o] Error 1
+  CC [M]  /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_event_class_syscall_exit.o
+/home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_event_class_syscall_exit.c:23:9: warning: no previous prototype for ‘event_class_syscall_exit’ [-Wmissing-prototypes]
+   23 |     int event_class_syscall_exit(uint64_t syscall_id, int return_code) {
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+In file included from ./include/linux/linkage.h:7,
+                 from ./include/linux/printk.h:8,
+                 from ./include/asm-generic/bug.h:22,
+                 from ./arch/arm64/include/asm/bug.h:26,
+                 from ./include/linux/bug.h:5,
+                 from ./include/linux/fortify-string.h:5,
+                 from ./include/linux/string.h:292,
+                 from /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya.h:19,
+                 from /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_event_class_syscall_exit.c:6:
+/home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_event_class_syscall_exit.c:28:19: error: ‘nymya_event_class_syscall_exit’ undeclared here (not in a function); did you mean ‘nymya_event_class_syscall_enter’?
+   28 | EXPORT_SYMBOL_GPL(nymya_event_class_syscall_exit);
+      |                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+./include/linux/export.h:56:23: note: in definition of macro ‘__EXPORT_SYMBOL’
+   56 |         extern typeof(sym) sym;                                 \
+      |                       ^~~
+./include/linux/export.h:69:41: note: in expansion of macro ‘_EXPORT_SYMBOL’
+   69 | #define EXPORT_SYMBOL_GPL(sym)          _EXPORT_SYMBOL(sym, "GPL")
+      |                                         ^~~~~~~~~~~~~~
+/home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_event_class_syscall_exit.c:28:1: note: in expansion of macro ‘EXPORT_SYMBOL_GPL’
+   28 | EXPORT_SYMBOL_GPL(nymya_event_class_syscall_exit);
+      | ^~~~~~~~~~~~~~~~~
+make[3]: *** [scripts/Makefile.build:243: /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_event_class_syscall_exit.o] Error 1
 make[2]: *** [/usr/src/linux-headers-6.8.0-1031-raspi/Makefile:1925: /home/erick/nymyaOS/nymya-core/kernel_syscalls/arm64] Error 2
 make[1]: *** [Makefile:240: __sub-make] Error 2
 make[1]: Leaving directory '/usr/src/linux-headers-6.8.0-1031-raspi'
