@@ -1,0 +1,95 @@
+gcc -Wall -fPIC -O2 -I. -c complex_conj.c -o build/complex_conj.o
+gcc -Wall -fPIC -O2 -I. -c complex_exp_i.c -o build/complex_exp_i.o
+gcc -Wall -fPIC -O2 -I. -c complex_im.c -o build/complex_im.o
+gcc -Wall -fPIC -O2 -I. -c complex_mul.c -o build/complex_mul.o
+gcc -Wall -fPIC -O2 -I. -c complex_re.c -o build/complex_re.o
+gcc -Wall -fPIC -O2 -I. -c fixed_complex_multiply.c -o build/fixed_complex_multiply.o
+gcc -Wall -fPIC -O2 -I. -c fixed_conj.c -o build/fixed_conj.o
+gcc -Wall -fPIC -O2 -I. -c fixed_cos.c -o build/fixed_cos.o
+gcc -Wall -fPIC -O2 -I. -c fixed_point_cos.c -o build/fixed_point_cos.o
+fixed_point_cos.c: In function ‘fixed_point_cos’:
+fixed_point_cos.c:24:18: warning: implicit declaration of function ‘fixed_point_mul’; did you mean ‘fixed_point_cos’? [-Wimplicit-function-declaration]
+   24 |     int64_t x2 = fixed_point_mul(angle_fp, angle_fp);
+      |                  ^~~~~~~~~~~~~~~
+      |                  fixed_point_cos
+gcc -Wall -fPIC -O2 -I. -c fixed_point_sin.c -o build/fixed_point_sin.o
+fixed_point_sin.c: In function ‘fixed_point_sin’:
+fixed_point_sin.c:24:18: warning: implicit declaration of function ‘fixed_point_mul’; did you mean ‘fixed_point_sin’? [-Wimplicit-function-declaration]
+   24 |     int64_t x2 = fixed_point_mul(x, x);
+      |                  ^~~~~~~~~~~~~~~
+      |                  fixed_point_sin
+gcc -Wall -fPIC -O2 -I. -c fixed_sin.c -o build/fixed_sin.o
+gcc -Wall -fPIC -O2 -I. -c log.c -o build/log.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3301_identity_gate.c -o build/nymya_3301_identity_gate.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3302_global_phase.c -o build/nymya_3302_global_phase.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3303_pauli_x.c -o build/nymya_3303_pauli_x.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3304_pauli_y.c -o build/nymya_3304_pauli_y.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3305_pauli_z.c -o build/nymya_3305_pauli_z.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3306_phase_gate.c -o build/nymya_3306_phase_gate.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3307_sqrt_x_gate.c -o build/nymya_3307_sqrt_x_gate.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3308_hadamard_gate.c -o build/nymya_3308_hadamard_gate.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3309_controlled_not.c -o build/nymya_3309_controlled_not.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3310_anticontrol_not.c -o build/nymya_3310_anticontrol_not.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3311_controlled_z.c -o build/nymya_3311_controlled_z.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3312_double_controlled_not.c -o build/nymya_3312_double_controlled_not.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3313_swap.c -o build/nymya_3313_swap.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3314_imaginary_swap.c -o build/nymya_3314_imaginary_swap.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3315_phase_shift.c -o build/nymya_3315_phase_shift.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3316_phase_gate.c -o build/nymya_3316_phase_gate.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3317_controlled_phase.c -o build/nymya_3317_controlled_phase.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3318_controlled_phase_s.c -o build/nymya_3318_controlled_phase_s.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3319_rotate_x.c -o build/nymya_3319_rotate_x.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3320_rotate_y.c -o build/nymya_3320_rotate_y.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3321_rotate_z.c -o build/nymya_3321_rotate_z.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3322_xx_interaction.c -o build/nymya_3322_xx_interaction.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3323_yy_interaction.c -o build/nymya_3323_yy_interaction.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3324_zz_interaction.c -o build/nymya_3324_zz_interaction.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3325_xyz_entangle.c -o build/nymya_3325_xyz_entangle.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3326_sqrt_swap.c -o build/nymya_3326_sqrt_swap.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3327_sqrt_iswap.c -o build/nymya_3327_sqrt_iswap.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3328_swap_pow.c -o build/nymya_3328_swap_pow.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3329_fredkin.c -o build/nymya_3329_fredkin.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3330_rotate.c -o build/nymya_3330_rotate.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3331_barenco.c -o build/nymya_3331_barenco.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3332_berkeley.c -o build/nymya_3332_berkeley.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3333_c_v.c -o build/nymya_3333_c_v.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3334_core_entangle.c -o build/nymya_3334_core_entangle.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3335_dagwood.c -o build/nymya_3335_dagwood.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3336_echo_cr.c -o build/nymya_3336_echo_cr.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3337_fermion_sim.c -o build/nymya_3337_fermion_sim.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3338_givens.c -o build/nymya_3338_givens.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3339_magic.c -o build/nymya_3339_magic.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3340_sycamore.c -o build/nymya_3340_sycamore.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3341_cz_swap.c -o build/nymya_3341_cz_swap.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3342_deutsch.c -o build/nymya_3342_deutsch.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3343_margolis.c -o build/nymya_3343_margolis.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3344_peres.c -o build/nymya_3344_peres.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3345_cf_swap.c -o build/nymya_3345_cf_swap.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3346_triangular_lattice.c -o build/nymya_3346_triangular_lattice.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3347_hexagonal_lattice.c -o build/nymya_3347_hexagonal_lattice.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3348_hex_rhombi_lattice.c -o build/nymya_3348_hex_rhombi_lattice.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3349_tessellated_triangles.c -o build/nymya_3349_tessellated_triangles.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3350_tessellated_hexagons.c -o build/nymya_3350_tessellated_hexagons.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3351_tessellated_hex_rhombi.c -o build/nymya_3351_tessellated_hex_rhombi.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3352_e8_group.c -o build/nymya_3352_e8_group.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3353_flower_of_life.c -o build/nymya_3353_flower_of_life.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3354_metatron_cube.c -o build/nymya_3354_metatron_cube.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3355_fcc_lattice.c -o build/nymya_3355_fcc_lattice.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3356_hcp_lattice.c -o build/nymya_3356_hcp_lattice.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3357_e8_projected_lattice.c -o build/nymya_3357_e8_projected_lattice.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3358_d4_lattice.c -o build/nymya_3358_d4_lattice.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3359_b5_lattice.c -o build/nymya_3359_b5_lattice.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3360_e5_projected_lattice.c -o build/nymya_3360_e5_projected_lattice.o
+gcc -Wall -fPIC -O2 -I. -c nymya_3361_qrng_range.c -o build/nymya_3361_qrng_range.o
+gcc -Wall -fPIC -O2 -I. -c nymya_complex_math.c -o build/nymya_complex_math.o
+gcc -Wall -fPIC -O2 -I. -c nymya_enter_syscall_print_funcs.c -o build/nymya_enter_syscall_print_funcs.o
+gcc -Wall -fPIC -O2 -I. -c nymya_event_class_syscall_enter.c -o build/nymya_event_class_syscall_enter.o
+gcc -Wall -fPIC -O2 -I. -c nymya_event_class_syscall_exit.c -o build/nymya_event_class_syscall_exit.o
+gcc -Wall -fPIC -O2 -I. -c nymya_exit_syscall_print_funcs.c -o build/nymya_exit_syscall_print_funcs.o
+gcc -shared -o libnymya.so build/complex_conj.o build/complex_exp_i.o build/complex_im.o build/complex_mul.o build/complex_re.o build/fixed_complex_multiply.o build/fixed_conj.o build/fixed_cos.o build/fixed_point_cos.o build/fixed_point_sin.o build/fixed_sin.o build/log.o build/nymya_3301_identity_gate.o build/nymya_3302_global_phase.o build/nymya_3303_pauli_x.o build/nymya_3304_pauli_y.o build/nymya_3305_pauli_z.o build/nymya_3306_phase_gate.o build/nymya_3307_sqrt_x_gate.o build/nymya_3308_hadamard_gate.o build/nymya_3309_controlled_not.o build/nymya_3310_anticontrol_not.o build/nymya_3311_controlled_z.o build/nymya_3312_double_controlled_not.o build/nymya_3313_swap.o build/nymya_3314_imaginary_swap.o build/nymya_3315_phase_shift.o build/nymya_3316_phase_gate.o build/nymya_3317_controlled_phase.o build/nymya_3318_controlled_phase_s.o build/nymya_3319_rotate_x.o build/nymya_3320_rotate_y.o build/nymya_3321_rotate_z.o build/nymya_3322_xx_interaction.o build/nymya_3323_yy_interaction.o build/nymya_3324_zz_interaction.o build/nymya_3325_xyz_entangle.o build/nymya_3326_sqrt_swap.o build/nymya_3327_sqrt_iswap.o build/nymya_3328_swap_pow.o build/nymya_3329_fredkin.o build/nymya_3330_rotate.o build/nymya_3331_barenco.o build/nymya_3332_berkeley.o build/nymya_3333_c_v.o build/nymya_3334_core_entangle.o build/nymya_3335_dagwood.o build/nymya_3336_echo_cr.o build/nymya_3337_fermion_sim.o build/nymya_3338_givens.o build/nymya_3339_magic.o build/nymya_3340_sycamore.o build/nymya_3341_cz_swap.o build/nymya_3342_deutsch.o build/nymya_3343_margolis.o build/nymya_3344_peres.o build/nymya_3345_cf_swap.o build/nymya_3346_triangular_lattice.o build/nymya_3347_hexagonal_lattice.o build/nymya_3348_hex_rhombi_lattice.o build/nymya_3349_tessellated_triangles.o build/nymya_3350_tessellated_hexagons.o build/nymya_3351_tessellated_hex_rhombi.o build/nymya_3352_e8_group.o build/nymya_3353_flower_of_life.o build/nymya_3354_metatron_cube.o build/nymya_3355_fcc_lattice.o build/nymya_3356_hcp_lattice.o build/nymya_3357_e8_projected_lattice.o build/nymya_3358_d4_lattice.o build/nymya_3359_b5_lattice.o build/nymya_3360_e5_projected_lattice.o build/nymya_3361_qrng_range.o build/nymya_complex_math.o build/nymya_enter_syscall_print_funcs.o build/nymya_event_class_syscall_enter.o build/nymya_event_class_syscall_exit.o build/nymya_exit_syscall_print_funcs.o
+/usr/bin/ld: build/complex_im.o: in function `complex_im':
+complex_im.c:(.text+0x0): multiple definition of `complex_im'; build/complex_exp_i.o:complex_exp_i.c:(.text+0x0): first defined here
+/usr/bin/ld: build/nymya_3360_e5_projected_lattice.o: in function `dist5d':
+nymya_3360_e5_projected_lattice.c:(.text+0x0): multiple definition of `dist5d'; build/nymya_3359_b5_lattice.o:nymya_3359_b5_lattice.c:(.text+0x0): first defined here
+collect2: error: ld returned 1 exit status
+make: *** [Makefile:56: libnymya.so] Error 1

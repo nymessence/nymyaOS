@@ -1,29 +1,15 @@
-// src/complex_im.c
+// complex_exp_i.c
 
 #include "nymya.h"
-#ifndef __KERNEL__
-#include <complex.h>
-#endif
 
 /**
- * complex_im - Returns the imaginary part of a complex_double.
+ * complex_exp_i - e^i*theta.
  *
- * In kernel mode, complex_double is a struct with a fixed-point `im` field.
- * In user mode, complex_double is a native `_Complex double`.
- *
- * @c: The complex_double input.
- *
- * Returns:
- *   - Kernel: `int64_t` fixed-point imaginary component.
- *   - User: `double` floating-point imaginary component.
+ * @theta: The angle in radians.
+ * Returns the complex number representing e^(i*theta).
  */
-#ifdef __KERNEL__
-int64_t complex_im(complex_double c) {
-    return c.im;
+complex_double complex_exp_i(double theta) {
+    return complex_add(complex_from_real(cos(theta)),
+                       complex_mul_real(I_val, sin(theta)));
 }
-#else
-double complex_im(complex_double c) {
-    return cimag(c);
-}
-#endif
 
