@@ -1,8 +1,8 @@
 // src/fixed_point_sin.c
 
 #include "nymya.h"
+#include "nymya.h"
 int64_t fixed_point_mul(int64_t a, int64_t b);
-#include "nymya_fixed_point.h"
 
 /**
  * fixed_point_sin - Calculate the sine of a fixed-point angle.
