@@ -14,13 +14,6 @@
 /**
  * dist5d - Calculates the Euclidean distance between two nymya_qpos5d points (userland).
  */
-static double dist5d(nymya_qpos5d a, nymya_qpos5d b) {
-    return sqrt(pow(a.x - b.x, 2) +
-                pow(a.y - b.y, 2) +
-                pow(a.z - b.z, 2) +
-                pow(a.w - b.w, 2) +
-                pow(a.v - b.v, 2));
-}
 
 /**
  * nymya_3360_e5_projected_lattice - Userland wrapper for E5 projected lattice syscall.
