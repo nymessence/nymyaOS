@@ -1,6 +1,7 @@
 // src/fixed_point_cos.c
 
 #include "nymya.h"
+#include "nymya_fixed_point.h"
 
 /**
  * fixed_point_cos - Calculate the cosine of a fixed-point angle.
