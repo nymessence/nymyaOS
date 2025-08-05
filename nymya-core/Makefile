@@ -58,7 +58,7 @@ $(LIB_FILE): $(OBJECTS)
 # Kernel module sources & objects
 # -----------------------------------------------------------------------------
 # Get all C files for the kernel module, excluding the ones for userland
-KERNEL_SRCS := $(filter-out complex_conj.c complex_exp_i.c complex_im.c complex_mul.c complex_re.c fixed_complex_multiply.c fixed_conj.c fixed_cos.c fixed_point_cos.c fixed_point_sin.c fixed_sin.c, $(wildcard *.c))
+KERNEL_SRCS := $(wildcard *.c)
 KERNEL_OBJS := $(patsubst %.c,%.o,$(KERNEL_SRCS))
 
 # -----------------------------------------------------------------------------
