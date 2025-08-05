@@ -57,9 +57,9 @@ $(LIB_FILE): $(OBJECTS)
 # -----------------------------------------------------------------------------
 # Kernel module sources & objects
 # -----------------------------------------------------------------------------
-# Get all C files for the kernel module, excluding the ones for userland
-KERNEL_SRCS := $(wildcard *.c)
-KERNEL_OBJS := $(patsubst %.c,%.o,$(KERNEL_SRCS))
+# Get all C files for the kernel module, expected to be in KERNEL_SRC_DIR
+KERNEL_SRCS := $(wildcard $(KERNEL_SRC_DIR)/*.c)
+KERNEL_OBJS := $(notdir $(patsubst %.c,%.o,$(KERNEL_SRCS)))
 
 # -----------------------------------------------------------------------------
 # Kernel module build for each architecture
