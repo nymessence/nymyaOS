@@ -6,7 +6,7 @@
 #ifdef __KERNEL__
 
 /**
- * fixed_complex_multiply - Multiplies two fixed-point complex numbers (internal static function).
+ * fixed_complex_multiply - Multiplies two fixed-point complex numbers.
  * @re1: Real part of the first complex number in Q32.32 fixed-point.
  * @im1: Imaginary part of the first complex number in Q32.32 fixed-point.
  * @re2: Real part of the second complex number in Q32.32 fixed-point.
@@ -21,8 +21,8 @@
  * Uses 128-bit intermediate types (`__int128`) to prevent overflow during intermediate
  * multiplications before shifting back to the 64-bit fixed-point format.
  *
- * This function is now 'static', meaning it is only visible and callable within this
- * compilation unit (nymya_complex_math.c). Other files should use `complex_mul`
+ * This function is declared globally in `nymya.h` and is intended to be
+ * visible across compilation units. Other files should typically use `complex_mul`
  * from `nymya.h` which operates on `complex_double` structs.
  *
  * Returns:
