@@ -13,7 +13,7 @@
  * @theta_fp: The angle in radians, as a Q32.32 fixed-point value.
  * Returns the complex number representing e^(i*theta).
  */
-complex_double complex_exp_i(int64_t theta_fp) {
+complex_double complex_exp_i(int64_t theta_fp) { // Corrected parameter type and name
     complex_double result;
     result.re = fixed_cos(theta_fp); // Call fixed-point cosine function
     result.im = fixed_sin(theta_fp); // Call fixed-point sine function
@@ -25,7 +25,7 @@ complex_double complex_exp_i(int64_t theta_fp) {
 
 #else // Userland implementation
 
-#include <complex.h> // For native complex numbers
+#include <complex.h> // For native _Complex double and I macro
 #include <math.h>    // For cos, sin
 #include <stdio.h>   // For printf, if used for debugging
 
@@ -36,14 +36,13 @@ complex_double complex_exp_i(int64_t theta_fp) {
  * Returns the complex number representing e^(i*theta).
  */
 complex_double complex_exp_i(double theta) {
-    // In userland, complex_double is likely _Complex double or a struct with double members.
-    // Assuming complex_double is _Complex double for direct multiplication.
-    // If complex_double is a struct, you'd need to define make_complex or assign members directly.
-    // For consistency with kernel, let's assume it's a struct and assign.
-    complex_double result;
-    result.re = cos(theta);
-    result.im = sin(theta);
-    return result;
+    // In userland, complex_double is typically defined as _Complex double when <complex.h> is included.
+    // The previous error "request for member 're' in something not a structure or union"
+    // indicates that 'result' was being treated as _Complex double, which doesn't have .re/.im members.
+    // The correct way to construct a complex number from real and imaginary parts using <complex.h>
+    // is with 'creal' and 'cimag' or directly using 'cos(theta) + I * sin(theta)'.
+    return cos(theta) + I * sin(theta);
 }
 
 #endif
+
