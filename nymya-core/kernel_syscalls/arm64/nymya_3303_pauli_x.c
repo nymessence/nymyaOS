@@ -1,0 +1,1 @@
+/home/erick/nymyaOS/nymya-core/nymya_3303_pauli_x.c
