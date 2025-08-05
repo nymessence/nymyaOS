@@ -1,12 +1,12 @@
 // src/nymya_event_class_syscall_enter.c
 //
-// Defines the event_class_syscall_enter function for both kernel and userland.
+// Defines the nymya_event_class_syscall_enter function for both kernel and userland.
 // In the kernel, it uses pr_info for logging. In userland, it uses printf.
 
 #include "nymya.h" // Assumed to define common types like uint64_t
 
 #ifdef __KERNEL__
-    int event_class_syscall_enter(uint64_t syscall_id, uint64_t qubit_id);
+    int nymya_event_class_syscall_enter(uint64_t syscall_id, uint64_t qubit_id);
 
 
     #include <linux/kernel.h> // For pr_info
@@ -19,7 +19,7 @@
     #ifndef EVENT_CLASS_SYSCALL_ENTER_DEFINED
     #define EVENT_CLASS_SYSCALL_ENTER_DEFINED
     /**
-     * event_class_syscall_enter - Kernel-side implementation for syscall entry event logging.
+     * nymya_event_class_syscall_enter - Kernel-side implementation for syscall entry event logging.
      * @syscall_id: The ID of the syscall being entered.
      * @qubit_id: The ID of the primary qubit involved (or 0 if not applicable).
      *
@@ -43,7 +43,7 @@
     #include <inttypes.h> // ADDED: For PRIu64 macro
 
     /**
-     * event_class_syscall_enter - Userland implementation for syscall entry event logging.
+     * nymya_event_class_syscall_enter - Userland implementation for syscall entry event logging.
      * @syscall_id: The ID of the syscall being entered.
      * @qubit_id: The ID of the primary qubit involved (or 0 if not applicable).
      *
