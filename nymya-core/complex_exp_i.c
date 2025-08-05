@@ -45,4 +45,3 @@ complex_double complex_exp_i(double theta) {
 }
 
 #endif
-
