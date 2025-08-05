@@ -5,9 +5,12 @@ LOG_FILE="gemini_automation_log.txt"
 GIT_COMMIT_MSG="Automated kernel fix: "
 BUILD_COMMAND="./compile.sh"
 BUILD_LOG="build_errors.log"
-DIFF_FILE="fix.diff"
+GEMINI_MODEL="gemini-2.5-flash"
 
 # --- Setup ---
+echo "--- $(date) ---" | tee -a "$LOG_FILE"
+echo "Starting autonomous kernel fix agent." | tee -a "$LOG_FILE"
+
 # Check if we are in the nymya-core directory
 if [[ ! -d "kernel_syscalls" ]]; then
     echo "Error: This script must be run from the 'nymya-core' directory." | tee -a "$LOG_FILE"
@@ -16,8 +19,11 @@ fi
 echo "Running from the correct directory." | tee -a "$LOG_FILE"
 
 # Initialize a new Git branch for this process
-# Ensure we are on a branch that can be reverted easily
-git checkout -b gemini-autofix-$(date +%s) || { echo "Error: Failed to create or checkout git branch."; exit 1; }
+BRANCH_NAME="gemini-autofix"
+git checkout -b "$BRANCH_NAME" || { echo "Error: Failed to create or checkout git branch."; exit 1; }
+echo "Created and checked out new branch: $BRANCH_NAME" | tee -a "$LOG_FILE"
+
+# Initialize log files
 echo "" > "$LOG_FILE"
 echo "" > "$BUILD_LOG"
 
@@ -36,48 +42,49 @@ while true; do
 
         ERROR_SUMMARY=$(tail -n 200 "$BUILD_LOG")
 
-        # The prompt is now updated to request a diff for the original source file.
+        # The prompt now requests a sed command to fix the first error
         GEMINI_PROMPT="You are an autonomous code-fixing agent. I have a failing kernel build. My task is to fix all errors and successfully compile.
-- The C source files are in the current directory, not in any subdirectories. The build process copies them.
+- The C source files are in the current directory, not in any subdirectories.
 - I will provide the build log containing the errors.
-- Your sole output must be a single, unified diff to fix the **first** error that directly prevents compilation or linking.
-- Do not provide any prose, explanations, or code blocks. Just the diff content.
-- The diff's file path must be relative to the current directory (e.g., '--- a/nymya_event_class_syscall_enter.c').
-- Example format:
---- a/file.c
-+++ b/file.c
-@@ -1,3 +1,3 @@
-- old line
-+ new line
+- Your sole output must be a single 'sed' command to fix the **first** error that directly prevents compilation or linking.
+- Do not provide any prose, explanations, or code blocks. Just the command.
+- Example command format:
+sed -i 's/old_pattern/new_pattern/' filename.c
 
 Here is the build log for analysis:
 $ERROR_SUMMARY
 "
         
-        GEMINI_RESPONSE=$(gemini -p "$GEMINI_PROMPT")
+        # Call Gemini CLI
+        GEMINI_RESPONSE=$(gemini -m "$GEMINI_MODEL" -p "$GEMINI_PROMPT")
         
         if [[ -z "$GEMINI_RESPONSE" ]]; then
             echo "Gemini provided no response. Exiting the autonomous loop." | tee -a "$LOG_FILE"
             exit 1
         fi
         
-        echo "$GEMINI_RESPONSE" > "$DIFF_FILE"
-        echo "Received diff from Gemini and saved to $DIFF_FILE." | tee -a "$LOG_FILE"
+        echo "Received command from Gemini: $GEMINI_RESPONSE" | tee -a "$LOG_FILE"
 
-        if patch -p1 -N --binary < "$DIFF_FILE"; then
-            echo "Successfully applied Gemini's fix." | tee -a "$LOG_FILE"
-            git add .
-            COMMIT_SUBJECT=$(head -n 1 "$DIFF_FILE" | sed 's/--- a\///' | sed 's/+++ b\///')
-            git commit -m "$GIT_COMMIT_MSG$COMMIT_SUBJECT"
-            echo "Committed changes: $GIT_COMMIT_MSG$COMMIT_SUBJECT" | tee -a "$LOG_FILE"
+        # Check if the response is a sed command before executing
+        if [[ "$GEMINI_RESPONSE" == "sed -i"* ]]; then
+            eval "$GEMINI_RESPONSE"
+            if [ $? -eq 0 ]; then
+                echo "Successfully executed Gemini's fix." | tee -a "$LOG_FILE"
+                git add .
+                # Create a commit message from the sed command
+                COMMIT_MSG=$(echo "$GEMINI_RESPONSE" | cut -d' ' -f4 | sed 's/\\//g' | cut -d'/' -f1)
+                git commit -m "$GIT_COMMIT_MSG$COMMIT_MSG"
+                echo "Committed changes." | tee -a "$LOG_FILE"
+            else
+                echo "Failed to execute Gemini's fix. Reverting and trying again." | tee -a "$LOG_FILE"
+                git reset --hard HEAD
+                exit 1 # Exit to prevent an infinite loop if the fix is bad
+            fi
         else
-            echo "Failed to apply Gemini's fix. Reverting and trying again." | tee -a "$LOG_FILE"
-            git reset --hard HEAD
+            echo "Gemini's response was not a valid sed command. Exiting." | tee -a "$LOG_FILE"
+            exit 1
         fi
-
-        rm -f "$DIFF_FILE"
-        echo "Cleaned up temporary diff file: $DIFF_FILE." | tee -a "$LOG_FILE"
-
+        
     else
         echo "Build completed successfully with zero errors!" | tee -a "$LOG_FILE"
         git add .
@@ -86,3 +93,6 @@ $ERROR_SUMMARY
         break
     fi
 done
+
+echo "Autonomous fix agent finished." | tee -a "$LOG_FILE"
+

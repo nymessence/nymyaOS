@@ -1,6 +1,6 @@
 // src/nymya_exit_syscall_print_funcs.c
 //
-// Defines the exit_syscall_print_funcs function for both kernel and userland.
+// Defines the nymya_exit_syscall_print_funcs function for both kernel and userland.
 // In the kernel, it uses pr_info for logging. In userland, it uses printf.
 
 #include "nymya.h" // Assumed to define common types like uint64_t
@@ -11,7 +11,7 @@
     #include <linux/module.h> // For general kernel module definitions and EXPORT_SYMBOL_GPL
 
     /**
-     * exit_syscall_print_funcs - Kernel-side implementation for syscall exit event logging.
+     * nymya_exit_syscall_print_funcs - Kernel-side implementation for syscall exit event logging.
      * @syscall_id: The ID of the syscall being exited.
      * @return_code: The return code of the syscall.
      *
@@ -20,20 +20,14 @@
      *
      * Returns: 0 on success.
      */
-#ifndef EXIT_SYSCALL_PRINT_FUNCS_DEFINED
-#define EXIT_SYSCALL_PRINT_FUNCS_DEFINED
-    int exit_syscall_print_funcs(uint64_t syscall_id, int return_code) {
+    int nymya_exit_syscall_print_funcs(uint64_t syscall_id, int return_code) {
         // For kernel logging (pr_info), %llu is generally correct for uint64_t
         pr_info("NYMYA_SYSCALL_EXIT: SyscallID=%llu, ReturnCode=%d\n", syscall_id, return_code);
         return 0;
     }
-    EXPORT_SYMBOL(exit_syscall_print_funcs);
-#endif // EXIT_SYSCALL_PRINT_FUNCS_DEFINED
-EXPORT_SYMBOL_GPL(nymya_exit_syscall_print_funcs);
-
-
 
     // Export the symbol so other kernel modules/code can call it directly.
+    // ONLY ONE EXPORT_SYMBOL_GPL CALL IS NEEDED PER FUNCTION.
     EXPORT_SYMBOL_GPL(nymya_exit_syscall_print_funcs);
 
 #else // Userland implementation
@@ -43,7 +37,7 @@ EXPORT_SYMBOL_GPL(nymya_exit_syscall_print_funcs);
     #include <inttypes.h> // For PRIu64 macro
 
     /**
-     * exit_syscall_print_funcs - Userland implementation for syscall exit event logging.
+     * nymya_exit_syscall_print_funcs - Userland implementation for syscall exit event logging.
      * @syscall_id: The ID of the syscall being exited.
      * @return_code: The return code of the syscall.
      *
@@ -53,7 +47,7 @@ EXPORT_SYMBOL_GPL(nymya_exit_syscall_print_funcs);
      *
      * Returns: 0 on success.
      */
-    int exit_syscall_print_funcs(uint64_t syscall_id, int return_code) {
+    int nymya_exit_syscall_print_funcs(uint64_t syscall_id, int return_code) {
         // Using PRIu64 for platform-independent printing of uint64_t
         printf("USERLAND_SYSCALL_EXIT: SyscallID=%" PRIu64 ", ReturnCode=%d\n", syscall_id, return_code);
         return 0;

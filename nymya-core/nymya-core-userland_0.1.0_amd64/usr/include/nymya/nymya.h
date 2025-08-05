@@ -145,6 +145,8 @@ typedef struct {
 // Shared function declarations
 int log_symbolic_event(const char* gate, uint64_t id, const char* tag, const char* msg);
 int nymya_event_class_syscall_enter(uint64_t syscall_id, uint64_t qubit_id);
+int nymya_syscall_event_exit(uint64_t syscall_id, int return_code);
+int nymya_syscall_print_exit_funcs(uint64_t syscall_id, int return_code);
 int nymya_exit_syscall_print_funcs(uint64_t syscall_id, int return_code);
 
 #ifdef __KERNEL__

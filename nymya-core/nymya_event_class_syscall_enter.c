@@ -28,12 +28,12 @@
      *
      * Returns: 0 on success.
      */
-    int event_class_syscall_enter(uint64_t syscall_id, uint64_t qubit_id) {
+    int nymya_event_class_syscall_enter(uint64_t syscall_id, uint64_t qubit_id) {
         // For kernel logging (pr_info), %llu is generally correct for uint64_t
         pr_info("NYMYA_SYSCALL_ENTER: SyscallID=%llu, QubitID=%llu\n", syscall_id, qubit_id);
         return 0;
     }
-    EXPORT_SYMBOL(event_class_syscall_enter);
+    EXPORT_SYMBOL(nymya_event_class_syscall_enter);
     #endif // EVENT_CLASS_SYSCALL_ENTER_DEFINED
     // EXPORT_SYMBOL_GPL(nymya_event_class_syscall_enter); // This line is duplicated and causes a build error.
 #else // Userland implementation
@@ -53,7 +53,7 @@
      *
      * Returns: 0 on success.
      */
-    int event_class_syscall_enter(uint64_t syscall_id, uint64_t qubit_id) {
+    int nymya_event_class_syscall_enter(uint64_t syscall_id, uint64_t qubit_id) {
         // Using PRIu64 for platform-independent printing of uint64_t
         printf("USERLAND_SYSCALL_ENTER: SyscallID=%" PRIu64 ", QubitID=%" PRIu64 "\n", syscall_id, qubit_id);
         return 0;

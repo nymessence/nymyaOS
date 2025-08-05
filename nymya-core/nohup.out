@@ -1,0 +1,273 @@
+Running from the correct directory.
+Already on 'gemini-autofix'
+M	nymya-core/auto_dev.sh
+Applying fix for implicit declaration of 'fixed_point_mul' in fixed_point_cos.c
+[gemini-autofix 6470494] Automated kernel fix:  Fixed implicit declaration in fixed_point_cos.c
+ 1 file changed, 1 insertion(+)
+Committed change to fixed_point_cos.c
+Applying fix for implicit declaration of 'fixed_point_mul' in fixed_point_sin.c
+[gemini-autofix 212cadd] Automated kernel fix:  Fixed implicit declaration in fixed_point_sin.c
+ 1 file changed, 1 insertion(+)
+Committed change to fixed_point_sin.c
+Applying fix for unused function 'dist5d' in nymya_3360_e5_projected_lattice.c
+[gemini-autofix 71b5813] Automated kernel fix:  Removed unused function 'dist5d'
+ 1 file changed, 7 deletions(-)
+Committed change to nymya_3360_e5_projected_lattice.c
+Applying fix for 'already defined' symbol errors by making syscall functions static.
+On branch gemini-autofix
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   auto_dev.sh
+	modified:   build_errors.log
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	gemini_automation_log.txt
+	nohup.out
+
+no changes added to commit (use "git add" and/or "git commit -a")
+Committed change to nymya_exit_syscall_print_funcs.c
+On branch gemini-autofix
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   auto_dev.sh
+	modified:   build_errors.log
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	gemini_automation_log.txt
+	nohup.out
+
+no changes added to commit (use "git add" and/or "git commit -a")
+Committed change to nymya_event_class_syscall_exit.c
+--- Thu Jul 31 21:47:28 EDT 2025 ---
+All fixes applied and committed. Starting final build to verify.
+Final build failed. There may be further issues.
+Check build_errors.log for details.
+--- Thu Jul 31 21:55:20 EDT 2025 ---
+Starting automated kernel fix script.
+Running from the correct directory.
+Already on 'gemini-autofix'
+M	nymya-core/auto_dev.sh
+M	nymya-core/build_errors.log
+M	nymya-core/gemini_automation_log.txt
+On branch 'gemini-autofix'.
+Applying fix for fatal error in fixed_point_cos.c.
+[gemini-autofix b76be2f] Automated kernel fix:  Added prototype for fixed_point_mul to resolve 'No such file or directory' error in fixed_point_cos.c
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+Committed change to fixed_point_cos.c.
+Applying fix for implicit declaration warning in fixed_point_sin.c.
+[gemini-autofix c54013d] Automated kernel fix:  Added prototype for fixed_point_mul to resolve implicit declaration warning in fixed_point_sin.c
+ 1 file changed, 1 insertion(+)
+Committed change to fixed_point_sin.c.
+Applying fix for unused function 'dist5d'.
+On branch gemini-autofix
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   auto_dev.sh
+	modified:   build_errors.log
+	modified:   gemini_automation_log.txt
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	nohup.out
+
+no changes added to commit (use "git add" and/or "git commit -a")
+Committed change to nymya_3360_e5_projected_lattice.c.
+Applying fix for 'already defined' symbol errors by making syscall functions static.
+On branch gemini-autofix
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   auto_dev.sh
+	modified:   build_errors.log
+	modified:   gemini_automation_log.txt
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	nohup.out
+
+no changes added to commit (use "git add" and/or "git commit -a")
+Committed change to nymya_exit_syscall_print_funcs.c.
+On branch gemini-autofix
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   auto_dev.sh
+	modified:   build_errors.log
+	modified:   gemini_automation_log.txt
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	nohup.out
+
+no changes added to commit (use "git add" and/or "git commit -a")
+Committed change to nymya_event_class_syscall_exit.c.
+--- Thu Jul 31 21:55:20 EDT 2025 ---
+All fixes applied and committed. Starting final build to verify.
+--- Thu Jul 31 21:58:08 EDT 2025 ---
+Starting automated kernel fix script.
+Running from the correct directory.
+Already on 'gemini-autofix'
+M	nymya-core/auto_dev.sh
+M	nymya-core/build_errors.log
+M	nymya-core/gemini_automation_log.txt
+On branch 'gemini-autofix'.
+Applying fix for fatal error in fixed_point_cos.c.
+[gemini-autofix 6221f06] Automated kernel fix:  Added prototype for fixed_point_mul to resolve 'No such file or directory' error in fixed_point_cos.c
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+Committed change to fixed_point_cos.c.
+Applying fix for implicit declaration warning in fixed_point_sin.c.
+[gemini-autofix fcd2f4c] Automated kernel fix:  Added prototype for fixed_point_mul to resolve implicit declaration warning in fixed_point_sin.c
+ 1 file changed, 1 insertion(+)
+Committed change to fixed_point_sin.c.
+Applying fix for unused function 'dist5d'.
+On branch gemini-autofix
+Revert currently in progress.
+  (run "git revert --continue" to continue)
+  (use "git revert --skip" to skip this patch)
+  (use "git revert --abort" to cancel the revert operation)
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   auto_dev.sh
+	modified:   build_errors.log
+	modified:   gemini_automation_log.txt
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	nohup.out
+
+no changes added to commit (use "git add" and/or "git commit -a")
+Committed change to nymya_3360_e5_projected_lattice.c.
+Applying fix for 'already defined' symbol errors by making syscall functions static.
+On branch gemini-autofix
+Revert currently in progress.
+  (run "git revert --continue" to continue)
+  (use "git revert --skip" to skip this patch)
+  (use "git revert --abort" to cancel the revert operation)
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   auto_dev.sh
+	modified:   build_errors.log
+	modified:   gemini_automation_log.txt
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	nohup.out
+
+no changes added to commit (use "git add" and/or "git commit -a")
+Committed change to nymya_exit_syscall_print_funcs.c.
+On branch gemini-autofix
+Revert currently in progress.
+  (run "git revert --continue" to continue)
+  (use "git revert --skip" to skip this patch)
+  (use "git revert --abort" to cancel the revert operation)
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   auto_dev.sh
+	modified:   build_errors.log
+	modified:   gemini_automation_log.txt
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	nohup.out
+
+no changes added to commit (use "git add" and/or "git commit -a")
+Committed change to nymya_event_class_syscall_exit.c.
+--- Thu Jul 31 21:58:08 EDT 2025 ---
+All fixes applied and committed. Starting final build to verify.
+Final build failed. There may be further issues or the fixes were incorrect.
+Check 'build_errors.log' for details.
+--- Thu Jul 31 22:04:51 EDT 2025 ---
+Starting automated kernel fix script.
+Running from the correct directory.
+Already on 'gemini-autofix'
+M	nymya-core/auto_dev.sh
+M	nymya-core/build_errors.log
+M	nymya-core/gemini_automation_log.txt
+On branch 'gemini-autofix'.
+Applying fix for missing nymya.h include in fixed_point_cos.c.
+[gemini-autofix dbc67df] Automated kernel fix:  Added correct include nymya.h to fixed_point_cos.c
+ 1 file changed, 1 insertion(+)
+Committed change to fixed_point_cos.c.
+Applying fix for missing nymya.h include in fixed_point_sin.c.
+[gemini-autofix 0c8b3f9] Automated kernel fix:  Added correct include nymya.h to fixed_point_sin.c
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+Committed change to fixed_point_sin.c.
+Applying fix for unused function 'dist5d'.
+On branch gemini-autofix
+Revert currently in progress.
+  (run "git revert --continue" to continue)
+  (use "git revert --skip" to skip this patch)
+  (use "git revert --abort" to cancel the revert operation)
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   auto_dev.sh
+	modified:   build_errors.log
+	modified:   gemini_automation_log.txt
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	nohup.out
+
+no changes added to commit (use "git add" and/or "git commit -a")
+Committed change to nymya_3360_e5_projected_lattice.c.
+Applying fix for 'already defined' symbol errors by making syscall functions static.
+On branch gemini-autofix
+Revert currently in progress.
+  (run "git revert --continue" to continue)
+  (use "git revert --skip" to skip this patch)
+  (use "git revert --abort" to cancel the revert operation)
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   auto_dev.sh
+	modified:   build_errors.log
+	modified:   gemini_automation_log.txt
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	nohup.out
+
+no changes added to commit (use "git add" and/or "git commit -a")
+Committed change to nymya_exit_syscall_print_funcs.c.
+On branch gemini-autofix
+Revert currently in progress.
+  (run "git revert --continue" to continue)
+  (use "git revert --skip" to skip this patch)
+  (use "git revert --abort" to cancel the revert operation)
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   auto_dev.sh
+	modified:   build_errors.log
+	modified:   gemini_automation_log.txt
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	nohup.out
+
+no changes added to commit (use "git add" and/or "git commit -a")
+Committed change to nymya_event_class_syscall_exit.c.
+--- Thu Jul 31 22:04:51 EDT 2025 ---
+All fixes applied and committed. Starting final build to verify.
+Final build failed. There may be further issues or the fixes were incorrect.
+Check 'build_errors.log' for details.
+--- Thu Jul 31 22:13:57 EDT 2025 ---
+Starting autonomous kernel fix agent.
+Running from the correct directory.
+fatal: a branch named 'gemini-autofix' already exists
+Error: Failed to create or checkout git branch.

@@ -1,5 +1,3 @@
-include ../version.conf
-
 # --- Toolchain & flags ---
 CC             := gcc
 KERNEL_BUILD_DIR := /lib/modules/$(shell uname -r)/build
@@ -27,10 +25,11 @@ INSTALL_INCLUDE_DIR := /usr/include/$(LIB_NAME)
 INSTALL_KERNEL_DIR  := /lib/modules/$(shell uname -r)/extra
 
 # --- Package metadata (from version.conf) ---
-VERSION     ?= 0.0.0
-PKG_ARCH    ?= amd64
-MAINTAINER  ?= Unknown <>
-DESCRIPTION := NymyaOS Core Syscall SDK
+# NOTE: version.conf is not provided, so we assume these are set
+VERSION       ?= 0.1.0
+PKG_ARCH      ?= amd64
+MAINTAINER    ?= Unknown <>
+DESCRIPTION   := NymyaOS Core Syscall SDK
 
 # --- .deb output dirs template ---
 DEB_USERLAND_DIR := nymya-core-userland_$(VERSION)_$(PKG_ARCH)
@@ -56,6 +55,13 @@ $(LIB_FILE): $(OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $^
 
 # -----------------------------------------------------------------------------
+# Kernel module sources & objects
+# -----------------------------------------------------------------------------
+# Get all C files for the kernel module, excluding the ones for userland
+KERNEL_SRCS := $(filter-out complex_conj.c complex_exp_i.c complex_im.c complex_mul.c complex_re.c fixed_complex_multiply.c fixed_conj.c fixed_cos.c fixed_point_cos.c fixed_point_sin.c fixed_sin.c, $(wildcard *.c))
+KERNEL_OBJS := $(patsubst %.c,%.o,$(KERNEL_SRCS))
+
+# -----------------------------------------------------------------------------
 # Kernel module build for each architecture
 # -----------------------------------------------------------------------------
 .PHONY: kernel $(ARCHS)
@@ -66,14 +72,15 @@ $(ARCHS):
 	$(eval OUT_DIR := $(KERNEL_SRC_DIR)/$@)
 	@echo "Building kernel module for $@ with CROSS_COMPILE='$(CCP)'"
 	@mkdir -p $(OUT_DIR)
-	@rm -f $(OUT_DIR)/*.c $(OUT_DIR)/nymya.h
-	# Link all nymya_*.c files and log.c into the architecture-specific kernel source directory
-	@for f in $(wildcard nymya_*.c); do ln -sf $(PWD)/$$f $(OUT_DIR)/; done
-	@ln -sf $(PWD)/log.c $(OUT_DIR)/ # Explicitly link log.c
+	@rm -f $(OUT_DIR)/*.c $(OUT_DIR)/*.h
+	# Link all required C files into the architecture-specific directory
+	@for f in $(KERNEL_SRCS); do ln -sf $(PWD)/$$f $(OUT_DIR)/; done
+	# Link the nymya.h header file
 	@ln -sf $(PWD)/nymya.h $(OUT_DIR)/
+	# Generate the Makefile for the kernel build system
 	@printf "obj-m := nymya_syscalls.o\n" > $(OUT_DIR)/Makefile
-	@printf "nymya_syscalls-objs := log.o " >> $(OUT_DIR)/Makefile # Add log.o explicitly
-	@for src in $(wildcard nymya_*.c); do base=$$(basename $$src .c); printf "$$base.o "; done >> $(OUT_DIR)/Makefile
+	@printf "nymya_syscalls-objs := " >> $(OUT_DIR)/Makefile
+	@for obj in $(KERNEL_OBJS); do printf "$$obj "; done >> $(OUT_DIR)/Makefile
 	@printf "\n" >> $(OUT_DIR)/Makefile
 	@$(MAKE) -C $(KERNEL_BUILD_DIR) M=$(PWD)/$(OUT_DIR) ARCH=$@ CROSS_COMPILE=$(CCP) modules
 
@@ -89,7 +96,7 @@ install: userland kernel
 	@mkdir -p $(INSTALL_INCLUDE_DIR)
 	@cp nymya.h $(INSTALL_INCLUDE_DIR)/
 	@for ARCH in $(ARCHS); do \
-	  MOD=$$(KERNEL_SRC_DIR)/$$ARCH/$(KERNEL_MODULE); \
+	  MOD=$(KERNEL_SRC_DIR)/$$ARCH/$(KERNEL_MODULE); \
 	  if [ -f $$MOD ]; then \
 	    echo ">> Installing $$ARCH kernel module"; \
 	    mkdir -p $(INSTALL_KERNEL_DIR); \
@@ -111,18 +118,18 @@ uninstall:
 # -----------------------------------------------------------------------------
 # Cleaning build artifacts
 # -----------------------------------------------------------------------------
-.PHONY: clean clean_dir
+.PHONY: clean
 clean:
 	@echo ">> Cleaning userland artifacts"
 	@rm -rf $(OBJ_DIR) $(LIB_FILE)
 	@echo ">> Cleaning kernel build artifacts"
 	@for ARCH in $(ARCHS); do \
 	  DIR=$(KERNEL_SRC_DIR)/$$ARCH; \
-	  make -C $(KERNEL_BUILD_DIR) M=$$PWD/$$DIR ARCH=$$ARCH clean || true; \
-	  rm -rf $$DIR; \
+	  if [ -d "$$DIR" ]; then \
+	    make -C $(KERNEL_BUILD_DIR) M=$$PWD/$$DIR ARCH=$$ARCH clean || true; \
+	    rm -rf $$DIR; \
+	  fi; \
 	done
-
-clean_dir: clean
 
 # -----------------------------------------------------------------------------
 # .deb packaging for userland
@@ -132,8 +139,8 @@ deb-userland: userland
 	@echo ">> Creating userland .deb"
 	@rm -rf $(DEB_USERLAND_DIR)
 	@mkdir -p $(DEB_USERLAND_DIR)/DEBIAN \
-	           $(DEB_USERLAND_DIR)/usr/lib \
-	           $(DEB_USERLAND_DIR)/usr/include/$(LIB_NAME)
+	        $(DEB_USERLAND_DIR)/usr/lib \
+	        $(DEB_USERLAND_DIR)/usr/include/$(LIB_NAME)
 	@cp $(LIB_FILE) $(DEB_USERLAND_DIR)/usr/lib/
 	@cp nymya.h    $(DEB_USERLAND_DIR)/usr/include/$(LIB_NAME)/
 	@printf "Package: $(LIB_NAME)-core-userland\nVersion: $(VERSION)\nArchitecture: $(PKG_ARCH)\nMaintainer: $(MAINTAINER)\nDescription: $(DESCRIPTION) (Userland)\n" > $(DEB_USERLAND_DIR)/DEBIAN/control
@@ -168,4 +175,3 @@ deb-kernel: kernel
 .PHONY: deb-all deb
 deb-all: deb-userland deb-kernel
 deb: deb-all
-
