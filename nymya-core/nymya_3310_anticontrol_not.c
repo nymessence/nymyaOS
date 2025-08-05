@@ -39,7 +39,7 @@
      * @return  0 on success. (Currently, this function does not return specific error codes
      *          as its input is assumed to be valid kernel data).
      */
-    int nymya_3310_anticontrol_not_core(const struct nymya_qubit *k_ctrl, struct nymya_qubit *k_target) {
+    static int nymya_3310_anticontrol_not_core(const struct nymya_qubit *k_ctrl, struct nymya_qubit *k_target) {
         int64_t ctrl_re, ctrl_im;
         __uint128_t mag_sq;
         // Pre-calculate the threshold for fixed-point magnitude squared comparison (0.5^2)
@@ -63,7 +63,6 @@
 
         return 0;
     }
-    EXPORT_SYMBOL_GPL(nymya_3310_anticontrol_not_core);
 
 
 /*
