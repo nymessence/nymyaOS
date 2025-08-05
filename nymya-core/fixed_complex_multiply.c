@@ -28,7 +28,6 @@
  * Returns:
  * A `complex_double` struct containing both the real and imaginary parts of the product.
  */
-// REMOVE 'static' from here:
 complex_double fixed_complex_multiply(int64_t re1, int64_t im1, int64_t re2, int64_t im2)
 {
     // Calculate the real part of the product: (re1 * re2) - (im1 * im2)
