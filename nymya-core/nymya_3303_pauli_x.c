@@ -3,8 +3,9 @@
 #ifdef __KERNEL__
     #include <linux/module.h>
     #include <linux/kernel.h>
-    #include <linux/syscalls.h>
+    #include <linux/syscalls.h> // Keep for compatibility, though not directly using SYSCALL_DEFINE for this function
     #include <linux/uaccess.h>
+    #include <linux/errno.h> // For -EINVAL, -EFAULT
 
 /*
  * Flip imaginary part sign in fixed-point amplitude
@@ -13,7 +14,10 @@ static inline void flip_imag_part(struct nymya_qubit *q) {
     q->amplitude.im = -q->amplitude.im;
 }
 
-SYSCALL_DEFINE1(nymya_3303_pauli_x, struct nymya_qubit __user *, user_q) {
+// The function is now defined as a regular kernel function named nymya_3303_pauli_x,
+// to match the requested EXPORT_SYMBOL_GPL name.
+// It uses 'long' as a return type, consistent with typical syscall return values.
+long nymya_3303_pauli_x(struct nymya_qubit __user *, user_q) {
     struct nymya_qubit kq;
 
     if (!user_q)
@@ -24,6 +28,7 @@ SYSCALL_DEFINE1(nymya_3303_pauli_x, struct nymya_qubit __user *, user_q) {
 
     flip_imag_part(&kq);
 
+    // Assuming log_symbolic_event is properly defined and accessible in the kernel context
     log_symbolic_event("PAULI_X", kq.id, kq.tag, "Polarity flipped");
 
     if (copy_to_user(user_q, &kq, sizeof(kq)))
@@ -32,8 +37,8 @@ SYSCALL_DEFINE1(nymya_3303_pauli_x, struct nymya_qubit __user *, user_q) {
     return 0;
 }
 
-// Export the symbol for use by other kernel modules/code
-// Corrected: EXPORT_SYMBOL_GPL should use the base name of the syscall, not the 'sys_' prefixed one.
+// Export the symbol for use by other kernel modules/code.
+// Changed to export 'nymya_3303_pauli_x' as requested.
 EXPORT_SYMBOL_GPL(nymya_3303_pauli_x);
 
 #else // Userland implementation
