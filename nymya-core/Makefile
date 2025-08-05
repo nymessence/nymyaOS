@@ -57,9 +57,32 @@ $(LIB_FILE): $(OBJECTS)
 # -----------------------------------------------------------------------------
 # Kernel module sources & objects
 # -----------------------------------------------------------------------------
-# Get all C files for the kernel module, expected to be in KERNEL_SRC_DIR
-KERNEL_SRCS := $(wildcard $(KERNEL_SRC_DIR)/*.c)
-KERNEL_OBJS := $(notdir $(patsubst %.c,%.o,$(KERNEL_SRCS)))
+# Explicitly list all C files that constitute the nymya_syscalls.ko module.
+# This ensures all necessary files are included in the build.
+KERNEL_MOD_C_FILES := \
+	nymya_syscalls.c \
+	complex_mul.c \
+	complex_exp_i.c \
+	fixed_point_square.c \
+	fixed_point_mul.c \
+	fixed_sin.c \
+	make_complex.c \
+	nymya_3303_pauli_x.c \
+	fixed_complex_multiply.c \
+	nymya_exit_syscall_print_funcs.c \
+	nymya_event_class_syscall_enter.c \
+	nymya_enter_syscall_print_funcs.c \
+	nymya_event_class_syscall_exit.c \
+	log.c \
+	nymya_complex_math.c
+
+# KERNEL_SRCS now holds the full paths to all C files required for the kernel module.
+# This is used for symlinking them into the architecture-specific build directory.
+KERNEL_SRCS := $(addprefix $(KERNEL_SRC_DIR)/,$(KERNEL_MOD_C_FILES))
+
+# KERNEL_OBJS holds just the base filenames (e.g., nymya_syscalls.o),
+# which are used to construct the 'nymya_syscalls-objs' line in the inner kernel Makefile.
+KERNEL_OBJS := $(patsubst %.c,%.o,$(KERNEL_MOD_C_FILES))
 
 # -----------------------------------------------------------------------------
 # Kernel module build for each architecture
@@ -74,14 +97,12 @@ $(ARCHS):
 	@mkdir -p $(OUT_DIR)
 	@rm -f $(OUT_DIR)/*.c $(OUT_DIR)/*.h
 	# Link all required C files into the architecture-specific directory
-	@for f in $(KERNEL_SRCS); do ln -sf $(PWD)/$$f $(OUT_DIR)/; done
-	# Link the nymya.h header file
+	@for f in $(KERNEL_SRCS); do ln -sf $$f $(OUT_DIR)/; done
+	# Link the nymya.h header file (assuming it's in the current directory)
 	@ln -sf $(PWD)/nymya.h $(OUT_DIR)/
 	# Generate the Makefile for the kernel build system
 	@printf "obj-m := nymya_syscalls.o\n" > $(OUT_DIR)/Makefile
-	@printf "nymya_syscalls-objs := " >> $(OUT_DIR)/Makefile
-	@for obj in $(KERNEL_OBJS); do printf "$$obj "; done >> $(OUT_DIR)/Makefile
-	@printf "\n" >> $(OUT_DIR)/Makefile
+	@printf "nymya_syscalls-objs := $(KERNEL_OBJS)\n" >> $(OUT_DIR)/Makefile
 	@$(MAKE) -C $(KERNEL_BUILD_DIR) M=$(PWD)/$(OUT_DIR) ARCH=$@ CROSS_COMPILE=$(CCP) modules
 
 # -----------------------------------------------------------------------------
