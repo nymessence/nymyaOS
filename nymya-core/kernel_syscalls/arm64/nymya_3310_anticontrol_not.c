@@ -1,0 +1,1 @@
+/home/erick/nymyaOS/nymya-core/nymya_3310_anticontrol_not.c
