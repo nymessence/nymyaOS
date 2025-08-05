@@ -8,7 +8,7 @@
 
 /*
  * Flip imaginary part sign in fixed-point amplitude
- */
+ 
 static inline void flip_imag_part(struct nymya_qubit *q) {
     q->amplitude.im = -q->amplitude.im;
 }
@@ -41,7 +41,7 @@ EXPORT_SYMBOL_GPL(nymya_3303_pauli_x);
 
 /*
  * Flip imaginary part sign in builtin complex amplitude
- */
+ 
 static inline void flip_imag_part(nymya_qubit *q) {
     double re = complex_re(q->amplitude);
     double im = complex_im(q->amplitude);
@@ -56,7 +56,7 @@ static inline void flip_imag_part(nymya_qubit *q) {
  * Logs the symbolic event with qubit ID and tag.
  *
  * Returns 0 on success, -1 if input is null.
- */
+ 
 int nymya_3303_pauli_x(nymya_qubit *q) {
     if (!q) return -1;
 
