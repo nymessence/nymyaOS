@@ -33,12 +33,13 @@ SYSCALL_DEFINE1(nymya_3303_pauli_x, struct nymya_qubit __user *, user_q) {
 }
 
 // Export the symbol for use by other kernel modules/code
-EXPORT_SYMBOL_GPL(sys_nymya_3303_pauli_x);
+// Corrected: EXPORT_SYMBOL_GPL should use the base name of the syscall, not the 'sys_' prefixed one.
+EXPORT_SYMBOL_GPL(nymya_3303_pauli_x);
 
 #else // Userland implementation
 
 #include <stdio.h>
-#include <complex.h>
+#include <complex.h> // Ensure this is included for _Complex and I
 
 /*
  * Flip imaginary part sign in builtin complex amplitude
