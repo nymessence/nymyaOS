@@ -42,6 +42,12 @@
     complex_double complex_conj(complex_double c);
     int64_t fixed_sin(int64_t theta);
     int64_t fixed_cos(int64_t theta);
+    complex_double complex_exp_i(int64_t theta_fp);
+    
+    // additional functions
+    int64_t fixed_sin(int64_t theta);
+    int64_t fixed_cos(int64_t theta);
+    int64_t fixed_conj(int64_t re, int64_t im);
 
 #else // userspace
 
@@ -159,11 +165,6 @@ int nymya_exit_syscall_print_funcs(uint64_t syscall_id, int return_code);
 #define FIXED_POINT_PI (int64_t)(3.141592653589793 * FIXED_POINT_SCALE)
 
 #define FIXED_POINT_PI_DIV_2 (int64_t)(1.5707963267948966 * FIXED_POINT_SCALE) // M_PI / 2.0
-
-// complex functions for kernel syscalls
-int64_t fixed_sin(int64_t theta);
-int64_t fixed_cos(int64_t theta);
-int64_t fixed_conj(int64_t re, int64_t im);
 
 /**
  * fixed_complex_multiply - Multiplies two fixed-point complex numbers and returns a complex_double.

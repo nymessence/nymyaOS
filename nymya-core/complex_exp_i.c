@@ -9,6 +9,9 @@
  * Returns the complex number representing e^(i*theta).
  */
 complex_double complex_exp_i(double theta) {
-    return make_complex(cos(theta), sin(theta));
+    complex_double result;
+        result.re = fixed_cos(theta_fp);
+        result.im = fixed_sin(theta_fp);
+        return result;
 }
 
