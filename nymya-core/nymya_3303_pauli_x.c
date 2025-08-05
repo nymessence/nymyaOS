@@ -8,7 +8,7 @@
 
 /*
  * Flip imaginary part sign in fixed-point amplitude
- */ // <-- Added closing for the comment block
+ */
 static inline void flip_imag_part(struct nymya_qubit *q) {
     q->amplitude.im = -q->amplitude.im;
 }
@@ -33,19 +33,18 @@ SYSCALL_DEFINE1(nymya_3303_pauli_x, struct nymya_qubit __user *, user_q) {
 }
 
 // Export the symbol for use by other kernel modules/code
-EXPORT_SYMBOL_GPL(nymya_3303_pauli_x);
+EXPORT_SYMBOL_GPL(sys_nymya_3303_pauli_x);
 
 #else // Userland implementation
 
 #include <stdio.h>
-#include <complex.h> // Ensure this is included for _Complex and I
+#include <complex.h>
 
 /*
  * Flip imaginary part sign in builtin complex amplitude
- */ // <-- Added closing for the comment block
+ */
 static inline void flip_imag_part(nymya_qubit *q) {
     // Assuming nymya_qubit's amplitude is _Complex double in userland
-    // and complex_re/complex_im are defined elsewhere or replaced by creal/cimag
     // For direct manipulation, if q->amplitude is _Complex double:
     q->amplitude = creal(q->amplitude) - I * cimag(q->amplitude);
 }
@@ -68,5 +67,4 @@ int nymya_3303_pauli_x(nymya_qubit *q) {
     return 0;
 }
 
-#endif // __KERNEL__ <-- Added missing #endif
-
+#endif // __KERNEL__
