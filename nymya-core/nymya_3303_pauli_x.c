@@ -16,23 +16,19 @@ static inline void flip_imag_part(struct nymya_qubit *q) {
 
 // The function is now defined as a regular kernel function named nymya_3303_pauli_x,
 // to match the requested EXPORT_SYMBOL_GPL name.
-// It uses 'long' as a return type, consistent with typical syscall return values.
-long nymya_3303_pauli_x(struct nymya_qubit __user *, user_q) {
-    struct nymya_qubit kq;
-
-    if (!user_q)
+// It uses 'int' as a return type, consistent with typical kernel function return values for success/error.
+// The parameter type has been changed from '__user *user_q' to '*q'
+// to match the expected declaration and
+// the logic for copying from/to user space has been removed, as this function
+// is now expected to operate on a kernel-space pointer.
+int nymya_3303_pauli_x(struct nymya_qubit *q) {
+    if (!q)
         return -EINVAL;
 
-    if (copy_from_user(&kq, user_q, sizeof(kq)))
-        return -EFAULT;
-
-    flip_imag_part(&kq);
+    flip_imag_part(q);
 
     // Assuming log_symbolic_event is properly defined and accessible in the kernel context
-    log_symbolic_event("PAULI_X", kq.id, kq.tag, "Polarity flipped");
-
-    if (copy_to_user(user_q, &kq, sizeof(kq)))
-        return -EFAULT;
+    log_symbolic_event("PAULI_X", q->id, q->tag, "Polarity flipped");
 
     return 0;
 }

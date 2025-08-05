@@ -1,1 +1,1 @@
-/home/erick/nymyaOS/nymya-core/complex_exp_i.c
+kernel_syscalls/complex_exp_i.c

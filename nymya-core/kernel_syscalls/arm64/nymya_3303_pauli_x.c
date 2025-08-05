@@ -1,1 +1,1 @@
-/home/erick/nymyaOS/nymya-core/nymya_3303_pauli_x.c
+kernel_syscalls/nymya_3303_pauli_x.c

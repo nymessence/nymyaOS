@@ -1,6 +1,7 @@
 #!/bin/bash
 export CROSS_COMPILE_arm64=aarch64-linux-gnu4
 
+make clean              # clean before any new compile
 make prepare            # Creates symlink
 make ARCH=x86_64        # Default build for amd64 userland
 make ARCH=arm64         # Cross-compile for ARM64 userland

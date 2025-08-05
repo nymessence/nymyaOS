@@ -1,1 +1,1 @@
-/home/erick/nymyaOS/nymya-core/fixed_complex_multiply.c
+kernel_syscalls/fixed_complex_multiply.c
