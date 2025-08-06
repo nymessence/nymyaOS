@@ -9,7 +9,7 @@
 // This file contains both userland syscall wrapper stub and kernel-side core logic.
 //
 
-#include "nymya.h"
+#include "nymya.h"  // Should declare: long nymya_3310_anticontrol_not_core(void *arg);
 
 #ifndef __KERNEL__
 
@@ -35,8 +35,6 @@
  * Returns 0 on success or -errno on failure.
  */
 int nymya_3310_anticontrol_not_user(const void *control, void *target) {
-    // Package arguments as needed for your syscall interface.
-    // For demonstration, we pass pointers directly.
     int ret = syscall(__NR_nymya_3310_anticontrol_not, control, target);
     if (ret < 0) {
         perror("nymya_3310_anticontrol_not syscall failed");
@@ -49,6 +47,7 @@ int nymya_3310_anticontrol_not_user(const void *control, void *target) {
 
 #include <linux/kernel.h>
 #include <linux/uaccess.h>  // For copy_from_user, copy_to_user
+#include <linux/module.h>   // For EXPORT_SYMBOL_GPL
 
 /**
  * nymya_3310_anticontrol_not_core - Kernel-side implementation of ACNOT gate.
@@ -62,7 +61,6 @@ int nymya_3310_anticontrol_not_user(const void *control, void *target) {
 long nymya_3310_anticontrol_not_core(void *arg) {
     // Define your qubit data structure matching userland layout
     struct qubit {
-        // For example, fixed-point or integer representation of complex amplitude parts
         int32_t real;
         int32_t imag;
     };
@@ -78,10 +76,10 @@ long nymya_3310_anticontrol_not_core(void *arg) {
         return -EFAULT;
     }
 
-    // Example threshold in fixed point (e.g., 0.5 scaled)
-    const int32_t threshold = 0x80000000 / 2; // Assuming Q31 fixed-point format
+    // Example threshold in fixed point (e.g., 0.5 scaled to Q31)
+    const int32_t threshold = 0x40000000; // 0.5 in Q31 format
 
-    // Compute amplitude magnitude (approximate)
+    // Compute amplitude magnitude squared
     int64_t mag_sq = (int64_t)params.control.real * params.control.real +
                      (int64_t)params.control.imag * params.control.imag;
 
@@ -102,7 +100,7 @@ long nymya_3310_anticontrol_not_core(void *arg) {
     return 0;
 }
 
-// Export symbol if needed for other kernel modules
+// Export symbol for kernel modules or other kernel code that calls this
 EXPORT_SYMBOL_GPL(nymya_3310_anticontrol_not_core);
 
 #endif // __KERNEL__
