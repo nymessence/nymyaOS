@@ -56,11 +56,9 @@ $(LIB_FILE): $(OBJECTS)
 # -----------------------------------------------------------------------------
 # Kernel module sources & objects
 # -----------------------------------------------------------------------------
-# Use wildcard to include all .c files in kernel_syscalls directory
-KERNEL_MOD_C_FILES := $(notdir $(wildcard $(KERNEL_SRC_DIR)/*.c))
-
-KERNEL_SRCS := $(addprefix $(KERNEL_SRC_DIR)/,$(KERNEL_MOD_C_FILES))
-KERNEL_OBJS := $(patsubst %.c,%.o,$(KERNEL_MOD_C_FILES))
+# Filter out userland-only or generated files from kernel build
+KERNEL_SRCS := $(filter-out complex_conj.c complex_exp_i.c complex_im.c complex_mul.c complex_re.c fixed_complex_multiply.c fixed_conj.c fixed_cos.c fixed_point_cos.c fixed_point_sin.c fixed_sin.c, $(wildcard $(KERNEL_SRC_DIR)/*.c))
+KERNEL_OBJS := $(patsubst %.c,%.o,$(notdir $(KERNEL_SRCS)))
 
 # -----------------------------------------------------------------------------
 # Kernel module build for each architecture
@@ -70,18 +68,22 @@ kernel: $(ARCHS)
 
 $(ARCHS):
 	$(eval CCP := $(CROSS_COMPILE_$@))
-	$(eval OUT_DIR := $(KERNEL_SRC_DIR)/$@)
+	$(eval OUT_DIR := $(abspath $(KERNEL_SRC_DIR)/$@))
 	@echo "Building kernel module for $@ with CROSS_COMPILE='$(CCP)'"
 	@mkdir -p $(OUT_DIR)
 	@rm -f $(OUT_DIR)/*.c $(OUT_DIR)/*.h
-	# Link all required C files into the architecture-specific directory
-	@for f in $(KERNEL_SRCS); do ln -sf $$f $(OUT_DIR)/; done
-	# Link the nymya.h header file (assuming it's in the current directory)
-	@ln -sf $(PWD)/nymya.h $(OUT_DIR)/
+	# Link all required C files into the architecture-specific directory using absolute paths
+	@for f in $(KERNEL_SRCS); do \
+	  ln -sf $(abspath $$f) $(OUT_DIR)/; \
+	done
+	# Link the nymya.h header file using absolute path
+	@ln -sf $(abspath nymya.h) $(OUT_DIR)/
 	# Generate the Makefile for the kernel build system
 	@printf "obj-m := nymya_syscalls.o\n" > $(OUT_DIR)/Makefile
-	@printf "nymya_syscalls-objs := $(KERNEL_OBJS)\n" >> $(OUT_DIR)/Makefile
-	@$(MAKE) -C $(KERNEL_BUILD_DIR) M=$(PWD)/$(OUT_DIR) ARCH=$@ CROSS_COMPILE=$(CCP) modules
+	@printf "nymya_syscalls-objs := " >> $(OUT_DIR)/Makefile
+	@for obj in $(KERNEL_OBJS); do printf "$$obj "; done >> $(OUT_DIR)/Makefile
+	@printf "\n" >> $(OUT_DIR)/Makefile
+	@$(MAKE) -C $(KERNEL_BUILD_DIR) M=$(OUT_DIR) ARCH=$@ CROSS_COMPILE=$(CCP) modules
 
 # -----------------------------------------------------------------------------
 # Install & uninstall targets
@@ -125,7 +127,7 @@ clean:
 	@for ARCH in $(ARCHS); do \
 	  DIR=$(KERNEL_SRC_DIR)/$$ARCH; \
 	  if [ -d "$$DIR" ]; then \
-	    make -C $(KERNEL_BUILD_DIR) M=$$PWD/$$DIR ARCH=$$ARCH clean || true; \
+	    make -C $(KERNEL_BUILD_DIR) M=$$DIR ARCH=$$ARCH clean || true; \
 	    rm -rf $$DIR; \
 	  fi; \
 	done
@@ -173,4 +175,4 @@ deb-kernel: kernel
 # -----------------------------------------------------------------------------
 .PHONY: deb-all deb
 deb-all: deb-userland deb-kernel
-
+deb: deb-all
