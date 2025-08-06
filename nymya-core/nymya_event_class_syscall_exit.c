@@ -8,7 +8,9 @@
 #ifdef __KERNEL__
     #include <linux/kernel.h> // For pr_info
     #include <linux/types.h>  // For uint64_t if not already in nymya.h
-    #include <linux/module.h> // Required for EXPORT_SYMBOL_GPL
+    #include <linux/module.h> // Required for MODULE_LICENSE and EXPORT_SYMBOL_GPL
+
+    MODULE_LICENSE("GPL");
 
     /**
      * nymya_event_class_syscall_exit - Kernel-side implementation for syscall exit event logging.
@@ -20,8 +22,8 @@
      *
      * Returns: 0 on success.
      */
-    int nymya_event_class_syscall_exit(uint64_t syscall_id, int return_code) {
-        pr_info("NYMYA_SYSCALL_EXIT: SyscallID=%llu, ReturnCode=%d\n", syscall_id, return_code);
+    int nymya_event_class_syscall_exit(uint64_t syscall_id, uint64_t return_code) {
+        pr_info("NYMYA_SYSCALL_EXIT: SyscallID=%llu, ReturnCode=%llu\n", syscall_id, return_code);
         return 0;
     }
 
@@ -45,8 +47,8 @@
      *
      * Returns: 0 on success.
      */
-    int nymya_event_class_syscall_exit(uint64_t syscall_id, int return_code) {
-        printf("USERLAND_SYSCALL_EXIT: SyscallID=%" PRIu64 ", ReturnCode=%d\n", syscall_id, return_code);
+    int nymya_event_class_syscall_exit(uint64_t syscall_id, uint64_t return_code) {
+        printf("USERLAND_SYSCALL_EXIT: SyscallID=%" PRIu64 ", ReturnCode=%" PRIu64 "\n", syscall_id, return_code);
         return 0;
     }
 

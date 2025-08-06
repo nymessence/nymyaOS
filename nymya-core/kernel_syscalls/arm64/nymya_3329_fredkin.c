@@ -1,0 +1,1 @@
+/home/erick/nymyaOS/nymya-core/nymya_3329_fredkin.c

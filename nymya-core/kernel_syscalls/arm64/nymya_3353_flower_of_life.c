@@ -1,0 +1,1 @@
+/home/erick/nymyaOS/nymya-core/nymya_3353_flower_of_life.c

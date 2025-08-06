@@ -1,0 +1,1 @@
+/home/erick/nymyaOS/nymya-core/nymya_3356_hcp_lattice.c
