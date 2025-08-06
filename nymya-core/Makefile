@@ -30,8 +30,15 @@ prepare:
 # Build userland shared library
 userland:
 	@echo "Building userland..."
-	gcc -Wall -fPIC -O2 -I. -c *.c -o build/
-	gcc -shared -o libnymya.so build/*.o
+	mkdir -p build
+	# Compile each .c separately to build/
+	@gcc -Wall -fPIC -O2 -I. -c nymya_syscalls.c -o build/nymya_syscalls.o
+	@for src in $(filter-out nymya_syscalls.c, $(wildcard *.c)); do \
+		base=$$(basename $$src .c); \
+		gcc -Wall -fPIC -O2 -I. -c $$src -o build/$$base.o; \
+	done
+	# Link all object files into shared library
+	@gcc -shared -o libnymya.so build/*.o
 
 # Build kernel module for arm64
 kernel: prepare
