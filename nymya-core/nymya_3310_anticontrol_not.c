@@ -7,9 +7,8 @@
 // Kernel-space uses fixed-point math and handles user memory safely.
 //
 // This file contains both userland syscall wrapper stub and kernel-side core logic.
-//
 
-#include "nymya.h"  // Should declare: long nymya_3310_anticontrol_not_core(void *arg);
+#include "nymya.h"
 
 #ifndef __KERNEL__
 
@@ -17,22 +16,19 @@
 #include <errno.h>
 #include <sys/syscall.h>
 #include <unistd.h>
-
-#define __NR_nymya_3310_anticontrol_not NYMYA_ACNOT_CODE
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <complex.h>
+
+#define __NR_nymya_3310_anticontrol_not NYMYA_ACNOT_CODE
 
 /**
  * nymya_3310_anticontrol_not_user - Userland wrapper for ACNOT syscall.
- * @control: pointer to the control qubit complex amplitude (double complex).
- * @target: pointer to the target qubit complex amplitude (double complex).
+ * @control: pointer to the control qubit (complex double).
+ * @target: pointer to the target qubit (complex double).
  *
- * This function wraps the syscall interface to invoke the kernel implementation.
- * User-space qubits are represented using complex doubles.
- *
- * Returns 0 on success or -errno on failure.
+ * Returns 0 on success, -errno on failure.
  */
 int nymya_3310_anticontrol_not_user(const void *control, void *target) {
     int ret = syscall(__NR_nymya_3310_anticontrol_not, control, target);
@@ -43,65 +39,81 @@ int nymya_3310_anticontrol_not_user(const void *control, void *target) {
     return 0;
 }
 
-#else // __KERNEL__
+int nymya_3310_anticontrol_not(nymya_qubit* q_ctrl, nymya_qubit* q_target) {
+    if (!q_ctrl || !q_target) return -1;
 
-#include <linux/kernel.h>
-#include <linux/uaccess.h>  // For copy_from_user, copy_to_user
-#include <linux/module.h>   // For EXPORT_SYMBOL_GPL
+    double magnitude = cabs(q_ctrl->amplitude);
 
-/**
- * nymya_3310_anticontrol_not_core - Kernel-side implementation of ACNOT gate.
- * @arg: Pointer to userland struct or buffer containing qubit data.
- *
- * This function performs the ACNOT operation on qubits, using fixed-point math.
- * It safely copies qubit data from user space, applies the operation, and writes back.
- *
- * Returns 0 on success or negative error code.
- */
-long nymya_3310_anticontrol_not_core(void *arg) {
-    // Define your qubit data structure matching userland layout
-    struct qubit {
-        int32_t real;
-        int32_t imag;
-    };
-
-    struct acnot_params {
-        struct qubit control;
-        struct qubit target;
-    } params;
-
-    // Copy data safely from user space
-    if (copy_from_user(&params, arg, sizeof(params))) {
-        pr_err("nymya_acnot: failed to copy data from user\n");
-        return -EFAULT;
-    }
-
-    // Example threshold in fixed point (e.g., 0.5 scaled to Q31)
-    const int32_t threshold = 0x40000000; // 0.5 in Q31 format
-
-    // Compute amplitude magnitude squared
-    int64_t mag_sq = (int64_t)params.control.real * params.control.real +
-                     (int64_t)params.control.imag * params.control.imag;
-
-    // Threshold check: if magnitude < 0.5, flip phase of target (negate imaginary part)
-    if (mag_sq < (int64_t)threshold * threshold) {
-        params.target.imag = -params.target.imag;
-        pr_info("nymya_acnot: phase flipped on target qubit\n");
+    if (magnitude < 0.5) {
+        q_target->amplitude *= -1;
+        log_symbolic_event("ACNOT", q_target->id, q_target->tag, "Phase flipped due to control");
     } else {
-        pr_info("nymya_acnot: no phase flip, control magnitude >= threshold\n");
-    }
-
-    // Write back to user space
-    if (copy_to_user(arg, &params, sizeof(params))) {
-        pr_err("nymya_acnot: failed to copy data back to user\n");
-        return -EFAULT;
+        log_symbolic_event("ACNOT", q_target->id, q_target->tag, "No action (control = 1)");
     }
 
     return 0;
 }
 
-// Export symbol for kernel modules or other kernel code that calls this
-EXPORT_SYMBOL_GPL(nymya_3310_anticontrol_not_core);
+#else // __KERNEL__
 
-#endif // __KERNEL__
+#include <linux/kernel.h>
+#include <linux/uaccess.h>
+#include <linux/errno.h>
+#include <linux/syscalls.h>
+#include <linux/module.h>
+
+int nymya_3310_anticontrol_not(struct nymya_qubit *q_ctrl, struct nymya_qubit *q_target) {
+    int64_t ctrl_re, ctrl_im;
+
+    if (!q_ctrl || !q_target) {
+        pr_err("NYMYA: nymya_3310_anticontrol_not received NULL qubit pointer(s)\n");
+        return -EINVAL;
+    }
+
+    ctrl_re = q_ctrl->amplitude.re;
+    ctrl_im = q_ctrl->amplitude.im;
+
+    __uint128_t mag_sq = (__uint128_t)ctrl_re * ctrl_re + (__uint128_t)ctrl_im * ctrl_im;
+
+    const __uint128_t threshold_sq = (__uint128_t)(FIXED_POINT_SCALE / 2) * (FIXED_POINT_SCALE / 2);
+
+    if (mag_sq < threshold_sq) {
+        q_target->amplitude.re = -q_target->amplitude.re;
+        q_target->amplitude.im = -q_target->amplitude.im;
+        log_symbolic_event("ACNOT", q_target->id, q_target->tag, "Phase flipped due to control");
+    } else {
+        log_symbolic_event("ACNOT", q_target->id, q_target->tag, "No action (control = 1)");
+    }
+
+    return 0;
+}
+
+EXPORT_SYMBOL_GPL(nymya_3310_anticontrol_not);
+
+SYSCALL_DEFINE2(nymya_3310_anticontrol_not,
+    struct nymya_qubit __user *, user_ctrl,
+    struct nymya_qubit __user *, user_target) {
+
+    struct nymya_qubit k_ctrl, k_target;
+    int ret;
+
+    if (!user_ctrl || !user_target)
+        return -EINVAL;
+
+    if (copy_from_user(&k_ctrl, user_ctrl, sizeof(k_ctrl)))
+        return -EFAULT;
+    if (copy_from_user(&k_target, user_target, sizeof(k_target)))
+        return -EFAULT;
+
+    ret = nymya_3310_anticontrol_not(&k_ctrl, &k_target);
+    if (ret)
+        return ret;
+
+    if (copy_to_user(user_target, &k_target, sizeof(k_target)))
+        return -EFAULT;
+
+    return 0;
+}
+
+#endif
 
