@@ -1,62 +1,66 @@
 KERNEL_HEADERS := /usr/src/linux-headers-6.8.0-1031-raspi
-ARCH := arm64
-CROSS_COMPILE := aarch64-linux-gnu-
-KS_DIR := kernel_syscalls/$(ARCH)
 
-# Get all .c sources except the main nymya_syscalls.c
+ARCH_arm64 := arm64
+CROSS_COMPILE_arm64 := aarch64-linux-gnu-
+
+ARCH_x86_64 := x86_64
+CROSS_COMPILE_x86_64 :=
+
+KS_DIR_arm64 := kernel_syscalls/$(ARCH_arm64)
+KS_DIR_x86_64 := kernel_syscalls/$(ARCH_x86_64)
+
+# Get all .c sources except main syscall file
 SOURCES := $(filter-out nymya_syscalls.c, $(wildcard *.c))
 
-.PHONY: all clean clean_dir prepare userland kernel deb
+.PHONY: all clean clean_dir prepare userland kernel_arm64 kernel_x86_64 deb
 
-all: userland kernel deb
+all: userland kernel_arm64 kernel_x86_64 deb
 
-# Prepare kernel_syscalls/arm64 directory
-prepare:
-	mkdir -p $(KS_DIR)
-	# Link all source files there
+# Prepare directory and links for a given arch
+prepare_%:
+	mkdir -p $(KS_DIR_$*)
 	@for src in $(SOURCES) nymya_syscalls.c; do \
-		ln -sf $(abspath $$src) $(KS_DIR)/; \
+		ln -sf $(abspath $$src) $(KS_DIR_$*)/; \
 	done
-	ln -sf $(abspath nymya.h) $(KS_DIR)/
+	ln -sf $(abspath nymya.h) $(KS_DIR_$*)/
 
-	# Generate kernel Makefile
-	@echo "obj-m := nymya_syscalls.o" > $(KS_DIR)/Makefile
-	@echo -n "nymya_syscalls-objs := " >> $(KS_DIR)/Makefile
+	@echo "obj-m := nymya_syscalls.o" > $(KS_DIR_$*)/Makefile
+	@echo -n "nymya_syscalls-objs := " >> $(KS_DIR_$*)/Makefile
 	@for src in $(SOURCES); do \
-		echo -n "$$(basename $$src .c).o " >> $(KS_DIR)/Makefile; \
+		echo -n "$$(basename $$src .c).o " >> $(KS_DIR_$*)/Makefile; \
 	done
-	@echo >> $(KS_DIR)/Makefile
+	@echo >> $(KS_DIR_$*)/Makefile
 
 # Build userland shared library
 userland:
 	@echo "Building userland..."
-	mkdir -p build
-	# Compile each .c separately to build/
-	@gcc -Wall -fPIC -O2 -I. -c nymya_syscalls.c -o build/nymya_syscalls.o
-	@for src in $(filter-out nymya_syscalls.c, $(wildcard *.c)); do \
-		base=$$(basename $$src .c); \
-		gcc -Wall -fPIC -O2 -I. -c $$src -o build/$$base.o; \
-	done
-	# Link all object files into shared library
-	@gcc -shared -o libnymya.so build/*.o
+	@mkdir -p build
+	gcc -Wall -fPIC -O2 -I. -c *.c -o build/
+	gcc -shared -o libnymya.so build/*.o
 
 # Build kernel module for arm64
-kernel: prepare
-	@echo "Building kernel module for $(ARCH) with CROSS_COMPILE='$(CROSS_COMPILE)'"
-	make -C $(KERNEL_HEADERS) M=$(abspath $(KS_DIR)) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) modules
+kernel_arm64: prepare_arm64
+	@echo "Building kernel module for arm64"
+	make -C $(KERNEL_HEADERS) M=$(abspath $(KS_DIR_arm64)) ARCH=$(ARCH_arm64) CROSS_COMPILE=$(CROSS_COMPILE_arm64) modules
 
-# Create deb packages (dummy target, adjust as needed)
+# Build kernel module for x86_64 native
+kernel_x86_64: prepare_x86_64
+	@echo "Building kernel module for x86_64"
+	make -C $(KERNEL_HEADERS) M=$(abspath $(KS_DIR_x86_64)) ARCH=$(ARCH_x86_64) CROSS_COMPILE=$(CROSS_COMPILE_x86_64) modules
+
+# Create deb packages placeholder
 deb:
 	@echo "Creating .deb packages (implement as needed)..."
 
-# Clean build artifacts
 clean:
-	@echo "Cleaning kernel build artifacts..."
-	make -C $(KERNEL_HEADERS) M=$(abspath $(KS_DIR)) clean || true
+	@echo "Cleaning kernel build artifacts for arm64..."
+	make -C $(KERNEL_HEADERS) M=$(abspath $(KS_DIR_arm64)) clean || true
+	@echo "Cleaning kernel build artifacts for x86_64..."
+	make -C $(KERNEL_HEADERS) M=$(abspath $(KS_DIR_x86_64)) clean || true
 	@echo "Cleaning userland build artifacts..."
 	rm -rf build/*.o libnymya.so
 
 clean_dir:
-	@echo "Cleaning symlinks and generated files in $(KS_DIR)..."
-	rm -rf $(KS_DIR)
+	@echo "Cleaning symlinks and generated files..."
+	rm -rf $(KS_DIR_arm64) $(KS_DIR_x86_64)
 
