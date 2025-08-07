@@ -43,7 +43,7 @@ OBJECTS := $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SOURCES))
 # -----------------------------------------------------------------------------
 # Default: build userland library
 # -----------------------------------------------------------------------------
-.PHONY: all userland $(OBJ_DIR)
+.PHONY: all userland $(OBJ_DIR) prepare
 all: userland
 
 userland: $(OBJ_DIR) $(LIB_FILE)
@@ -53,6 +53,22 @@ $(OBJ_DIR):
 	# If rm fails, make should stop here as subsequent steps will likely fail anyway.
 	@rm -rf $(OBJ_DIR)
 	@mkdir -p $(OBJ_DIR)
+
+# New 'prepare' target: Ensures all necessary build directories are set up cleanly.
+# This target explicitly cleans and recreates build directories.
+prepare:
+	@echo ">> Preparing build directories by cleaning and recreating..."
+	# Clean and recreate userland build directory
+	@rm -rf $(OBJ_DIR)
+	@mkdir -p $(OBJ_DIR)
+	# Clean and recreate kernel module directories for all architectures
+	@for ARCH in $(ARCHS); do \
+	  OUT_DIR=$(KERNEL_SRC_DIR)/$$ARCH; \
+	  echo "  - Cleaning and creating $$OUT_DIR for $$ARCH"; \
+	  rm -rf $$OUT_DIR; \
+	  mkdir -p $$OUT_DIR; \
+	done
+	@echo "✅ All build directories prepared."
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -I$(INCLUDE_DIR) -c $< -o $@
@@ -138,7 +154,7 @@ uninstall:
 # -----------------------------------------------------------------------------
 # Cleaning build artifacts
 # -----------------------------------------------------------------------------
-.PHONY: clean print-kbuild-dir
+.PHONY: clean print-kbuild-dir clean_dir
 clean:
 	@echo ">> Cleaning userland artifacts"
 	@rm -rf $(OBJ_DIR) $(LIB_FILE)
@@ -151,6 +167,16 @@ clean:
 	    rm -rf $$DIR; \
 	  fi; \
 	done
+
+# New 'clean_dir' target: removes only the directories, similar to what 'clean' does for directories.
+clean_dir:
+	@echo ">> Cleaning build directories only..."
+	@rm -rf $(OBJ_DIR)
+	@for ARCH in $(ARCHS); do \
+	  DIR=$(KERNEL_SRC_DIR)/$$ARCH; \
+	  rm -rf $$DIR; \
+	done
+	@echo "✅ All build directories removed."
 
 # Helper target to print KERNEL_BUILD_DIR for a given ARCH for use in shell scripts
 # This allows shell commands to query the Makefile for the correct KBUILD_DIR
