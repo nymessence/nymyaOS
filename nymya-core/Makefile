@@ -50,6 +50,7 @@ userland: $(OBJ_DIR) $(LIB_FILE) # Ensure OBJ_DIR is created and clean first
 $(OBJ_DIR):
 	@rm -rf $(OBJ_DIR) || true # Clean and recreate the build directory to avoid permission issues, allow rm to fail gracefully
 	@mkdir -p $(OBJ_DIR)
+	@chmod -R u+rwX $(OBJ_DIR) || true # Ensure writable permissions on the directory
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	# Removed: @mkdir -p $(OBJ_DIR) as it's now handled by the $(OBJ_DIR) target
@@ -66,12 +67,9 @@ KERNEL_SRCS := $(filter-out complex_conj.c complex_exp_i.c complex_im.c complex_
 KERNEL_OBJS := $(patsubst %.c,%.o,$(KERNEL_SRCS))
 
 # --- Helper to get KERNEL_BUILD_DIR for a given architecture ---
-# This uses 'find' to robustly locate the kernel header directory,
-# as /lib/modules/$(uname -r)/build might be incorrect for cross-compilation.
+# Standard and most reliable way to get the kernel build directory for external modules.
 define GET_KERNEL_BUILD_DIR
-  $(if $(filter arm64,$(1)), \
-    $(shell find /usr/src/ -maxdepth 1 -type d -name "linux-headers-rpi-v8*" 2>/dev/null | head -1), \
-    $(shell find /usr/src/ -maxdepth 1 -type d -name "linux-headers-$(shell uname -r)*" 2>/dev/null | head -1))
+  /lib/modules/$(shell uname -r)/build
 endef
 
 # -----------------------------------------------------------------------------
@@ -86,6 +84,7 @@ $(ARCHS):
 	@echo "Building kernel module for $@ with CROSS_COMPILE='$(CCP)'"
 	@rm -rf $(OUT_DIR) || true # Ensure the architecture-specific directory is completely removed, allow rm to fail gracefully
 	@mkdir -p $(OUT_DIR) # Recreate it fresh to avoid permission and stale file issues
+	@chmod -R u+rwX $(OUT_DIR) || true # Ensure writable permissions on the directory
 	# Link all required C files into the architecture-specific directory
 	@for f in $(KERNEL_SRCS); do ln -sf $(PWD)/$$f $(OUT_DIR)/; done
 	# Link the nymya.h header file
@@ -98,8 +97,8 @@ $(ARCHS):
 
 	# Get the correct KERNEL_BUILD_DIR for the target architecture
 	$(eval CURRENT_ARCH_KBUILD_DIR := $(call GET_KERNEL_BUILD_DIR,$@))
-	# Fallback to general /lib/modules/$(uname -r)/build if specific headers not found
-	$(if $(CURRENT_ARCH_KBUILD_DIR),,$(eval CURRENT_ARCH_KBUILD_DIR := /lib/modules/$(shell uname -r)/build))
+	# Fallback to general /lib/modules/$(uname -r)/build is no longer needed
+	# because GET_KERNEL_BUILD_DIR now consistently points to the standard path.
 
 	@echo "Using KERNEL_BUILD_DIR for $@: $(CURRENT_ARCH_KBUILD_DIR)"
 	@$(MAKE) -C $(CURRENT_ARCH_KBUILD_DIR) M=$(PWD)/$(OUT_DIR) ARCH=$@ CROSS_COMPILE=$(CCP) modules
@@ -147,12 +146,12 @@ clean:
 	  DIR=$(KERNEL_SRC_DIR)/$$ARCH; \
 	  # Get the correct KERNEL_BUILD_DIR for the arch when cleaning
 	  KBUILD_DIR_FOR_CLEAN=$$(/usr/bin/make -s -f $(MAKEFILE_LIST) print-kbuild-dir ARCH=$$ARCH); \
-	  # Fallback if specific headers not found (e.g., if ARCH headers weren't installed)
-	  if [ -z "$$KBUILD_DIR_FOR_CLEAN" ]; then KBUILD_DIR_FOR_CLEAN="/lib/modules/$(shell uname -r)/build"; fi; \
+	  # Fallback logic is no longer strictly needed as print-kbuild-dir is consistent
+	  # if [ -z "$$KBUILD_DIR_FOR_CLEAN" ]; then KBUILD_DIR_FOR_CLEAN="/lib/modules/$(shell uname -r)/build"; fi; \
 	  if [ -d "$$DIR" ]; then \
 	    # Use the specific KBUILD_DIR for clean target
 	    make -C $$KBUILD_DIR_FOR_CLEAN M=$$PWD/$$DIR ARCH=$$ARCH clean || true; \
-	    rm -rf $$DIR; \
+	    rm -rf $$DIR || true; \
 	  fi; \
 	done
 
