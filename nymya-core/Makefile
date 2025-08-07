@@ -1,6 +1,6 @@
 # --- Toolchain & flags ---
 CC             := gcc
-KERNEL_BUILD_DIR := /lib/modules/$(shell uname -r)/build
+# KERNEL_BUILD_DIR is now dynamically determined per-architecture for kernel modules
 CFLAGS         := -Wall -fPIC -O2
 LDFLAGS        := -shared
 
@@ -48,7 +48,7 @@ all: userland
 userland: $(OBJ_DIR) $(LIB_FILE) # Ensure OBJ_DIR is created and clean first
 
 $(OBJ_DIR):
-	@rm -rf $(OBJ_DIR) # Clean and recreate the build directory to avoid permission issues
+	@rm -rf $(OBJ_DIR) || true # Clean and recreate the build directory to avoid permission issues, allow rm to fail gracefully
 	@mkdir -p $(OBJ_DIR)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
@@ -65,6 +65,15 @@ $(LIB_FILE): $(OBJECTS)
 KERNEL_SRCS := $(filter-out complex_conj.c complex_exp_i.c complex_im.c complex_mul.c complex_re.c fixed_complex_multiply.c fixed_conj.c fixed_cos.c fixed_point_cos.c fixed_point_sin.c fixed_sin.c, $(wildcard *.c))
 KERNEL_OBJS := $(patsubst %.c,%.o,$(KERNEL_SRCS))
 
+# --- Helper to get KERNEL_BUILD_DIR for a given architecture ---
+# This uses 'find' to robustly locate the kernel header directory,
+# as /lib/modules/$(uname -r)/build might be incorrect for cross-compilation.
+define GET_KERNEL_BUILD_DIR
+  $(if $(filter arm64,$(1)), \
+    $(shell find /usr/src/ -maxdepth 1 -type d -name "linux-headers-rpi-v8*" 2>/dev/null | head -1), \
+    $(shell find /usr/src/ -maxdepth 1 -type d -name "linux-headers-$(shell uname -r)*" 2>/dev/null | head -1))
+endef
+
 # -----------------------------------------------------------------------------
 # Kernel module build for each architecture
 # -----------------------------------------------------------------------------
@@ -75,7 +84,7 @@ $(ARCHS):
 	$(eval CCP := $(CROSS_COMPILE_$@))
 	$(eval OUT_DIR := $(KERNEL_SRC_DIR)/$@)
 	@echo "Building kernel module for $@ with CROSS_COMPILE='$(CCP)'"
-	@rm -rf $(OUT_DIR) # Ensure the architecture-specific directory is completely removed
+	@rm -rf $(OUT_DIR) || true # Ensure the architecture-specific directory is completely removed, allow rm to fail gracefully
 	@mkdir -p $(OUT_DIR) # Recreate it fresh to avoid permission and stale file issues
 	# Link all required C files into the architecture-specific directory
 	@for f in $(KERNEL_SRCS); do ln -sf $(PWD)/$$f $(OUT_DIR)/; done
@@ -86,7 +95,14 @@ $(ARCHS):
 	@printf "nymya_syscalls-objs := " >> $(OUT_DIR)/Makefile
 	@for obj in $(KERNEL_OBJS); do printf "$$obj "; done >> $(OUT_DIR)/Makefile
 	@printf "\n" >> $(OUT_DIR)/Makefile
-	@$(MAKE) -C $(KERNEL_BUILD_DIR) M=$(PWD)/$(OUT_DIR) ARCH=$@ CROSS_COMPILE=$(CCP) modules
+
+	# Get the correct KERNEL_BUILD_DIR for the target architecture
+	$(eval CURRENT_ARCH_KBUILD_DIR := $(call GET_KERNEL_BUILD_DIR,$@))
+	# Fallback to general /lib/modules/$(uname -r)/build if specific headers not found
+	$(if $(CURRENT_ARCH_KBUILD_DIR),,$(eval CURRENT_ARCH_KBUILD_DIR := /lib/modules/$(shell uname -r)/build))
+
+	@echo "Using KERNEL_BUILD_DIR for $@: $(CURRENT_ARCH_KBUILD_DIR)"
+	@$(MAKE) -C $(CURRENT_ARCH_KBUILD_DIR) M=$(PWD)/$(OUT_DIR) ARCH=$@ CROSS_COMPILE=$(CCP) modules
 
 # -----------------------------------------------------------------------------
 # Install & uninstall targets
@@ -122,18 +138,28 @@ uninstall:
 # -----------------------------------------------------------------------------
 # Cleaning build artifacts
 # -----------------------------------------------------------------------------
-.PHONY: clean
+.PHONY: clean print-kbuild-dir
 clean:
 	@echo ">> Cleaning userland artifacts"
 	@rm -rf $(OBJ_DIR) $(LIB_FILE)
 	@echo ">> Cleaning kernel build artifacts"
 	@for ARCH in $(ARCHS); do \
 	  DIR=$(KERNEL_SRC_DIR)/$$ARCH; \
+	  # Get the correct KERNEL_BUILD_DIR for the arch when cleaning
+	  KBUILD_DIR_FOR_CLEAN=$$(/usr/bin/make -s -f $(MAKEFILE_LIST) print-kbuild-dir ARCH=$$ARCH); \
+	  # Fallback if specific headers not found (e.g., if ARCH headers weren't installed)
+	  if [ -z "$$KBUILD_DIR_FOR_CLEAN" ]; then KBUILD_DIR_FOR_CLEAN="/lib/modules/$(shell uname -r)/build"; fi; \
 	  if [ -d "$$DIR" ]; then \
-	    make -C $(KERNEL_BUILD_DIR) M=$$PWD/$$DIR ARCH=$$ARCH clean || true; \
+	    # Use the specific KBUILD_DIR for clean target
+	    make -C $$KBUILD_DIR_FOR_CLEAN M=$$PWD/$$DIR ARCH=$$ARCH clean || true; \
 	    rm -rf $$DIR; \
 	  fi; \
 	done
+
+# Helper target to print KERNEL_BUILD_DIR for a given ARCH for use in shell scripts
+# This allows shell commands to query the Makefile for the correct KBUILD_DIR
+print-kbuild-dir:
+	@echo $(call GET_KERNEL_BUILD_DIR,$(ARCH))
 
 # -----------------------------------------------------------------------------
 # .deb packaging for userland
