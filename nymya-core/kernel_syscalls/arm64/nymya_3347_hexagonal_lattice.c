@@ -1,1 +1,0 @@
-/home/erick/nymyaOS/nymya-core/nymya_3347_hexagonal_lattice.c

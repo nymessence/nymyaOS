@@ -1,1 +1,0 @@
-/home/erick/nymyaOS/nymya-core/nymya_3323_yy_interaction.c

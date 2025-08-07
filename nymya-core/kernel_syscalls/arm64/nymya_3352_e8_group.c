@@ -1,1 +1,0 @@
-/home/erick/nymyaOS/nymya-core/nymya_3352_e8_group.c

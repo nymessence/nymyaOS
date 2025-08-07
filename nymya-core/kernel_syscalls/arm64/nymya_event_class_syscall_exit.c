@@ -1,1 +1,0 @@
-/home/erick/nymyaOS/nymya-core/nymya_event_class_syscall_exit.c

@@ -1,1 +1,0 @@
-/home/erick/nymyaOS/nymya-core/nymya_3357_e8_projected_lattice.c

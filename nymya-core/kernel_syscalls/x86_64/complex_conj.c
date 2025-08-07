@@ -1,1 +1,0 @@
-/home/erick/nymyaOS/nymya-core/complex_conj.c

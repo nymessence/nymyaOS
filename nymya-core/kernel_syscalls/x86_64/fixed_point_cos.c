@@ -1,1 +1,0 @@
-/home/erick/nymyaOS/nymya-core/fixed_point_cos.c

@@ -1,1 +1,0 @@
-/home/erick/nymyaOS/nymya-core/nymya_3354_metatron_cube.c

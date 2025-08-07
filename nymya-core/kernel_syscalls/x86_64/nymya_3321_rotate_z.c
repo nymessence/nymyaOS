@@ -1,1 +1,0 @@
-/home/erick/nymyaOS/nymya-core/nymya_3321_rotate_z.c

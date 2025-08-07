@@ -1,1 +1,0 @@
-/home/erick/nymyaOS/nymya-core/nymya_3349_tessellated_triangles.c

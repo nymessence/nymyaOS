@@ -1,1 +1,0 @@
-/home/erick/nymyaOS/nymya-core/nymya_3307_sqrt_x_gate.c
