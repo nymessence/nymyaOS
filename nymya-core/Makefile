@@ -36,7 +36,8 @@ DEB_USERLAND_DIR := nymya-core-userland_$(VERSION)_$(PKG_ARCH)
 DEB_KERNEL_DIR   := nymya-core-kernel_$(VERSION)_#ARCH#
 
 # --- Userland sources & objects ---
-SOURCES := $(wildcard $(SRC_DIR)/*.c)
+# Exclude nymya_syscalls.c as it's a kernel module source
+SOURCES := $(filter-out $(SRC_DIR)/nymya_syscalls.c,$(wildcard $(SRC_DIR)/*.c))
 OBJECTS := $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SOURCES))
 
 # -----------------------------------------------------------------------------
@@ -50,7 +51,7 @@ userland: $(OBJ_DIR) $(LIB_FILE)
 $(OBJ_DIR):
 	# Clean and recreate the build directory to avoid permission issues.
 	# If rm fails, make should stop here as subsequent steps will likely fail anyway.
-	@rm -rf $(OBJ_DIR)
+	@rm -rf $(OBJ_DIR) || true # Allow cleanup to fail without stopping make (e.g., permission denied)
 	@mkdir -p $(OBJ_DIR)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
@@ -84,7 +85,7 @@ $(ARCHS):
 	@echo "Building kernel module for $@ with CROSS_COMPILE='$(CCP)'"
 	# Ensure the architecture-specific directory is completely removed and recreated fresh
 	# If rm fails, make should stop here as subsequent steps will likely fail anyway.
-	@rm -rf $(OUT_DIR)
+	@rm -rf $(OUT_DIR) || true # Allow cleanup to fail without stopping make (e.g., permission denied)
 	@mkdir -p $(OUT_DIR)
 	# Link all required C files into the architecture-specific directory
 	@for f in $(KERNEL_SRCS); do ln -sf $(PWD)/$$f $(OUT_DIR)/; done
