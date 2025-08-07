@@ -51,7 +51,6 @@ userland: $(OBJ_DIR) $(LIB_FILE)
 $(OBJ_DIR):
 	# Clean and recreate the build directory to avoid permission issues.
 	# If rm fails, make should stop here as subsequent steps will likely fail anyway.
-	@test -d $(OBJ_DIR) && find $(OBJ_DIR) -delete || true
 	@rm -rf $(OBJ_DIR)
 	@mkdir -p $(OBJ_DIR)
 
@@ -86,7 +85,6 @@ $(ARCHS):
 	@echo "Building kernel module for $@ with CROSS_COMPILE='$(CCP)'"
 	# Ensure the architecture-specific directory is completely removed and recreated fresh
 	# If rm fails, make should stop here as subsequent steps will likely fail anyway.
-	@test -d $(OUT_DIR) && find $(OUT_DIR) -delete || true
 	@rm -rf $(OUT_DIR)
 	@mkdir -p $(OUT_DIR)
 	# Link all required C files into the architecture-specific directory
@@ -143,14 +141,13 @@ uninstall:
 .PHONY: clean print-kbuild-dir
 clean:
 	@echo ">> Cleaning userland artifacts"
-	@test -d $(OBJ_DIR) && find $(OBJ_DIR) -delete || true; rm -rf $(OBJ_DIR) $(LIB_FILE)
+	@rm -rf $(OBJ_DIR) $(LIB_FILE)
 	@echo ">> Cleaning kernel build artifacts"
 	@for ARCH in $(ARCHS); do \
 	  DIR=$(KERNEL_SRC_DIR)/$$ARCH; \
 	  KBUILD_DIR_FOR_CLEAN=$$(/usr/bin/make -s -f $(MAKEFILE_LIST) print-kbuild-dir ARCH=$$ARCH); \
 	  if [ -d "$$DIR" ]; then \
 	    make -C $$KBUILD_DIR_FOR_CLEAN M=$$PWD/$$DIR ARCH=$$ARCH clean || true; \
-	    test -d $$DIR && find $$DIR -delete || true; \
 	    rm -rf $$DIR; \
 	  fi; \
 	done
