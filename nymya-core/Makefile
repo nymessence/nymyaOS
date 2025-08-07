@@ -48,10 +48,10 @@ all: userland
 userland: $(OBJ_DIR) $(LIB_FILE)
 
 $(OBJ_DIR):
-	@chmod -R u+rwX $(OBJ_DIR) || true # Attempt to fix permissions on existing contents before removal
-	@rm -rf $(OBJ_DIR) || true # Clean and recreate the build directory to avoid permission issues, allow rm to fail gracefully
+	# Clean and recreate the build directory to avoid permission issues.
+	# If rm fails, make should stop here as subsequent steps will likely fail anyway.
+	@rm -rf $(OBJ_DIR)
 	@mkdir -p $(OBJ_DIR)
-	@chmod u+rwX $(OBJ_DIR) || true # Ensure writable permissions on the newly created directory
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -I$(INCLUDE_DIR) -c $< -o $@
@@ -82,10 +82,10 @@ $(ARCHS):
 	$(eval CCP := $(CROSS_COMPILE_$@))
 	$(eval OUT_DIR := $(KERNEL_SRC_DIR)/$@)
 	@echo "Building kernel module for $@ with CROSS_COMPILE='$(CCP)'"
-	@chmod -R u+rwX $(OUT_DIR) || true # Attempt to fix permissions on existing contents before removal
-	@rm -rf $(OUT_DIR) || true # Ensure the architecture-specific directory is completely removed, allow rm to fail gracefully
-	@mkdir -p $(OUT_DIR) # Recreate it fresh to avoid permission and stale file issues
-	@chmod u+rwX $(OUT_DIR) || true # Ensure writable permissions on the newly created directory
+	# Ensure the architecture-specific directory is completely removed and recreated fresh
+	# If rm fails, make should stop here as subsequent steps will likely fail anyway.
+	@rm -rf $(OUT_DIR)
+	@mkdir -p $(OUT_DIR)
 	# Link all required C files into the architecture-specific directory
 	@for f in $(KERNEL_SRCS); do ln -sf $(PWD)/$$f $(OUT_DIR)/; done
 	# Link the nymya.h header file
@@ -100,7 +100,9 @@ $(ARCHS):
 	$(eval CURRENT_ARCH_KBUILD_DIR := $(call GET_KERNEL_BUILD_DIR,$@))
 
 	@echo "Using KERNEL_BUILD_DIR for $@: $(CURRENT_ARCH_KBUILD_DIR)"
-	@$(MAKE) -C $(CURRENT_ARCH_KBUILD_DIR) M=$(PWD)/$(OUT_DIR) ARCH=$@ CROSS_COMPILE=$(CCP) modules
+	# Explicitly run modules_prepare to set up the kernel source tree for external module build
+	# before attempting to build the modules. This addresses the "No rule to make target 'prepare'" error.
+	@$(MAKE) -C $(CURRENT_ARCH_KBUILD_DIR) M=$(PWD)/$(OUT_DIR) ARCH=$@ CROSS_COMPILE=$(CCP) modules_prepare modules
 
 # -----------------------------------------------------------------------------
 # Install & uninstall targets
@@ -139,16 +141,14 @@ uninstall:
 .PHONY: clean print-kbuild-dir
 clean:
 	@echo ">> Cleaning userland artifacts"
-	@chmod -R u+rwX $(OBJ_DIR) || true # Attempt to fix permissions before cleaning
-	@rm -rf $(OBJ_DIR) $(LIB_FILE) || true
+	@rm -rf $(OBJ_DIR) $(LIB_FILE)
 	@echo ">> Cleaning kernel build artifacts"
 	@for ARCH in $(ARCHS); do \
 	  DIR=$(KERNEL_SRC_DIR)/$$ARCH; \
 	  KBUILD_DIR_FOR_CLEAN=$$(/usr/bin/make -s -f $(MAKEFILE_LIST) print-kbuild-dir ARCH=$$ARCH); \
 	  if [ -d "$$DIR" ]; then \
 	    make -C $$KBUILD_DIR_FOR_CLEAN M=$$PWD/$$DIR ARCH=$$ARCH clean || true; \
-	    chmod -R u+rwX $$DIR || true; # Attempt to fix permissions before cleaning
-	    rm -rf $$DIR || true; \
+	    rm -rf $$DIR; \
 	  fi; \
 	done
 
