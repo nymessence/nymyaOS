@@ -100,9 +100,8 @@ $(ARCHS):
 	$(eval CURRENT_ARCH_KBUILD_DIR := $(call GET_KERNEL_BUILD_DIR,$@))
 
 	@echo "Using KERNEL_BUILD_DIR for $@: $(CURRENT_ARCH_KBUILD_DIR)"
-	# Explicitly run modules_prepare to set up the kernel source tree for external module build
-	# before attempting to build the modules. This addresses the "No rule to make target 'prepare'" error.
-	@$(MAKE) -C $(CURRENT_ARCH_KBUILD_DIR) M=$(PWD)/$(OUT_DIR) ARCH=$@ CROSS_COMPILE=$(CCP) modules_prepare modules
+	# Build the kernel module using the kernel build system.
+	@$(MAKE) -C $(CURRENT_ARCH_KBUILD_DIR) M=$(PWD)/$(OUT_DIR) ARCH=$@ CROSS_COMPILE=$(CCP) modules
 
 # -----------------------------------------------------------------------------
 # Install & uninstall targets
