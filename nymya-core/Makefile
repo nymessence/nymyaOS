@@ -51,6 +51,7 @@ userland: $(OBJ_DIR) $(LIB_FILE)
 $(OBJ_DIR):
 	# Clean and recreate the build directory to avoid permission issues.
 	# If rm fails, make should stop here as subsequent steps will likely fail anyway.
+	@chmod -R u+rwX $(OBJ_DIR) 2>/dev/null || true
 	@rm -rf $(OBJ_DIR)
 	@mkdir -p $(OBJ_DIR)
 
@@ -59,12 +60,14 @@ $(OBJ_DIR):
 prepare:
 	@echo ">> Preparing build directories by cleaning and recreating..."
 	# Clean and recreate userland build directory
+	@chmod -R u+rwX $(OBJ_DIR) 2>/dev/null || true
 	@rm -rf $(OBJ_DIR)
 	@mkdir -p $(OBJ_DIR)
 	# Clean and recreate kernel module directories for all architectures
 	@for ARCH in $(ARCHS); do \
 	  OUT_DIR=$(KERNEL_SRC_DIR)/$$ARCH; \
 	  echo "  - Cleaning and creating $$OUT_DIR for $$ARCH"; \
+	  chmod -R u+rwX $$OUT_DIR 2>/dev/null || true; \
 	  rm -rf $$OUT_DIR; \
 	  mkdir -p $$OUT_DIR; \
 	done
@@ -101,6 +104,7 @@ $(ARCHS):
 	@echo "Building kernel module for $@ with CROSS_COMPILE='$(CCP)'"
 	# Ensure the architecture-specific directory is completely removed and recreated fresh
 	# If rm fails, make should stop here as subsequent steps will likely fail anyway.
+	@chmod -R u+rwX $(OUT_DIR) 2>/dev/null || true
 	@rm -rf $(OUT_DIR)
 	@mkdir -p $(OUT_DIR)
 	# Link all required C files into the architecture-specific directory
@@ -157,6 +161,7 @@ uninstall:
 .PHONY: clean print-kbuild-dir clean_dir
 clean:
 	@echo ">> Cleaning userland artifacts"
+	@chmod -R u+rwX $(OBJ_DIR) 2>/dev/null || true
 	@rm -rf $(OBJ_DIR) $(LIB_FILE)
 	@echo ">> Cleaning kernel build artifacts"
 	@for ARCH in $(ARCHS); do \
@@ -164,6 +169,7 @@ clean:
 	  KBUILD_DIR_FOR_CLEAN=$$(/usr/bin/make -s -f $(MAKEFILE_LIST) print-kbuild-dir ARCH=$$ARCH); \
 	  if [ -d "$$DIR" ]; then \
 	    make -C $$KBUILD_DIR_FOR_CLEAN M=$$PWD/$$DIR ARCH=$$ARCH clean || true; \
+	    chmod -R u+rwX $$DIR 2>/dev/null || true; \
 	    rm -rf $$DIR; \
 	  fi; \
 	done
@@ -171,9 +177,11 @@ clean:
 # New 'clean_dir' target: removes only the directories, similar to what 'clean' does for directories.
 clean_dir:
 	@echo ">> Cleaning build directories only..."
+	@chmod -R u+rwX $(OBJ_DIR) 2>/dev/null || true
 	@rm -rf $(OBJ_DIR)
 	@for ARCH in $(ARCHS); do \
 	  DIR=$(KERNEL_SRC_DIR)/$$ARCH; \
+	  chmod -R u+rwX $$DIR 2>/dev/null || true; \
 	  rm -rf $$DIR; \
 	done
 	@echo "✅ All build directories removed."
@@ -189,6 +197,7 @@ print-kbuild-dir:
 .PHONY: deb-userland
 deb-userland: userland
 	@echo ">> Creating userland .deb"
+	@chmod -R u+rwX $(DEB_USERLAND_DIR) 2>/dev/null || true
 	@rm -rf $(DEB_USERLAND_DIR)
 	@mkdir -p $(DEB_USERLAND_DIR)/DEBIAN \
 	        $(DEB_USERLAND_DIR)/usr/lib \
@@ -209,6 +218,7 @@ deb-kernel: kernel
 	  DEB_DIR=$$(echo $(DEB_KERNEL_DIR) | sed "s/#ARCH#/$${ARCH}/"); \
 	  MOD_SRC=$(KERNEL_SRC_DIR)/$$ARCH/$(KERNEL_MODULE); \
 	  echo "Building $$DEB_DIR.deb..."; \
+	  chmod -R u+rwX $$DEB_DIR 2>/dev/null || true; \
 	  rm -rf $$DEB_DIR; \
 	  mkdir -p $$DEB_DIR/DEBIAN $$DEB_DIR/lib/modules/$(shell uname -r)/extra; \
 	  if [ -f $$MOD_SRC ]; then \
