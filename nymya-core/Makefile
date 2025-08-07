@@ -42,18 +42,18 @@ OBJECTS := $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SOURCES))
 # -----------------------------------------------------------------------------
 # Default: build userland library
 # -----------------------------------------------------------------------------
-.PHONY: all userland $(OBJ_DIR) # Added OBJ_DIR to phony targets
+.PHONY: all userland $(OBJ_DIR)
 all: userland
 
-userland: $(OBJ_DIR) $(LIB_FILE) # Ensure OBJ_DIR is created and clean first
+userland: $(OBJ_DIR) $(LIB_FILE)
 
 $(OBJ_DIR):
+	@chmod -R u+rwX $(OBJ_DIR) || true # Attempt to fix permissions on existing contents before removal
 	@rm -rf $(OBJ_DIR) || true # Clean and recreate the build directory to avoid permission issues, allow rm to fail gracefully
 	@mkdir -p $(OBJ_DIR)
-	@chmod -R u+rwX $(OBJ_DIR) || true # Ensure writable permissions on the directory
+	@chmod u+rwX $(OBJ_DIR) || true # Ensure writable permissions on the newly created directory
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
-	# Removed: @mkdir -p $(OBJ_DIR) as it's now handled by the $(OBJ_DIR) target
 	$(CC) $(CFLAGS) -I$(INCLUDE_DIR) -c $< -o $@
 
 $(LIB_FILE): $(OBJECTS)
@@ -82,9 +82,10 @@ $(ARCHS):
 	$(eval CCP := $(CROSS_COMPILE_$@))
 	$(eval OUT_DIR := $(KERNEL_SRC_DIR)/$@)
 	@echo "Building kernel module for $@ with CROSS_COMPILE='$(CCP)'"
+	@chmod -R u+rwX $(OUT_DIR) || true # Attempt to fix permissions on existing contents before removal
 	@rm -rf $(OUT_DIR) || true # Ensure the architecture-specific directory is completely removed, allow rm to fail gracefully
 	@mkdir -p $(OUT_DIR) # Recreate it fresh to avoid permission and stale file issues
-	@chmod -R u+rwX $(OUT_DIR) || true # Ensure writable permissions on the directory
+	@chmod u+rwX $(OUT_DIR) || true # Ensure writable permissions on the newly created directory
 	# Link all required C files into the architecture-specific directory
 	@for f in $(KERNEL_SRCS); do ln -sf $(PWD)/$$f $(OUT_DIR)/; done
 	# Link the nymya.h header file
@@ -97,8 +98,6 @@ $(ARCHS):
 
 	# Get the correct KERNEL_BUILD_DIR for the target architecture
 	$(eval CURRENT_ARCH_KBUILD_DIR := $(call GET_KERNEL_BUILD_DIR,$@))
-	# Fallback to general /lib/modules/$(uname -r)/build is no longer needed
-	# because GET_KERNEL_BUILD_DIR now consistently points to the standard path.
 
 	@echo "Using KERNEL_BUILD_DIR for $@: $(CURRENT_ARCH_KBUILD_DIR)"
 	@$(MAKE) -C $(CURRENT_ARCH_KBUILD_DIR) M=$(PWD)/$(OUT_DIR) ARCH=$@ CROSS_COMPILE=$(CCP) modules
@@ -140,17 +139,15 @@ uninstall:
 .PHONY: clean print-kbuild-dir
 clean:
 	@echo ">> Cleaning userland artifacts"
-	@rm -rf $(OBJ_DIR) $(LIB_FILE)
+	@chmod -R u+rwX $(OBJ_DIR) || true # Attempt to fix permissions before cleaning
+	@rm -rf $(OBJ_DIR) $(LIB_FILE) || true
 	@echo ">> Cleaning kernel build artifacts"
 	@for ARCH in $(ARCHS); do \
 	  DIR=$(KERNEL_SRC_DIR)/$$ARCH; \
-	  # Get the correct KERNEL_BUILD_DIR for the arch when cleaning
 	  KBUILD_DIR_FOR_CLEAN=$$(/usr/bin/make -s -f $(MAKEFILE_LIST) print-kbuild-dir ARCH=$$ARCH); \
-	  # Fallback logic is no longer strictly needed as print-kbuild-dir is consistent
-	  # if [ -z "$$KBUILD_DIR_FOR_CLEAN" ]; then KBUILD_DIR_FOR_CLEAN="/lib/modules/$(shell uname -r)/build"; fi; \
 	  if [ -d "$$DIR" ]; then \
-	    # Use the specific KBUILD_DIR for clean target
 	    make -C $$KBUILD_DIR_FOR_CLEAN M=$$PWD/$$DIR ARCH=$$ARCH clean || true; \
+	    chmod -R u+rwX $$DIR || true; # Attempt to fix permissions before cleaning
 	    rm -rf $$DIR || true; \
 	  fi; \
 	done
