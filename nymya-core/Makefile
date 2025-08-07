@@ -42,13 +42,17 @@ OBJECTS := $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SOURCES))
 # -----------------------------------------------------------------------------
 # Default: build userland library
 # -----------------------------------------------------------------------------
-.PHONY: all userland
+.PHONY: all userland $(OBJ_DIR) # Added OBJ_DIR to phony targets
 all: userland
 
-userland: $(LIB_FILE)
+userland: $(OBJ_DIR) $(LIB_FILE) # Ensure OBJ_DIR is created and clean first
+
+$(OBJ_DIR):
+	@rm -rf $(OBJ_DIR) # Clean and recreate the build directory to avoid permission issues
+	@mkdir -p $(OBJ_DIR)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
-	@mkdir -p $(OBJ_DIR)
+	# Removed: @mkdir -p $(OBJ_DIR) as it's now handled by the $(OBJ_DIR) target
 	$(CC) $(CFLAGS) -I$(INCLUDE_DIR) -c $< -o $@
 
 $(LIB_FILE): $(OBJECTS)
@@ -71,8 +75,8 @@ $(ARCHS):
 	$(eval CCP := $(CROSS_COMPILE_$@))
 	$(eval OUT_DIR := $(KERNEL_SRC_DIR)/$@)
 	@echo "Building kernel module for $@ with CROSS_COMPILE='$(CCP)'"
-	@mkdir -p $(OUT_DIR)
-	@rm -f $(OUT_DIR)/*.c $(OUT_DIR)/*.h
+	@rm -rf $(OUT_DIR) # Ensure the architecture-specific directory is completely removed
+	@mkdir -p $(OUT_DIR) # Recreate it fresh to avoid permission and stale file issues
 	# Link all required C files into the architecture-specific directory
 	@for f in $(KERNEL_SRCS); do ln -sf $(PWD)/$$f $(OUT_DIR)/; done
 	# Link the nymya.h header file
