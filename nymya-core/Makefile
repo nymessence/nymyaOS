@@ -51,7 +51,7 @@ userland: $(OBJ_DIR) $(LIB_FILE)
 $(OBJ_DIR):
 	# Clean and recreate the build directory to avoid permission issues.
 	# If rm fails, make should stop here as subsequent steps will likely fail anyway.
-	@rm -rf $(OBJ_DIR) || true # Allow cleanup to fail without stopping make (e.g., permission denied)
+	@rm -rf $(OBJ_DIR)
 	@mkdir -p $(OBJ_DIR)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
@@ -85,7 +85,7 @@ $(ARCHS):
 	@echo "Building kernel module for $@ with CROSS_COMPILE='$(CCP)'"
 	# Ensure the architecture-specific directory is completely removed and recreated fresh
 	# If rm fails, make should stop here as subsequent steps will likely fail anyway.
-	@rm -rf $(OUT_DIR) || true # Allow cleanup to fail without stopping make (e.g., permission denied)
+	@rm -rf $(OUT_DIR)
 	@mkdir -p $(OUT_DIR)
 	# Link all required C files into the architecture-specific directory
 	@for f in $(KERNEL_SRCS); do ln -sf $(PWD)/$$f $(OUT_DIR)/; done
