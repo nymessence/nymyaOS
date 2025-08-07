@@ -1,0 +1,23 @@
+# Use an Ubuntu base image, as requested.
+FROM ubuntu:24.04
+
+# Set environment variables to avoid interactive prompts during installation.
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install all necessary dependencies for kernel module compilation.
+# 'linux-headers-generic' is the correct meta-package for Ubuntu.
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    linux-headers-generic \
+    --no-install-recommends && \
+    rm -rf /var/lib/apt/lists/*
+
+# Set the working directory inside the container.
+WORKDIR /app
+
+# Copy the entire project into the container.
+COPY . .
+
+# Set the default command to 'make'.
+CMD ["make"]
+
