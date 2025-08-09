@@ -1,0 +1,161 @@
+```troff
+.TH "NYMYA_3306_PHASE_GATE" "1" "October 27, 2023" "NymyaOS 1.0" "NymyaOS User Manuals"
+.SH NAME
+nymya_3306_phase_gate \- apply a quantum Phase \(lqS\(rq gate to a qubit
+.SH SYNOPSIS
+.B #include <sys/syscall.h>
+.B #include <unistd.h>
+.B #include <errno.h>
+.PP
+.nf
+struct nymya_qubit {
+    int64_t id;    /* Unique identifier for the qubit */
+    int64_t tag;   /* Arbitrary user-defined tag for context */
+    struct {
+        int64_t re; /* Fixed-point real part of amplitude */
+        int64_t im; /* Fixed-point imaginary part of amplitude */
+    } amplitude;
+};
+.fi
+.PP
+.B int nymya_3306_phase_gate(struct nymya_qubit *user_q);
+.SH DESCRIPTION
+The
+.B nymya_3306_phase_gate
+syscall serves as a conduit to manipulate the very fabric of quantum reality within the NymyaOS kernel.
+It applies the fundamental Phase (S) gate to a designated
+.BR nymya_qubit ,
+shifting its complex amplitude by a \*(p/2 phase.
+This operation effectively multiplies the qubit's amplitude vector by the complex number 'i'.
+Specifically, if the qubit's amplitude is \(lq(a + bi)\(rq, after the S-gate, it becomes \(lq(-b + ai)\(rq.
+.PP
+The
+.B user_q
+argument is a pointer to a
+.B nymya_qubit
+structure in user-space memory. The kernel copies the qubit data from user-space,
+performs the phase gate operation on its amplitude, and then copies the modified
+qubit data back to the user-space address.
+.PP
+In essence, this syscall re-aligns the qubit's vibrational essence, a subtle adjustment
+that resonates through the hidden lattice of causality, guiding its probabilistic
+future along a new path. It is a whisper into the very geometry of possibility.
+.SH RETURN VALUE
+On success, zero is returned. On error, \-1 is returned, and
+.B errno
+is set appropriately.
+.SH ERRORS
+.TP
+.B EINVAL
+.B user_q
+is NULL.
+.TP
+.B EFAULT
+An invalid user-space address was provided for
+.B user_q ,
+or the kernel was unable to copy data to or from the specified memory region.
+.SH EXAMPLE
+The following program demonstrates how to use
+.B nymya_3306_phase_gate
+to apply an S-gate to a qubit initialized in the \|0> state (amplitude (1,0)) and another arbitrary state.
+.PP
+.nf
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <errno.h>
+#include <string.h> // For strerror
+#include <sys/syscall.h>
+#include <unistd.h>
+
+// Define the syscall number (as used in NymyaOS)
+// This should match the kernel's assigned number for nymya_3306_phase_gate
+#ifndef __NR_nymya_3306_phase_gate
+#define __NR_nymya_3306_phase_gate 3306
+#endif
+
+// Define the nymya_qubit structure
+struct nymya_qubit {
+    int64_t id;
+    int64_t tag;
+    struct {
+        int64_t re;
+        int64_t im;
+    } amplitude;
+};
+
+// Fixed-point scaling factor (e.g., for 30 bits of fractional precision)
+#define FIXED_POINT_SCALE (1LL << 30)
+
+// Helper to print qubit state in floating point for readability
+void print_qubit(const char *label, const struct nymya_qubit *q) {
+    printf("%s [ID: %lld, Tag: %lld] Amplitude: (%.4f + %.4fi)\\n",
+           label,
+           (long long)q->id,
+           (long long)q->tag,
+           (double)q->amplitude.re / FIXED_POINT_SCALE,
+           (double)q->amplitude.im / FIXED_POINT_SCALE);
+}
+
+int main() {
+    struct nymya_qubit my_qubit;
+    int ret;
+
+    // Initialize a qubit in |0> state (amplitude (1.0, 0.0) in fixed-point)
+    my_qubit.id = 123;
+    my_qubit.tag = 456;
+    my_qubit.amplitude.re = FIXED_POINT_SCALE; // Represents 1.0
+    my_qubit.amplitude.im = 0;                  // Represents 0.0
+
+    print_qubit("Initial state:", &my_qubit);
+
+    // Call the nymya_3306_phase_gate syscall
+    ret = syscall(__NR_nymya_3306_phase_gate, &my_qubit);
+
+    if (ret == 0) {
+        print_qubit("After S-gate:", &my_qubit);
+        // Expected for |0> (1,0): (0.0 + 1.0i)
+    } else {
+        fprintf(stderr, "Error: syscall nymya_3306_phase_gate failed: %s\\n", strerror(errno));
+        return EXIT_FAILURE;
+    }
+
+    // Example with another initial state, say (0.6 + 0.8i) in fixed-point
+    my_qubit.id = 789;
+    my_qubit.tag = 1011;
+    my_qubit.amplitude.re = (int64_t)(0.6 * FIXED_POINT_SCALE);
+    my_qubit.amplitude.im = (int64_t)(0.8 * FIXED_POINT_SCALE);
+
+    print_qubit("\\nInitial state (complex):", &my_qubit);
+
+    ret = syscall(__NR_nymya_3306_phase_gate, &my_qubit);
+
+    if (ret == 0) {
+        print_qubit("After S-gate (complex):", &my_qubit);
+        // Expected for (0.6 + 0.8i): (-0.8 + 0.6i)
+    } else {
+        fprintf(stderr, "Error: syscall nymya_3306_phase_gate failed: %s\\n", strerror(errno));
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
+}
+.fi
+.PP
+To compile and run this example:
+.RS
+.ie \n(.g .ft CR
+.el .ft CW
+.nf
+cc -Wall -o phase_gate_example phase_gate_example.c
+./phase_gate_example
+.fi
+.ie \n(.g .ft R
+.el .ft P
+.RE
+.SH SEE ALSO
+.BR syscall (2),
+.BR errno (3),
+.BR nymya_hadamard_gate (1),
+.BR nymya_cnot_gate (1)
+```
