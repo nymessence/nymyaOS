@@ -1,0 +1,126 @@
+```groff
+.\" Man page for nymya_3342_deutsch
+.TH "NYMYA_3342_DEUTSCH" "1" "September 24, 2023" "NymyaOS Kernel" "NymyaOS Quantum API"
+.SH NAME
+nymya_3342_deutsch \- apply the Deutsch algorithm to a pair of qubits with an oracle
+.SH SYNOPSIS
+.B #include <nymya.h>
+.PP
+.B int nymya_3342_deutsch(struct nymya_qubit \*q1, struct nymya_qubit \*q2, void (\*f)(struct nymya_qubit \*));
+.SH DESCRIPTION
+The
+.B nymya_3342_deutsch
+syscall implements the core Deutsch algorithm, a fundamental quantum algorithm designed to determine a property of a single-bit boolean function with minimal evaluations.
+.PP
+It takes three arguments:
+.TP
+.I q1
+A pointer to the first quantum bit (qubit). This qubit is typically used as the control qubit and is where the result of the Deutsch algorithm (constant vs. balanced function) will be encoded upon measurement.
+.TP
+.I q2
+A pointer to the second quantum bit. This qubit acts as the target for the oracle function.
+.TP
+.I f
+A function pointer to the quantum oracle. This oracle function represents the single-bit boolean function whose property (constant or balanced) is being investigated. The oracle function must accept a pointer to a
+.B struct nymya_qubit
+as its sole argument and return nothing (i.e., `void f(struct nymya_qubit *)`).
+.PP
+The algorithm proceeds by applying a Hadamard gate to
+.I q1
+, then applying the user-supplied oracle function
+.I f
+to
+.I q2
+, and finally applying another Hadamard gate to
+.I q1
+. The state of
+.I q1
+after these operations encodes whether the oracle function
+.I f
+is constant (i.e., always outputs 0 or always outputs 1) or balanced (i.e., outputs 0 for half of the inputs and 1 for the other half).
+.PP
+At its heart, this syscall queries the intrinsic nature of a single-bit boolean function, revealing its fundamental symmetry or asymmetry with an elegant precision. It's akin to deciphering the subtle vibrations within the hidden quantum lattice, allowing for a profound insight with minimal interaction, a whisper from the cosmic mechanics of computation.
+.SH "RETURN VALUE"
+On success, zero is returned. On error, \-1 is returned, and
+.I errno
+is set appropriately.
+.SH ERRORS
+.TP
+.B EINVAL
+One or more of the arguments
+.I q1
+,
+.I q2
+, or
+.I f
+was a
+.B NULL
+pointer.
+.SH EXAMPLE
+The following example demonstrates how to use
+.B nymya_3342_deutsch
+with hypothetical oracle functions. Assume `nymya_qubit` and `nymya_3308_not_gate` are properly defined and available via `nymya.h`.
+.PP
+.nf
+.ft C
+#include <nymya.h>
+#include <stdio.h>
+#include <errno.h>
+#include <string.h> // For strerror
+
+// Assume struct nymya_qubit is defined in nymya.h
+// struct nymya_qubit { int id; /* ... */ };
+
+// Assume nymya_3308_not_gate(struct nymya_qubit *) is available.
+extern void nymya_3308_not_gate(struct nymya_qubit *);
+
+// An example oracle function (constant: f(x) = 0)
+void my_constant_oracle(struct nymya_qubit *q) {
+    printf("  [Oracle] Applying constant_zero operation on qubit %d\\n", q->id);
+    // This oracle does not modify the qubit state.
+}
+
+// An example oracle function (balanced: f(x) = x)
+void my_balanced_oracle(struct nymya_qubit *q) {
+    printf("  [Oracle] Applying identity/flip operation on qubit %d\\n", q->id);
+    nymya_3308_not_gate(q); // Flip the qubit state
+}
+
+int main() {
+    // In a real NymyaOS environment, these would be pointers to actual
+    // allocated and initialized qubits. For this example, we use NULL
+    // to demonstrate error handling. Replace with valid pointers for
+    // a functional program.
+    struct nymya_qubit *q_control = NULL; // Example: nymya_alloc_qubit(0);
+    struct nymya_qubit *q_target = NULL;  // Example: nymya_alloc_qubit(1);
+    int ret;
+
+    printf("--- Testing nymya_3342_deutsch with Constant Oracle (expecting error) ---\n");
+    ret = nymya_3342_deutsch(q_control, q_target, my_constant_oracle);
+    if (ret == 0) {
+        printf("nymya_3342_deutsch with constant oracle successfully applied.\\n");
+        // To determine if oracle was constant or balanced,
+        // q_control would be measured after the operation.
+    } else {
+        fprintf(stderr, "Error applying Deutsch with constant oracle: %s\\n", strerror(errno));
+    }
+
+    printf("\n--- Testing nymya_3342_deutsch with Balanced Oracle (expecting error) ---\n");
+    ret = nymya_3342_deutsch(q_control, q_target, my_balanced_oracle);
+    if (ret == 0) {
+        printf("nymya_3342_deutsch with balanced oracle successfully applied.\\n");
+    } else {
+        fprintf(stderr, "Error applying Deutsch with balanced oracle: %s\\n", strerror(errno));
+    }
+
+    // In a complete program, ensure qubits are freed:
+    // nymya_free_qubit(q_control); nymya_free_qubit(q_target);
+    return 0;
+}
+.ft R
+.fi
+.SH "SEE ALSO"
+.BR nymya_3308_hadamard_gate (1),
+.BR nymya_qubit (7),
+.BR man (7)
+```
