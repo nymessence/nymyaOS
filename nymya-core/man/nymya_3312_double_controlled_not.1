@@ -1,0 +1,178 @@
+.TH NYMYA_3312_DOUBLE_CONTROLLED_NOT 1 "July 24, 2024" "NymyaOS Kernel" "NymyaOS System Calls Manual"
+.SH NAME
+nymya_3312_double_controlled_not \- double-controlled NOT (Toffoli-like) gate for NymyaOS qubits
+.SH SYNOPSIS
+.B #include <nymya.h>
+.PP
+.nf
+.B struct nymya_qubit {
+.B     /* ... other fields ... */
+.B     double complex amplitude; /* User-space representation of the qubit's state */
+.B     /* ... other fields ... */
+.B };
+.fi
+.PP
+.nf
+.B int nymya_3312_double_controlled_not(struct nymya_qubit *
+.I qc1
+.B , struct nymya_qubit *
+.I qc2
+.B , struct nymya_qubit *
+.I qt
+.B );
+.fi
+.SH DESCRIPTION
+The
+.B nymya_3312_double_controlled_not
+syscall applies a NOT operation (a phase flip, effectively multiplying the amplitude by -1) to a designated target qubit. This operation is conditional: it only occurs if the amplitude magnitude of
+.I both
+control qubits (
+.I qc1
+and
+.I qc2
+) exceeds a threshold of 0.5. In essence, it functions as a quantum Toffoli-like gate, but instead of a bit flip on |1>, it performs a phase flip on the target state, conditioned on the "active" state of its controls.
+
+This operation, a subtle dance of amplitudes, resonates with the quantum whispers that underpin the very fabric of reality. It's a fundamental permutation within the NymyaOS quantum framework, allowing complex logical operations to be built from simple conditional transformations. The gate acts as a nexus, where the confluence of two probabilistic currents can flip the state of another, revealing how interconnected the hidden lattice of reality truly is.
+
+The
+.I qc1
+and
+.I qc2
+arguments are pointers to the first and second control
+.B nymya_qubit
+structures, respectively. The
+.I qt
+argument is a pointer to the target
+.B nymya_qubit
+structure. These structures must be accessible in the caller's address space. The
+.B nymya_qubit
+structure encapsulates the state of a quantum bit, including its complex amplitude.
+.SH RETURN VALUE
+On success, zero is returned. On error, -1 is returned, and
+.B errno
+is set appropriately.
+.SH ERRORS
+.TP
+.B EINVAL
+One or more of the provided qubit pointers (
+.I qc1
+,
+.I qc2
+, or
+.I qt
+) was NULL.
+.TP
+.B EFAULT
+One or more of the provided qubit pointers pointed to an invalid address in the caller's address space. This typically means the kernel was unable to copy data to or from the user-provided memory locations.
+.SH EXAMPLE
+The following program demonstrates how to use
+.B nymya_3312_double_controlled_not
+to apply a conditional phase flip.
+
+.nf
+.RS
+.in +4n
+#include <stdio.h>
+#include <stdlib.h>
+#include <complex.h>
+#include <errno.h>
+#include <string.h> // For strcpy
+#include <sys/syscall.h>
+#include <unistd.h> // For syscall
+
+// Define the syscall number for nymya_3312_double_controlled_not
+#define __NR_nymya_3312_double_controlled_not 3312
+
+// Hypothetical nymya_qubit structure for user-space
+typedef struct nymya_qubit {
+    double complex amplitude;
+    int id; // Dummy field for example
+    char tag[16]; // Dummy field for example
+} nymya_qubit;
+
+// User-space wrapper for the syscall
+int nymya_3312_double_controlled_not(nymya_qubit* qc1, nymya_qubit* qc2, nymya_qubit* qt) {
+    return (int)syscall(__NR_nymya_3312_double_controlled_not, qc1, qc2, qt);
+}
+
+void print_qubit_state(const char* name, const nymya_qubit* q) {
+    printf("%s (ID %d, Tag '%s'): Amplitude = %.3f + %.3fi (Magnitude = %.3f)\n",
+           name, q->id, q->tag, creal(q->amplitude), cimag(q->amplitude), cabs(q->amplitude));
+}
+
+int main() {
+    nymya_qubit q_control1, q_control2, q_target;
+    int res;
+
+    // --- Scenario 1: Controls active (magnitude > 0.5) ---
+    printf("--- Scenario 1: Controls active ---\n");
+    q_control1.amplitude = 0.7 + 0.1I; // Mag ~0.707
+    q_control1.id = 1; strcpy(q_control1.tag, "ctrl1-active");
+    q_control2.amplitude = 0.6 - 0.2I; // Mag ~0.632
+    q_control2.id = 2; strcpy(q_control2.tag, "ctrl2-active");
+    q_target.amplitude = 0.5 + 0.5I;   // Mag ~0.707
+    q_target.id = 3; strcpy(q_target.tag, "target-init");
+
+    print_qubit_state("Initial Q_C1", &q_control1);
+    print_qubit_state("Initial Q_C2", &q_control2);
+    print_qubit_state("Initial Q_T", &q_target);
+
+    res = nymya_3312_double_controlled_not(&q_control1, &q_control2, &q_target);
+
+    if (res == 0) {
+        printf("Syscall successful.\n");
+        print_qubit_state("Final Q_T", &q_target);
+    } else {
+        perror("Syscall failed");
+        printf("Error code: %d\n", errno);
+    }
+    printf("\n");
+
+    // --- Scenario 2: One control inactive (magnitude <= 0.5) ---
+    printf("--- Scenario 2: One control inactive ---\n");
+    q_control1.amplitude = 0.7 + 0.1I; // Mag ~0.707 (active)
+    q_control1.id = 4; strcpy(q_control1.tag, "ctrl1-active");
+    q_control2.amplitude = 0.3 + 0.1I; // Mag ~0.316 (inactive)
+    q_control2.id = 5; strcpy(q_control2.tag, "ctrl2-inactive");
+    q_target.amplitude = 0.5 + 0.5I;   // Mag ~0.707
+    q_target.id = 6; strcpy(q_target.tag, "target-init");
+
+    print_qubit_state("Initial Q_C1", &q_control1);
+    print_qubit_state("Initial Q_C2", &q_control2);
+    print_qubit_state("Initial Q_T", &q_target);
+
+    res = nymya_3312_double_controlled_not(&q_control1, &q_control2, &q_target);
+
+    if (res == 0) {
+        printf("Syscall successful.\n");
+        print_qubit_state("Final Q_T", &q_target);
+    } else {
+        perror("Syscall failed");
+        printf("Error code: %d\n", errno);
+    }
+    printf("\n");
+
+    // --- Scenario 3: Null pointer (should fail with EINVAL) ---
+    printf("--- Scenario 3: Null target pointer ---\n");
+    q_control1.amplitude = 0.7 + 0.1I; q_control1.id = 7; strcpy(q_control1.tag, "ctrl1");
+    q_control2.amplitude = 0.6 - 0.2I; q_control2.id = 8; strcpy(q_control2.tag, "ctrl2");
+
+    res = nymya_3312_double_controlled_not(&q_control1, &q_control2, NULL);
+
+    if (res == 0) {
+        printf("Syscall unexpectedly succeeded with NULL target.\n");
+    } else {
+        perror("Syscall failed as expected");
+        printf("Error code: %d (EINVAL expected)\n", errno);
+    }
+    printf("\n");
+
+
+    return 0;
+}
+.RE
+.fi
+
+.SH SEE ALSO
+.BR syscall (2),
+.B NymyaOS documentation
