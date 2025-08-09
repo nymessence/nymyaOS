@@ -1,0 +1,147 @@
+```groff
+.\"
+.\" Man page for nymya_3316_phase_gate syscall
+.\"
+.TH NYMYA_3316_PHASE_GATE 1 "December 10, 2023" "nymyaOS Kernel" "User Commands"
+.SH NAME
+nymya_3316_phase_gate \- apply a symbolic phase gate to a nymyaOS qubit
+.SH SYNOPSIS
+.nf
+.B #include <unistd.h>
+.B #include <sys/syscall.h>
+.B #include <nymya/types.h>
+.PP
+.B int syscall(SYS_nymya_3316_phase_gate, struct nymya_qubit *
+.IR user_q ,
+.B int64_t
+.IR phi_fixed );
+.fi
+.SH DESCRIPTION
+The
+.BR nymya_3316_phase_gate (3316)
+system call applies a symbolic phase gate operation to the amplitude of a specified nymyaOS qubit. This operation effectively multiplies the qubit's complex amplitude by a phase factor of e^(i * phi), where 'phi' is the phase angle.
+.PP
+The
+.IR user_q
+argument is a pointer to a
+.IR nymya_qubit
+structure in the caller's address space. This structure contains the qubit's current state, including its complex amplitude, which is represented in a fixed-point format. The system call copies this structure into kernel space, applies the phase gate using high-precision fixed-point arithmetic, and copies the modified structure back to user space.
+.PP
+The
+.IR phi_fixed
+argument specifies the phase angle 'phi' in radians. It must be provided as a 64-bit integer in Q32.32 fixed-point format. This high-precision representation allows for the subtle shifts that echo the universal vibrations, aligning the qubit's state with the underlying, hidden lattice of reality.
+.PP
+In essence, this gate subtly reorients the qubit within its Hilbert space, a fundamental manipulation for quantum algorithms and the gentle shaping of causality at its most delicate edges.
+.SH RETURN VALUE
+On success,
+.BR nymya_3316_phase_gate
+returns 0. On error, \-1 is returned, and
+.IR errno
+is set appropriately.
+.SH ERRORS
+.TP
+.B EINVAL
+The
+.IR user_q
+argument was NULL.
+.TP
+.B EFAULT
+An invalid pointer address was provided for
+.IR user_q ,
+or a problem occurred during the copy operation between user and kernel space. This indicates a potential misalignment between consciousness and memory, or a transient ripple in the fabric of the address space.
+.SH EXAMPLE
+The following program demonstrates how to use
+.BR nymya_3316_phase_gate
+to apply a pi/2 phase shift to a qubit. Note that the
+.IR nymya_qubit
+structure passed to the syscall must match the kernel's internal representation, specifically for its fixed-point complex amplitude.
+.PP
+.nf
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/syscall.h>
+#include <errno.h>
+#include <complex.h> // For cexp, I etc. in user-space conceptual logic
+#include <math.h>    // For M_PI
+
+// Define fixed-point constants and types for user-space interaction with syscall
+#define FIXED_POINT_SCALE (1ULL << 32)
+#define INV_FIXED_POINT_SCALE (1.0 / (double)FIXED_POINT_SCALE)
+
+// Kernel's complex number representation (fixed-point Q32.32)
+typedef struct {
+    int64_t re;
+    int64_t im;
+} complex_fixed_q32_32;
+
+// nymya_qubit structure as it must be passed to the kernel syscall
+// (must match kernel's layout for copy_from_user/copy_to_user)
+typedef struct {
+    int id;
+    char tag[32];
+    complex_fixed_q32_32 amplitude; // Kernel expects fixed-point complex amplitude
+} nymya_qubit;
+
+// Helper to convert double to fixed-point Q32.32
+int64_t double_to_fixed_q32_32(double val) {
+    return (int64_t)(val * FIXED_POINT_SCALE);
+}
+
+// Helper to convert double complex to complex_fixed_q32_32
+void complex_double_to_fixed(double complex d_c, complex_fixed_q32_32 *f_c) {
+    f_c->re = double_to_fixed_q32_32(creal(d_c));
+    f_c->im = double_to_fixed_q32_32(cimag(d_c));
+}
+
+// Helper to convert complex_fixed_q32_32 back to double complex for user display
+double complex complex_fixed_to_double(complex_fixed_q32_32 f_c) {
+    return (double)f_c.re * INV_FIXED_POINT_SCALE +
+           (double)f_c.im * INV_FIXED_POINT_SCALE * I;
+}
+
+// Syscall number for nymya_3316_phase_gate
+#ifndef SYS_nymya_3316_phase_gate
+#define SYS_nymya_3316_phase_gate 3316
+#endif
+
+int main() {
+    nymya_qubit q_syscall;
+    double complex initial_amplitude = 1.0 + 0.0 * I; // User's conceptual amplitude
+
+    q_syscall.id = 1;
+    snprintf(q_syscall.tag, sizeof(q_syscall.tag), "my_test_qubit");
+    complex_double_to_fixed(initial_amplitude, &q_syscall.amplitude);
+
+    printf("Initial qubit amplitude (conceptual): %.4f + %.4fi\n",
+           creal(initial_amplitude), cimag(initial_amplitude));
+    printf("Initial qubit amplitude (fixed-point stored): %lld + %lldi\n",
+           q_syscall.amplitude.re, q_syscall.amplitude.im);
+
+    double phase_angle_radians = M_PI / 2.0; // Pi/2 phase shift
+    int64_t phase_angle_fixed = double_to_fixed_q32_32(phase_angle_radians);
+
+    printf("Applying phase gate with angle %.4f radians (fixed-point: %lld)\n",
+           phase_angle_radians, phase_angle_fixed);
+
+    long res = syscall(SYS_nymya_3316_phase_gate, &q_syscall, phase_angle_fixed);
+
+    if (res == 0) {
+        printf("Phase gate applied successfully.\n");
+        double complex final_amplitude = complex_fixed_to_double(q_syscall.amplitude);
+        printf("Final qubit amplitude (conceptual): %.4f + %.4fi\n",
+               creal(final_amplitude), cimag(final_amplitude));
+        // Expected result for initial (1.0 + 0.0i) after Pi/2 phase shift: (0.0 + 1.0i)
+    } else {
+        perror("syscall nymya_3316_phase_gate failed");
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
+}
+.fi
+.SH SEE ALSO
+.BR syscall (2),
+.BR nymya_qubit (7),
+.BR nymya_gate_overview (7)
+```
