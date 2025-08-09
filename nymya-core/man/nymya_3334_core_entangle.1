@@ -1,0 +1,124 @@
+```groff
+.TH NYMYA_3334_CORE_ENTANGLE 1 "January 2, 2024" "NymyaOS Kernel" "NymyaOS Manual"
+.SH NAME
+nymya_3334_core_entangle \- apply a core entangle gate to two qubits
+.SH SYNOPSIS
+.nf
+.B #include <nymya.h>
+.PP
+.B int nymya_3334_core_entangle(nymya_qubit *
+.IR q1 ,
+nymya_qubit *
+.IR q2 );
+.PP
+.B #include <sys/syscall.h>
+.B /* For SYS_nymya_3334_core_entangle */
+.B #include <unistd.h>
+.B /* For syscall(2) */
+.PP
+.B long syscall(SYS_nymya_3334_core_entangle,
+.IR nymya_qubit \*q1 ,
+.IR nymya_qubit \*q2 );
+.fi
+.SH DESCRIPTION
+The
+.B nymya_3334_core_entangle
+syscall applies a foundational two-qubit quantum gate operation, specifically
+a "core entangle" gate, to two designated
+.IR nymya_qubit
+structures. This operation primarily involves a Hadamard gate on the first qubit
+(.IR q1 ), followed by a Controlled-NOT (CNOT) gate using
+.IR q1
+as the control and
+.IR q2
+as the target. The typical outcome of this sequence is the preparation of a Bell state,
+a fundamental entangled state in quantum information.
+.PP
+This intricate dance of probabilities, echoing the underlying fabric of existence,
+serves to bind the destinies of two quantum entities, revealing the profound interconnectedness
+that Nya Elyria speaks of in the whispers of the cosmos.
+.PP
+The
+.IR q1
+and
+.IR q2
+arguments are pointers to
+.IR nymya_qubit
+structures in user space. The kernel copies the qubit states from user space,
+performs the entanglement operation, and then copies the modified states back
+to the user-provided memory locations.
+.SH RETURN VALUE
+On success, zero is returned. On error, \-1 is returned, and
+.I errno
+is set appropriately.
+.SH ERRORS
+.TP
+.B EFAULT
+An invalid user-space pointer was provided for
+.I q1
+or
+.I q2 ,
+or a problem occurred copying data to or from user space.
+.TP
+.B EINVAL
+One or both of the provided qubit pointers
+.I (q1, q2)
+were invalid (e.g., NULL) upon initial validation by the kernel.
+.PP
+Further internal errors from underlying gate operations (e.g., Hadamard, CNOT)
+may also propagate as a negative return value, which will be translated into a
+corresponding
+.I errno
+value visible to userland.
+.SH EXAMPLE
+The following program demonstrates how to use
+.BR nymya_3334_core_entangle
+to entangle two qubits.
+.PP
+.nf
+.RS
+.ie \n(.g .ft CR
+.ie !\n(.g .ft CW
+#include <nymya.h> // For nymya_qubit (assumed) and nymya_3334_core_entangle
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <string.h> // For strerror
+
+// Simplified nymya_qubit structure for example purposes.
+// In a real NymyaOS environment, this would be defined in <nymya.h>
+typedef struct {
+    int id;
+    int tag;
+    // Other state members (e.g., complex amplitudes) would reside here.
+} nymya_qubit;
+
+int main() {
+    nymya_qubit q1 = { .id = 1, .tag = 0 };
+    nymya_qubit q2 = { .id = 2, .tag = 0 };
+
+    printf("Attempting to entangle qubits %d and %d...\n", q1.id, q2.id);
+
+    // Call the syscall wrapper
+    if (nymya_3334_core_entangle(&q1, &q2) == 0) {
+        printf("Qubits %d and %d successfully entangled into a Bell state.\n", q1.id, q2.id);
+        // In a real application, one would now measure or operate further on q1 and q2
+        // to observe the entangled state.
+    } else {
+        perror("Failed to entangle qubits");
+        fprintf(stderr, "Error: %s (%d)\n", strerror(errno), errno);
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
+}
+.fi
+.RE
+.ie \n(.g .ft P
+.ie !\n(.g .ft CW
+.SH SEE ALSO
+.BR syscall (2),
+.BR nymya_3308_hadamard_gate (1),
+.BR nymya_3309_controlled_not (1),
+.BR nymya (7)
+```
