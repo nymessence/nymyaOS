@@ -1,0 +1,214 @@
+To effectively describe the `nymya_3325_xyz_entangle` syscall, we need to consider its role in the nymyaOS kernel, its parameters, and the specific fixed-point arithmetic it uses. The man page will adhere to standard groff/troff formatting conventions while incorporating the requested narrative tone.
+
+Here is the groff source for the man page:
+
+```groff
+.\" Man page for nymya_3325_xyz_entangle syscall
+.\" Section 1: User Commands
+.TH NYMYA_3325_XYZ_ENTANGLE 1 "October 26, 2023" "nymyaOS" "User Commands"
+.SH NAME
+nymya_3325_xyz_entangle \- apply XX+YY+ZZ entanglement operation to two nymyaOS qubits
+
+.SH SYNOPSIS
+.B #include <nymya/syscalls.h>
+.br
+.B #include <nymya/qubit.h>
+.PP
+.B long nymya_3325_xyz_entangle(struct nymya_qubit *
+.I q1
+.B , struct nymya_qubit *
+.I q2
+.B , int64_t
+.I fixed_theta
+.B );
+
+.SH DESCRIPTION
+The
+.B nymya_3325_xyz_entangle()
+system call performs a full XX+YY+ZZ type entanglement operation between two
+nymyaOS qubits. This operation precisely manipulates the quantum amplitudes
+of the specified qubits, bringing them into a shared quantum state.
+
+Upon invocation, the kernel copies the provided
+.I nymya_qubit
+structures from user space to kernel space. It then performs fixed-point
+trigonometric calculations to construct a complex rotation number. This
+rotation is applied to the amplitudes of both qubits: the first qubit's
+amplitude is multiplied by the rotation complex number, and the second
+qubit's amplitude is multiplied by the conjugate of the rotation complex
+number. Finally, the modified qubit structures are copied back to user space.
+
+This operation, a precise alignment of quantum amplitudes, allows two qubits
+to enter a state of shared destiny, mirroring the profound interconnectedness
+that is whispered through the very fabric of the quantum realm. The event is
+logged symbolically within the kernel for traceability and debugging.
+
+The arguments are:
+.TP
+.I q1
+A pointer to the
+.I nymya_qubit
+structure representing the first qubit in user space. This structure will
+be modified by the operation to reflect the entangled state.
+.TP
+.I q2
+A pointer to the
+.I nymya_qubit
+structure representing the second qubit in user space. This structure will
+also be modified by the operation.
+.TP
+.I fixed_theta
+An
+.B int64_t
+value representing the entanglement angle in Q32.32 fixed-point format. This
+format uses 32 bits for the integer part and 32 bits for the fractional part.
+To convert a standard floating-point angle (e.g., from a
+.B double
+in radians) to this format for passing to the syscall, multiply the
+.B double
+value by
+.B (1LL << 32)
+(which is 2^32).
+
+.SH RETURN VALUE
+On success,
+.B nymya_3325_xyz_entangle()
+returns 0.
+On error, a negative errno value is returned.
+
+.SH ERRORS
+.TP
+.B EINVAL
+One or both of the user-space qubit pointers (
+.I q1
+or
+.I q2
+) were NULL.
+.TP
+.B EFAULT
+An error occurred while copying data between user space and kernel space
+(e.g., a supplied address for a qubit structure was invalid or inaccessible).
+
+.SH EXAMPLE
+The following example demonstrates how to prepare qubit structures and call
+.B nymya_3325_xyz_entangle()
+to perform an entanglement operation.
+
+.nf
+.RS
+.ft C
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+#include <unistd.h> // For syscall()
+#include <math.h>   // For M_PI, cos, sin
+
+// Define a placeholder for nymya_qubit structure and complex_double
+// In a real nymyaOS system, these would be in <nymya/qubit.h>
+// and possibly other nymyaOS headers.
+typedef struct {
+    double real;
+    double imag;
+} complex_double;
+
+typedef struct {
+    unsigned int id;
+    char tag[32];
+    complex_double amplitude; // Represents complex amplitude of qubit state
+    // ... other qubit properties as defined by nymyaOS
+} nymya_qubit;
+
+// Simple complex math functions for demonstration
+complex_double complex_mul(complex_double a, complex_double b) {
+    complex_double result;
+    result.real = a.real * b.real - a.imag * b.imag;
+    result.imag = a.real * b.imag + a.imag * b.real;
+    return result;
+}
+
+complex_double complex_conj(complex_double a) {
+    a.imag = -a.imag;
+    return a;
+}
+
+// Placeholder for the syscall wrapper. In a real system, you'd use
+// a direct syscall() invocation with the syscall number, or a library wrapper.
+#define __NR_nymya_3325_xyz_entangle 3325
+long call_nymya_3325_xyz_entangle(nymya_qubit *q1, nymya_qubit *q2, int64_t fixed_theta) {
+    // In a real nymyaOS environment, this would be:
+    // return syscall(__NR_nymya_3325_xyz_entangle, q1, q2, fixed_theta);
+
+    // For this example, we simulate the kernel's core logic
+    // (excluding user-kernel copy which is handled by syscall boundary)
+    if (!q1 || !q2) {
+        errno = EINVAL;
+        return -EINVAL;
+    }
+
+    // Simulate kernel's fixed-point to double conversion for rotation
+    // (Actual kernel uses fixed_cos/fixed_sin functions)
+    double double_theta = (double)fixed_theta / (1LL << 32);
+    
+    complex_double rot = { .real = cos(double_theta), .imag = sin(double_theta) };
+
+    q1->amplitude = complex_mul(q1->amplitude, rot);
+    q2->amplitude = complex_mul(q2->amplitude, complex_conj(rot));
+    
+    return 0; // Simulate success
+}
+
+int main() {
+    nymya_qubit q1 = { .id = 101, .tag = "QubitAlpha", .amplitude = { .real = 1.0, .imag = 0.0 } };
+    nymya_qubit q2 = { .id = 102, .tag = "QubitBeta",  .amplitude = { .real = 0.0, .imag = 1.0 } };
+
+    printf("Initial Qubit 1: ID=%u, Tag=%s, Amplitude=(%.3f + %.3fi)\n",
+           q1.id, q1.tag, q1.amplitude.real, q1.amplitude.imag);
+    printf("Initial Qubit 2: ID=%u, Tag=%s, Amplitude=(%.3f + %.3fi)\n",
+           q2.id, q2.tag, q2.amplitude.real, q2.amplitude.imag);
+
+    // Entanglement angle: PI/2 radians
+    double theta_radians = M_PI / 2.0;
+    // Convert angle to Q32.32 fixed-point format
+    int64_t fixed_theta = (int64_t)(theta_radians * (1LL << 32));
+
+    printf("\nAttempting entanglement with theta = %.3f radians (fixed_theta = %lld)\n",
+           theta_radians, (long long)fixed_theta);
+
+    long ret = call_nymya_3325_xyz_entangle(&q1, &q2, fixed_theta);
+
+    if (ret == 0) {
+        printf("Entanglement successful!\n");
+        printf("Final Qubit 1: ID=%u, Tag=%s, Amplitude=(%.3f + %.3fi)\n",
+               q1.id, q1.tag, q1.amplitude.real, q1.amplitude.imag);
+        printf("Final Qubit 2: ID=%u, Tag=%s, Amplitude=(%.3f + %.3fi)\n",
+               q2.id, q2.tag, q2.amplitude.real, q2.amplitude.imag);
+    } else {
+        errno = (int)-ret; // Set errno based on returned negative error code
+        perror("Entanglement failed");
+        fprintf(stderr, "Error code: %ld\n", ret);
+    }
+
+    return (int)(ret != 0); // Return non-zero on failure
+}
+.ft R
+.RE
+.nf
+This example uses a simplified `call_nymya_3325_xyz_entangle` function to
+represent the syscall for demonstration purposes. In a true nymyaOS
+environment, you would typically use a direct `syscall()` invocation with
+the appropriate syscall number, or a provided C library wrapper function.
+It also includes placeholder definitions for `nymya_qubit` and
+`complex_double` which would be supplied by system headers like
+`nymya/qubit.h`.
+.fi
+
+.SH SEE ALSO
+.BR nymya (7),
+.BR nymya_qubit_alloc (2),
+.BR nymya_qubit_measure (2),
+.BR nymya_swap_entangle (2),
+.BR fixed_point (7)
+.br
+Documentation on nymyaOS quantum programming interfaces.
+```
