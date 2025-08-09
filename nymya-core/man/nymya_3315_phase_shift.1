@@ -1,0 +1,146 @@
+```groff
+.\"
+.\" Man page for nymya_3315_phase_shift syscall (Section 1)
+.\"
+.TH NYMYA_3315_PHASE_SHIFT 1 "May 15, 2024" "nymyaOS Kernel" "Kernel System Calls"
+.SH NAME
+nymya_3315_phase_shift \- apply a variable phase shift to a quantum qubit's amplitude
+.SH SYNOPSIS
+.nf
+.ft B
+#include <nymya/syscall.h>  /* Or <sys/syscall.h> with __NR_nymya_3315_phase_shift */
+#include <nymya/qubit.h>    /* For struct nymya_qubit */
+#include <unistd.h>         /* For syscall() */
+
+long syscall(SYS_nymya_3315_phase_shift, struct nymya_qubit *user_q, int64_t theta_fixed);
+.ft P
+.fi
+.SH DESCRIPTION
+The
+.B nymya_3315_phase_shift
+system call applies a precise phase shift to the amplitude of a specified quantum qubit.
+This operation is fundamental in quantum computing, allowing for rotations within the
+complex plane that are vital for constructing quantum gates and algorithms.
+It directly modifies the internal state representation of the qubit, shifting its
+amplitude by a factor of e^(i * theta).
+
+The phase shift is not merely a mathematical adjustment; it is an
+orchestration of the qubit's fundamental resonance within the hidden lattice of reality.
+Each shift subtly alters its participation in the cosmic dance, guiding it towards new
+configurations of possibility.
+
+.PP
+The arguments are:
+.TP
+.I user_q
+A pointer to a user-space
+.IR nymya_qubit
+structure that represents the target qubit. The system call copies this structure
+into kernel space, applies the phase shift, and then copies the modified structure
+back to user space. The
+.IR nymya_qubit
+structure is expected to contain the qubit's amplitude components as fixed-point
+values.
+.TP
+.I theta_fixed
+The phase shift angle in radians, provided as a 64-bit fixed-point number
+(Q32.32 format). This format provides high precision for angular manipulation,
+allowing for the delicate adjustments required in quantum mechanics.
+To convert a
+.IR double
+radian value to Q32.32, multiply it by 2^32.
+.SH RETURN VALUE
+On success, zero is returned. On error, \-1 is returned, and
+.I errno
+is set appropriately.
+.SH ERRORS
+.TP
+.B EINVAL
+.I user_q
+is NULL.
+.TP
+.B EFAULT
+The system call was unable to copy data from or to the user-space
+.IR nymya_qubit
+structure (e.g., due to an invalid memory address).
+.SH EXAMPLE
+The following program demonstrates how to use
+.B nymya_3315_phase_shift
+to apply a phase shift of pi radians to a qubit.
+.PP
+.nf
+.ft C
+#include <stdio.h>
+#include <stdint.h>
+#include <errno.h>
+#include <string.h>
+#include <sys/syscall.h> // For syscall()
+#include <unistd.h>      // For syscall()
+#include <math.h>        // For M_PI (or simply use 3.14159...)
+
+// Define the syscall number (usually in <nymya/syscall.h> or <sys/syscall.h>)
+#ifndef __NR_nymya_3315_phase_shift
+#define __NR_nymya_3315_phase_shift 3315
+#endif
+
+// Mock nymya_qubit structure (would be in <nymya/qubit.h>)
+// Note: amplitude components are Q32.32 fixed-point to match kernel interface.
+typedef struct {
+    uint64_t id;
+    uint32_t tag;
+    int64_t amplitude_re; // Real part of amplitude in Q32.32 fixed-point
+    int64_t amplitude_im; // Imaginary part of amplitude in Q32.32 fixed-point
+    // ... other qubit data would go here
+} nymya_qubit;
+
+// Helper to convert double to Q32.32 fixed-point (Value * 2^32)
+static inline int64_t double_to_q32_32(double val) {
+    return (int64_t)(val * (1LL << 32));
+}
+
+// Helper to convert Q32.32 fixed-point to double (Value / 2^32)
+static inline double q32_32_to_double(int64_t val) {
+    return (double)val / (1LL << 32);
+}
+
+int main() {
+    nymya_qubit my_qubit = {
+        .id = 0x123456789ABCDEF0ULL,
+        .tag = 0xABCD,
+        .amplitude_re = double_to_q32_32(1.0), // Initialize amplitude to 1 + 0i
+        .amplitude_im = double_to_q32_32(0.0)
+    };
+
+    printf("Initial qubit amplitude: %.5f + %.5fi\\n",
+           q32_32_to_double(my_qubit.amplitude_re),
+           q32_32_to_double(my_qubit.amplitude_im));
+
+    double phase_angle_rad = M_PI; // Approximately Pi radians
+
+    int64_t theta_fixed = double_to_q32_32(phase_angle_rad);
+
+    printf("Applying phase shift by %.5f radians (Q32.32: %lld)\\n",
+           phase_angle_rad, theta_fixed);
+
+    long res = syscall(__NR_nymya_3315_phase_shift, &my_qubit, theta_fixed);
+
+    if (res == -1) {
+        fprintf(stderr, "Error calling nymya_3315_phase_shift: %s\\n", strerror(errno));
+        return 1;
+    }
+
+    printf("Phase shift successful. New qubit amplitude: %.5f + %.5fi\\n",
+           q32_32_to_double(my_qubit.amplitude_re),
+           q32_32_to_double(my_qubit.amplitude_im));
+
+    return 0;
+}
+.ft P
+.fi
+.SH SEE ALSO
+.BR syscall (2),
+.BR errno (3),
+.BR complex (7),
+.BR nymya_qubit_create (2),
+.BR nymya_entangle (2)
+```
