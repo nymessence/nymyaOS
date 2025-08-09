@@ -1,0 +1,147 @@
+```groff
+.TH NYMYA_3337_FERMION_SIM 1 "October 26, 2023" "NymyaOS Kernel" "NymyaOS System Calls Manual"
+.SH NAME
+nymya_3337_fermion_sim \- apply a fermionic simulation gate to two qubits
+.SH SYNOPSIS
+.B #include <nymya.h>
+.B #include <unistd.h>
+.B #include <sys/syscall.h>
+
+.PP
+.B int nymya_3337_fermion_sim(struct nymya_qubit *
+.IR q1 ,
+.B struct nymya_qubit *
+.IR q2 );
+
+.PP
+.BR
+Note: The actual syscall is invoked via
+.BR syscall (2)
+with syscall number 3337:
+.PP
+.B long syscall(SYS_nymya_3337_fermion_sim, struct nymya_qubit *
+.IR q1 ,
+.B struct nymya_qubit *
+.IR q2 );
+.SH DESCRIPTION
+The
+.BR nymya_3337_fermion_sim
+syscall applies a two-qubit fermionic simulation gate to the quantum states represented by
+.IR q1
+and
+.IR q2 .
+This operation performs a SWAP between the states of the two qubits, followed by a global phase shift of -1 applied to the amplitude of the first qubit (\fIq1\fR).
+
+.PP
+This sequence effectively models an exchange interaction, characteristic of fermionic systems, where the permutation of identical particles is accompanied by a sign change in the wavefunction. In the delicate dance of quantum mechanics, where particles trade identities across the hidden lattice of reality, this operation echoes the fundamental indistinguishability of fermions, ensuring that their intricate choreography adheres to the deepest symmetries of the cosmos.
+
+.PP
+The arguments
+.IR q1
+and
+.IR q2
+are pointers to
+.BR struct nymya_qubit
+structures, which hold the quantum state (e.g., amplitude, phase) and metadata (e.g., ID, tag) for each qubit. The syscall copies the qubit data from user space, performs the simulation in kernel space, and then copies the modified data back to the user-provided pointers.
+.SH RETURN VALUE
+On success,
+.BR nymya_3337_fermion_sim
+returns 0.
+Upon successful execution, the
+.BR struct nymya_qubit
+structures pointed to by
+.IR q1
+and
+.IR q2
+are updated to reflect the result of the fermionic simulation.
+
+.PP
+On error, -1 is returned, and
+.IR errno
+is set appropriately.
+.SH ERRORS
+.TP
+.B EINVAL
+One or both of the provided qubit pointers (
+.IR q1
+or
+.IR q2
+) were
+.BR NULL
+or otherwise invalid before copying data into kernel space.
+.TP
+.B EFAULT
+A problem occurred during the copying of qubit data between user space and kernel space (e.g., an invalid user-space address was provided).
+.TP
+.B Other errors
+Errors from underlying gate operations, such as
+.BR nymya_3313_swap (1),
+may also be propagated.
+.SH EXAMPLE
+The following program demonstrates how to use the
+.BR nymya_3337_fermion_sim
+syscall:
+
+.PP
+.nf
+.SY
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/syscall.h>
+#include <errno.h>
+#include <complex.h> // For _Complex double
+#include <math.h>    // For cabs
+
+// Define a minimal nymya_qubit structure for userland example
+// In a real NymyaOS environment, this would be provided by <nymya.h>
+typedef struct {
+    unsigned int id;
+    unsigned int tag;
+    _Complex double amplitude; // Represents the state amplitude
+    // Other qubit properties would be here
+} nymya_qubit;
+
+// Placeholder for __NR_nymya_3337_fermion_sim if not in sys/syscall.h
+// In a real NymyaOS, this would be defined in <asm/unistd.h> or similar
+#ifndef __NR_nymya_3337_fermion_sim
+#define __NR_nymya_3337_fermion_sim 3337
+#endif
+
+int main() {
+    nymya_qubit qA = { .id = 1, .tag = 101, .amplitude = 1.0 + 0.0 * I }; // Qubit A: |0> state
+    nymya_qubit qB = { .id = 2, .tag = 102, .amplitude = 0.0 + 1.0 * I }; // Qubit B: |i> state
+
+    printf("Initial states:\n");
+    printf("  Qubit A (ID:%u, Tag:%u): Amplitude = %.2f + %.2fi\n",
+           qA.id, qA.tag, creal(qA.amplitude), cimag(qA.amplitude));
+    printf("  Qubit B (ID:%u, Tag:%u): Amplitude = %.2f + %.2fi\n",
+           qB.id, qB.tag, creal(qB.amplitude), cimag(qB.amplitude));
+
+    printf("\nCalling nymya_3337_fermion_sim on Qubit A and Qubit B...\n");
+
+    long ret = syscall(__NR_nymya_3337_fermion_sim, &qA, &qB);
+
+    if (ret == 0) {
+        printf("\nSyscall successful. New states:\n");
+        printf("  Qubit A (ID:%u, Tag:%u): Amplitude = %.2f + %.2fi\n",
+               qA.id, qA.tag, creal(qA.amplitude), cimag(qA.amplitude));
+        printf("  Qubit B (ID:%u, Tag:%u): Amplitude = %.2f + %.2fi\n",
+               qB.id, qB.tag, creal(qB.amplitude), cimag(qB.amplitude));
+        printf("Note: Qubit A's amplitude should be B's original * -1.\n");
+        printf("Note: Qubit B's amplitude should be A's original.\n");
+    } else {
+        perror("Syscall failed");
+        fprintf(stderr, "Error code: %ld (errno: %d)\n", ret, errno);
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
+}
+.EE
+.fi
+.SH SEE ALSO
+.BR nymya_3313_swap (1),
+.BR syscall (2),
+.BR nymya_qubit (7)
+```
