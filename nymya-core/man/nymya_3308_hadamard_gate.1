@@ -1,0 +1,110 @@
+```groff
+.TH NYMYA_3308_HADAMARD_GATE 1 "2023-10-27" "NymyaOS Kernel Syscalls" "NYMYAOS Programmer's Manual"
+.SH NAME
+nymya_3308_hadamard_gate \- apply Hadamard transformation (amplitude scaling) to a qubit
+.SH SYNOPSIS
+.nf
+.B #include <nymya.h>
+.PP
+.B int nymya_3308_hadamard_gate(nymya_qubit *q);
+.fi
+.SH DESCRIPTION
+The
+.B nymya_3308_hadamard_gate
+syscall applies a specific transformation to the complex amplitude stored within a designated qubit structure. This operation scales both the real and imaginary components of the qubit's amplitude by a precise factor of 1/√2 (approximately 0.7071).
+
+While named for the Hadamard gate, a cornerstone operation in quantum computing renowned for its ability to generate superposition from classical states, this syscall specifically implements the amplitude scaling aspect. This scaling is a critical preliminary step in preparing a qubit for probabilistic exploration within the quantum realm, allowing its essence to ripple through the potential fabric of existence, ready for further intricate transformations.
+
+The
+.I q
+argument points to a
+.B nymya_qubit
+structure in user-space. This structure is expected to encapsulate the qubit's essential properties, including a unique identifier, an optional tag, and a
+.B nymya_complex
+member representing its complex amplitude. The syscall meticulously reads the current amplitude from user-space, performs the fixed-point scaling calculation in kernel-space for precision, and then securely writes the modified amplitude back to the user-space structure.
+.SH RETURN VALUE
+On success,
+.B nymya_3308_hadamard_gate
+returns 0.
+On error, -1 is returned, and
+.B errno
+is set appropriately to indicate the specific issue.
+.SH ERRORS
+.TP
+.B EINVAL
+The
+.I q
+argument provided was NULL, indicating an invalid or uninitialized qubit pointer.
+.TP
+.B EFAULT
+The address pointed to by
+.I q
+was outside the accessible address space of the calling process, or there was a failure during the attempt to copy data to or from user-space.
+.SH EXAMPLE
+The following program demonstrates how to apply the amplitude scaling aspect of the Hadamard transformation to a qubit using the
+.B nymya_3308_hadamard_gate
+syscall.
+
+.nf
+#include <nymya.h> // Assumed to define nymya_qubit and nymya_complex
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <math.h> // For sqrt in user-space example logic for understanding
+
+// Minimal dummy definitions for demonstration purposes if nymya.h isn't fully available.
+// In a real NymyaOS environment, these would be provided by nymya.h
+#ifndef NYMYA_H_INCLUDED
+#include <stdint.h>
+
+// Represents a complex number
+typedef struct {
+    double re; // Real part
+    double im; // Imaginary part
+} nymya_complex;
+
+// Represents a qubit's state and metadata
+typedef struct {
+    uint32_t id;         // Unique identifier for the qubit
+    uint32_t tag;        // User-defined tag
+    nymya_complex amplitude; // The complex amplitude of the qubit
+} nymya_qubit;
+
+// Dummy log_symbolic_event for user-space example compilation.
+// In a real NymyaOS system, this function would interact with kernel event logging.
+void log_symbolic_event(const char* event, uint32_t id, uint32_t tag, const char* message) {
+    printf("[LOG] Event: %s, Qubit ID: %u, Tag: %u, Message: %s\\n", event, id, tag, message);
+}
+#endif // NYMYA_H_INCLUDED
+
+int main() {
+    nymya_qubit my_qubit = {
+        .id = 123,
+        .tag = 0,
+        .amplitude = {.re = 1.0, .im = 0.0} // Initial amplitude, e.g., representing state |0>
+    };
+
+    printf("Initial qubit amplitude: (%.4f + %.4fi)\\n",
+           my_qubit.amplitude.re, my_qubit.amplitude.im);
+
+    // Call the nymya_3308_hadamard_gate syscall
+    if (nymya_3308_hadamard_gate(&my_qubit) == -1) {
+        perror("nymya_3308_hadamard_gate");
+        return EXIT_FAILURE;
+    }
+
+    printf("Qubit amplitude after Hadamard transformation: (%.4f + %.4fi)\\n",
+           my_qubit.amplitude.re, my_qubit.amplitude.im);
+
+    // Expected output for initial (1.0 + 0.0i) is approximately (0.7071 + 0.0000i)
+
+    return EXIT_SUCCESS;
+}
+.fi
+.SH SEE ALSO
+.BR man (7),
+.BR syscalls (2),
+.BR nymya_qubit (3),
+.BR nymya_cnot_gate (3),
+.BR nymya_pauli_x_gate (3)
+```
