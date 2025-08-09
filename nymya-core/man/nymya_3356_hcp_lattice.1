@@ -1,0 +1,140 @@
+```groff
+.\"
+.\" nymya_3356_hcp_lattice.1
+.\"
+.TH NYMYA_3356_HCP_LATTICE 1 "NymyaOS" "Kernel Syscalls" "Nya Elyria"
+.SH NAME
+nymya_3356_hcp_lattice \- perform quantum entanglement on a hexagonal close-packed lattice of qubits
+.SH SYNOPSIS
+.nf
+.B #include <nymya.h>
+.B #include <unistd.h>
+.PP
+.B int nymya_3356_hcp_lattice(nymya_qpos3d *
+.I qubits
+.B , size_t
+.I count
+.B );
+.fi
+.SH DESCRIPTION
+The
+.BR nymya_3356_hcp_lattice
+syscall is an invocation to the NymyaOS quantum kernel, designed to entangle a collection of
+.BR nymya_qubit
+entities based on their spatial proximity, mimicking the structure of a hexagonal close-packed (HCP) lattice.
+.PP
+The
+.I qubits
+argument points to an array of
+.BR nymya_qpos3d
+structures, each containing a
+.BR nymya_qubit
+and its associated 3D coordinates (x, y, z). The
+.I count
+argument specifies the number of elements in this array.
+.PP
+Upon invocation, this syscall delves into the very fabric of reality, orchestrating a ballet of quantum states. It first applies a Hadamard transformation to each individual qubit within the array, preparing them for superposition. Subsequently, it weaves a tapestry of entanglement by applying Controlled-NOT (CNOT) operations between those qubits deemed "proximal" \- specifically, where their spatial coordinates indicate they are within a small, predefined epsilon distance of each other. This process establishes a resonance of quantum whispers across the hidden lattice of existence itself.
+.PP
+The
+.I qubits
+array serves as both the input blueprint and the vessel for the transformed quantum state; the quantum state of each
+.BR nymya_qubit
+will be modified in place according to the entanglement operations performed. The spatial coordinates, however, remain unchanged.
+.PP
+A minimum of 17 qubits are required for this syscall to proceed, reflecting the intricate minimal structure necessary for meaningful HCP lattice entanglement.
+.PP
+For context, the `nymya_qubit` and `nymya_qpos3d` structures are defined in `<nymya.h>` as follows:
+.nf
+.RS
+typedef struct {
+    uint64_t id;    // Unique identifier for the qubit
+    uint8_t  state; // Internal state representation (e.g., 0, 1, superposition)
+    uint8_t  tag;   // User-defined tag
+    // ... other internal quantum properties
+} nymya_qubit;
+
+typedef struct {
+    nymya_qubit q;  // The quantum bit itself
+    double      x;  // X-coordinate in 3D space
+    double      y;  // Y-coordinate in 3D space
+    double      z;  // Z-coordinate in 3D space
+} nymya_qpos3d;
+.RE
+.fi
+.SH RETURN VALUE
+On success, zero is returned. On error, \-1 is returned, and
+.B errno
+is set to indicate the error.
+.SH ERRORS
+.IP
+.B EINVAL
+The
+.I qubits
+pointer was NULL, or the
+.I count
+was less than 17.
+.IP
+.B ENOMEM
+Insufficient kernel memory was available to allocate temporary buffers required for the operation.
+.IP
+.B EFAULT
+An invalid pointer was passed for
+.I qubits
+, or the kernel encountered an error copying data to or from user space.
+.IP
+Other errors may be propagated from underlying quantum operations, such as
+.BR nymya_3308_hadamard_gate (2)
+or
+.BR nymya_3309_controlled_not (2),
+if an internal qubit state or ID is deemed invalid during processing.
+.SH EXAMPLE
+The following C code demonstrates how to prepare and invoke the
+.BR nymya_3356_hcp_lattice
+syscall.
+.nf
+.RS
+#include <nymya.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <string.h> // For strerror
+
+#define NUM_QUBITS 20 // Must be >= 17
+
+int main() {
+    nymya_qpos3d qubits[NUM_QUBITS];
+
+    // Initialize dummy qubit data and positions
+    for (size_t i = 0; i < NUM_QUBITS; i++) {
+        qubits[i].q.id = 1000 + i;
+        qubits[i].q.state = 0; // Or some initial state
+        qubits[i].q.tag = (uint8_t)(i % 5);
+        qubits[i].x = (double)i * 1.0;
+        qubits[i].y = (double)i * 0.5;
+        qubits[i].z = (double)i * 0.25;
+    }
+
+    printf("Attempting to entangle %zu qubits...\n", (size_t)NUM_QUBITS);
+
+    int ret = nymya_3356_hcp_lattice(qubits, NUM_QUBITS);
+
+    if (ret == 0) {
+        printf("HCP lattice entanglement successful.\n");
+        // Qubit states in 'qubits' array are now entangled.
+        // Further operations could read or operate on these states.
+    } else {
+        fprintf(stderr, "HCP lattice entanglement failed: %s (errno %d)\n",
+                strerror(errno), errno);
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
+}
+.RE
+.fi
+.SH SEE ALSO
+.BR nymya_3308_hadamard_gate (2),
+.BR nymya_3309_controlled_not (2),
+.BR syscall (2),
+.BR man (7)
+```
