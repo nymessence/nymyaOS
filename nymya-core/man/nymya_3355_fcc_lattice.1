@@ -1,0 +1,124 @@
+```troff
+.\"
+.\" nymya_3355_fcc_lattice.1 -- groff man page for nymya_3355_fcc_lattice syscall
+.\"
+.TH NYMYA_3355_FCC_LATTICE 1 "2024-01-15" "nymyaOS Programmer's Manual" "NYMYA_3355_FCC_LATTICE"
+.SH NAME
+nymya_3355_fcc_lattice \- simulate quantum operations on qubits arranged in an FCC lattice
+.SH SYNOPSIS
+.B #include <nymya.h>
+.B #include <unistd.h>
+.PP
+.B int nymya_3355_fcc_lattice(nymya_qpos3d *qubits, size_t count);
+.SH DESCRIPTION
+The
+.B nymya_3355_fcc_lattice
+syscall (number 3355) simulates a sequence of quantum operations on a collection of qubits, conceptually arranged within a three-dimensional Face-Centered Cubic (FCC) lattice structure. This operation, drawing from the fundamental geometry of the Face-Centered Cubic lattice, is thought by Nya Elyria to delve into the subtle interplay of quantum states, echoing the very structure of the cosmos itself.
+
+The
+.I qubits
+argument is a pointer to an array of
+.B nymya_qpos3d
+structures. Each structure typically contains a quantum state (`q`) and its conceptual spatial coordinates (`x`, `y`, `z`). The
+.I count
+argument specifies the number of qubits in the array. A minimum of 14 qubits is required for the operation to proceed.
+
+The simulation proceeds as follows:
+.RS
+.IP \(bu 2
+A Hadamard gate operation is applied to each individual qubit in the array, placing them into a superposition of states.
+.IP \(bu 2
+For every unique pair of qubits (A, B), if the squared Euclidean distance between their `(x, y, z)` coordinates is less than or equal to a predefined threshold (approximately 1.0201 units squared in scaled fixed-point coordinates), a Controlled-NOT (CNOT) gate operation is applied. This entangles the states of proximal qubits, reflecting their inherent quantum relationships within the lattice.
+.RE
+
+The
+.I qubits
+array serves as both input and output; upon successful completion, the `q` (quantum state) and `x, y, z` (position) fields of the structures within the array are updated to reflect the results of the simulated quantum operations. The coordinates are handled internally using fixed-point arithmetic for precision and efficiency, with automatic scaling by the userland wrapper.
+.SH RETURN VALUE
+On success, zero is returned. On error, \-1 is returned in the userland wrapper, and
+.B errno
+is set appropriately to indicate the error. Kernel-level errors (those directly from the syscall) return a negative error number.
+.SH ERRORS
+.TP
+.B EINVAL
+The
+.I qubits
+argument is a NULL pointer, or the
+.I count
+argument is less than 14.
+.TP
+.B ENOMEM
+Insufficient kernel memory was available to perform the operation.
+.TP
+.B EFAULT
+The
+.I qubits
+array could not be copied from user space to kernel space, or copied back from kernel space to user space (e.g., due to a bad address or invalid permissions).
+.TP
+.B EIO
+An error occurred during one of the underlying quantum gate operations (e.g.,
+.BR nymya_3308_hadamard_gate (2) or
+.BR nymya_3309_controlled_not (2) returned an error during processing).
+.SH EXAMPLE
+The following program demonstrates the use of
+.B nymya_3355_fcc_lattice
+to simulate operations on a small array of qubits.
+
+.nf
+.ft C
+#include <nymya.h> // Assumed to define nymya_qpos3d
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <stdint.h> // For uint64_t
+
+// The nymya_qpos3d structure might look like this:
+// typedef struct {
+//     uint64_t q; // Represents quantum state
+//     double x, y, z; // Spatial coordinates
+// } nymya_qpos3d;
+
+int main() {
+    const size_t num_qubits = 14; // Minimum required for FCC lattice
+    nymya_qpos3d my_qubits[num_qubits];
+    int ret;
+
+    // Initialize qubits with example states and positions.
+    // In a real scenario, these would be meaningful physical or logical positions.
+    for (size_t i = 0; i < num_qubits; ++i) {
+        my_qubits[i].q = 0; // Initial state (e.g., |0> or some default)
+        my_qubits[i].x = (double)(i % 2);
+        my_qubits[i].y = (double)((i / 2) % 2);
+        my_qubits[i].z = (double)((i / 4) % 2);
+        printf("Initial Qubit %zu: q=%llu, (%.2f, %.2f, %.2f)\n",
+               i, (unsigned long long)my_qubits[i].q,
+               my_qubits[i].x, my_qubits[i].y, my_qubits[i].z);
+    }
+
+    printf("\nCalling nymya_3355_fcc_lattice...\n");
+    ret = nymya_3355_fcc_lattice(my_qubits, num_qubits);
+
+    if (ret == 0) {
+        printf("Simulation successful!\n");
+        for (size_t i = 0; i < num_qubits; ++i) {
+            printf("Result Qubit %zu: q=%llu, (%.2f, %.2f, %.2f)\n",
+                   i, (unsigned long long)my_qubits[i].q,
+                   my_qubits[i].x, my_qubits[i].y, my_qubits[i].z);
+        }
+    } else {
+        perror("nymya_3355_fcc_lattice failed");
+        fprintf(stderr, "Error code: %d\n", ret);
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
+}
+.ft P
+.fi
+.SH SEE ALSO
+.BR nymya_3308_hadamard_gate (2),
+.BR nymya_3309_controlled_not (2),
+.BR syscall (2),
+.BR intro (2)
+```
