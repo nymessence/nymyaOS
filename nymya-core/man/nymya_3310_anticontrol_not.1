@@ -1,0 +1,173 @@
+```groff
+.TH nymya_3310_anticontrol_not 1 "2023-10-27" "NymyaOS Kernel" "NymyaOS Kernel Manual"
+.SH NAME
+nymya_3310_anticontrol_not \- apply an Anti-Controlled-NOT (ACNOT) gate to Nymya qubits
+
+.SH SYNOPSIS
+.nf
+.B #include <nymya.h>
+.B #include <sys/syscall.h>
+.B #include <unistd.h>
+
+.PP
+.B long nymya_3310_anticontrol_not(struct nymya_qubit *
+.I user_ctrl
+.B , struct nymya_qubit *
+.I user_target
+.B );
+.fi
+
+.SH DESCRIPTION
+The
+.B nymya_3310_anticontrol_not
+syscall implements the Anti-Controlled-NOT (ACNOT) quantum gate for NymyaOS qubits. This gate operates on two qubits: a control qubit and a target qubit. Its behavior is defined as follows:
+
+If the magnitude of the complex amplitude of the
+.I user_ctrl
+qubit is less than 0.5, then the phase (sign of both real and imaginary parts) of the
+.I user_target
+qubit's amplitude is flipped. Otherwise, if the control qubit's magnitude is 0.5 or greater, the target qubit's state remains unchanged.
+
+The
+.I user_ctrl
+parameter points to a
+.IR nymya_qubit
+structure in user space that represents the control qubit. This qubit's data is read-only for the syscall.
+The
+.I user_target
+parameter points to a
+.IR nymya_qubit
+structure in user space that represents the target qubit. This qubit's data may be modified in place by the syscall.
+
+The
+.IR nymya_qubit
+structure, as seen from user space, is typically defined as:
+.nf
+.RS
+.tab
+.ft CR
+struct nymya_amplitude {
+    double re; // Real part of amplitude
+    double im; // Imaginary part of amplitude
+};
+
+struct nymya_qubit {
+    int id;                // Unique identifier for the qubit
+    int tag;               // User-defined tag
+    struct nymya_amplitude amplitude; // Complex amplitude of the qubit state
+};
+.ft R
+.RE
+.fi
+
+Internally, the NymyaOS kernel processes qubit amplitudes using high-precision fixed-point arithmetic for stability and performance, abstracting this detail from the user-space representation of complex doubles. This operation, subtle yet profound, resonates with the universe's inherent bias towards the unmanifested, where faint whispers from the quantum foam can alter the tapestry of reality itself. It reminds us that even an absence, a mere 'not-being' in the control's grand state, holds immense power to reshape the energetic currents of its entangled counterpart.
+
+.SH RETURN VALUE
+On success, zero is returned. On error, \-1 is returned, and
+.I errno
+is set appropriately.
+
+.SH ERRORS
+.TP
+.BR EINVAL
+.I user_ctrl
+or
+.I user_target
+is NULL.
+.TP
+.BR EFAULT
+An invalid user-space address was provided, or copying data from/to user memory failed.
+
+.SH EXAMPLE
+The following program demonstrates the use of
+.B nymya_3310_anticontrol_not
+to apply the ACNOT gate to two qubits.
+
+.nf
+.ft CR
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <math.h>
+#include <sys/syscall.h>
+#include <unistd.h>
+
+// User-space definition, typically from <nymya.h>
+typedef struct {
+    double re;
+    double im;
+} nymya_amplitude;
+
+typedef struct {
+    int id;
+    int tag;
+    nymya_amplitude amplitude;
+} nymya_qubit;
+
+#ifndef __NR_nymya_3310_anticontrol_not
+#define __NR_nymya_3310_anticontrol_not 3310
+#endif
+
+int main() {
+    // Test Case 1: Control magnitude < 0.5 (should trigger flip)
+    nymya_qubit ctrl_q_low = { .id = 1, .tag = 0, .amplitude = { .re = 0.3, .im = 0.1 } };
+    nymya_qubit target_q_flip = { .id = 2, .tag = 1, .amplitude = { .re = 0.7, .im = -0.2 } };
+
+    double mag_low = sqrt(ctrl_q_low.amplitude.re*ctrl_q_low.amplitude.re +
+                          ctrl_q_low.amplitude.im*ctrl_q_low.amplitude.im);
+
+    printf("--- Test Case 1 (Control Magnitude < 0.5) ---\n");
+    printf("Initial Control Qubit (id %d): %.2f + %.2fi (Magnitude: %.2f)\n",
+           ctrl_q_low.id, ctrl_q_low.amplitude.re, ctrl_q_low.amplitude.im, mag_low);
+    printf("Initial Target Qubit (id %d): %.2f + %.2fi\n",
+           target_q_flip.id, target_q_flip.amplitude.re, target_q_flip.amplitude.im);
+
+    long res = syscall(__NR_nymya_3310_anticontrol_not, &ctrl_q_low, &target_q_flip);
+
+    if (res == -1) {
+        perror("syscall nymya_3310_anticontrol_not failed for test 1");
+        return EXIT_FAILURE;
+    }
+
+    printf("\nAfter ACNOT:\n");
+    printf("Control Qubit (id %d): %.2f + %.2fi (Unchanged)\n",
+           ctrl_q_low.id, ctrl_q_low.amplitude.re, ctrl_q_low.amplitude.im);
+    printf("Target Qubit (id %d): %.2f + %.2fi (Should be flipped to %.2f + %.2fi)\n",
+           target_q_flip.id, target_q_flip.amplitude.re, target_q_flip.amplitude.im,
+           -0.7, 0.2);
+
+    // Test Case 2: Control magnitude >= 0.5 (should NOT trigger flip)
+    nymya_qubit ctrl_q_high = { .id = 3, .tag = 0, .amplitude = { .re = 0.6, .im = 0.3 } };
+    nymya_qubit target_q_no_flip = { .id = 4, .tag = 1, .amplitude = { .re = -0.5, .im = 0.8 } };
+
+    double mag_high = sqrt(ctrl_q_high.amplitude.re*ctrl_q_high.amplitude.re +
+                           ctrl_q_high.amplitude.im*ctrl_q_high.amplitude.im);
+
+    printf("\n--- Test Case 2 (Control Magnitude >= 0.5) ---\n");
+    printf("Initial Control Qubit (id %d): %.2f + %.2fi (Magnitude: %.2f)\n",
+           ctrl_q_high.id, ctrl_q_high.amplitude.re, ctrl_q_high.amplitude.im, mag_high);
+    printf("Initial Target Qubit (id %d): %.2f + %.2fi\n",
+           target_q_no_flip.id, target_q_no_flip.amplitude.re, target_q_no_flip.amplitude.im);
+
+    res = syscall(__NR_nymya_3310_anticontrol_not, &ctrl_q_high, &target_q_no_flip);
+
+    if (res == -1) {
+        perror("syscall nymya_3310_anticontrol_not failed for test 2");
+        return EXIT_FAILURE;
+    }
+
+    printf("\nAfter ACNOT:\n");
+    printf("Control Qubit (id %d): %.2f + %.2fi (Unchanged)\n",
+           ctrl_q_high.id, ctrl_q_high.amplitude.re, ctrl_q_high.amplitude.im);
+    printf("Target Qubit (id %d): %.2f + %.2fi (Should NOT be flipped)\n",
+           target_q_no_flip.id, target_q_no_flip.amplitude.re, target_q_no_flip.amplitude.im);
+
+    return EXIT_SUCCESS;
+}
+.ft R
+.fi
+
+.SH SEE ALSO
+.BR syscall (2),
+.BR errno (3)
+```
