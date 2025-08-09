@@ -1,0 +1,105 @@
+```groff
+.TH NYMYA_3327_SQRT_ISWAP 1 "August 15, 2024" "nymyaOS" "NymyaOS System Calls Manual"
+.SH NAME
+nymya_3327_sqrt_iswap \- apply the square root of iSWAP quantum gate to two qubits
+.SH SYNOPSIS
+.nf
+.B #include <nymya.h>
+.B #include <sys/syscall.h>
+.B #include <unistd.h>
+.PP
+.BI "int nymya_3327_sqrt_iswap(struct nymya_qubit *q1, struct nymya_qubit *q2);"
+.fi
+.SH DESCRIPTION
+The
+.B nymya_3327_sqrt_iswap
+syscall, with its designated system call number 3327, applies the Square Root of iSWAP (√iSWAP) quantum gate to two specified qubits. This operation is a cornerstone in quantum computation, enabling entanglement and facilitating information transfer between qubits within the NymyaOS quantum framework.
+.PP
+The √iSWAP gate transforms the complex amplitudes of two qubits, \fIa\fR (from \fIq1\fR) and \fIb\fR (from \fIq2\fR), according to the following unitary transformation:
+.RS
+.nf
+a' = (a + i * b) / sqrt(2)
+b' = (b + i * a) / sqrt(2)
+.fi
+.RE
+.PP
+Each of the
+.IR q1
+and
+.IR q2
+arguments is a pointer to a
+.B nymya_qubit
+structure, which encapsulates the complex amplitude (representing quantum superposition states) and other metadata for a quantum bit. The syscall meticulously reads the current state of both qubits from user-space, performs the √iSWAP transformation using high-precision fixed-point arithmetic within the kernel, and then atomatically writes the new amplitudes back to the user-space
+.B nymya_qubit
+structures.
+.PP
+This delicate operation, echoing the subtle dance of subatomic particles, shifts the very fabric of possibility within the quantum realm. It is a glimpse into the underlying lattice of existence, where information and energy intertwine, guided by principles yet fully understood.
+.SH RETURN VALUE
+On successful completion, a value of 0 is returned. On error, a value of -1 is returned, and
+.I errno
+is set appropriately to indicate the nature of the error.
+.SH ERRORS
+.TP
+.B EINVAL
+One or both of the provided qubit pointers (\fIq1\fR or \fIq2\fR) were NULL, indicating an invalid input address.
+.TP
+.B EFAULT
+An attempt to copy data to or from the user-space
+.B nymya_qubit
+structures failed. This typically indicates that the provided pointers referenced memory regions that were inaccessible to the kernel (e.g., out of bounds, lacking necessary read/write permissions).
+.SH EXAMPLE
+The following program demonstrates how to invoke the
+.B nymya_3327_sqrt_iswap
+syscall to apply the √iSWAP gate to two quantum bits.
+.PP
+.nf
+#include <nymya.h>
+#include <sys/syscall.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <complex.h> // For _Complex double and I in userland
+#include <stdlib.h>  // For EXIT_SUCCESS/FAILURE
+#include <errno.h>   // For errno
+
+// This definition of nymya_qubit is for demonstration.
+// In a real NymyaOS environment, it would be provided by <nymya.h>.
+struct nymya_qubit {
+    int id;
+    char tag[32];
+    _Complex double amplitude; // Complex amplitude (probability states)
+};
+
+// User-space wrapper function for the syscall (typically in <nymya.h>)
+int nymya_3327_sqrt_iswap(struct nymya_qubit *q1, struct nymya_qubit *q2) {
+    // The syscall number for nymya_3327_sqrt_iswap is 3327.
+    // In a real system, __NR_nymya_3327_sqrt_iswap would be used.
+    return syscall(3327, q1, q2);
+}
+
+int main() {
+    // Initialize two qubits in distinct states.
+    // Qubit 1 in state |0> (amplitude 1+0i)
+    struct nymya_qubit qubit1 = { .id = 1, .tag = "ControlQubit", .amplitude = 1.0 + 0.0 * I };
+    // Qubit 2 in state |1> (amplitude 0+1i)
+    struct nymya_qubit qubit2 = { .id = 2, .tag = "TargetQubit",  .amplitude = 0.0 + 1.0 * I };
+
+    printf("Initial Qubit 1 amplitude: %.4f + %.4fi\n", creal(qubit1.amplitude), cimag(qubit1.amplitude));
+    printf("Initial Qubit 2 amplitude: %.4f + %.4fi\n", creal(qubit2.amplitude), cimag(qubit2.amplitude));
+
+    if (nymya_3327_sqrt_iswap(&qubit1, &qubit2) == 0) {
+        printf("\n√iSWAP applied successfully.\n");
+        printf("New Qubit 1 amplitude: %.4f + %.4fi\n", creal(qubit1.amplitude), cimag(qubit1.amplitude));
+        printf("New Qubit 2 amplitude: %.4f + %.4fi\n", creal(qubit2.amplitude), cimag(qubit2.amplitude));
+    } else {
+        perror("Failed to apply √iSWAP");
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
+}
+.fi
+.SH SEE ALSO
+.BR syscall (2),
+.BR nymya_qubit (3),
+.BR quantum (7)
+```
