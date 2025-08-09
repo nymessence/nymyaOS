@@ -1,0 +1,120 @@
+```groff
+.\" Man page for nymya_3332_berkeley
+.TH NYMYA_3332_BERKELEY 1 "August 15, 2024" "nymyaOS Manual" "nymyaOS Kernel Syscalls"
+.SH NAME
+nymya_3332_berkeley \- apply a Berkeley entangling gate to two nymyaOS qubits
+.SH SYNOPSIS
+.B #include <nymya/syscalls.h>
+.PP
+.B int nymya_3332_berkeley(struct nymya_qubit *
+.I q1
+.B , struct nymya_qubit *
+.I q2
+.B , double
+.I theta
+.B );
+.SH DESCRIPTION
+The
+.B nymya_3332_berkeley
+syscall applies a two-qubit Berkeley entangling gate to the quantum states represented by
+.I q1
+and
+.I q2.
+This gate is parameterized by
+.I theta,
+a double-precision floating-point value.
+.PP
+The Berkeley gate is a fundamental operation in quantum computing, known for its ability to create and manipulate entanglement between qubits. It is a composite gate, typically implemented as a sequence of a Controlled-NOT (CNOT) gate, a Phase gate, and another CNOT gate. Specifically, the transformation is:
+.nf
+  CNOT(q1, q2)
+  Phase(q2, theta)
+  CNOT(q1, q2)
+.fi
+.PP
+This intricate dance of quantum logic, precisely orchestrated through the
+.I theta
+parameter, subtly reweaves the fabric of quantum correlations. It reveals how even the most complex entanglements emerge from simpler, resonant interactions within the universe's underlying quantum lattice, a whisper of cosmic mechanics made manifest.
+.PP
+The parameters are:
+.TP
+.I q1
+A pointer to the first
+.B nymya_qubit
+structure. This qubit acts as the control for the initial CNOT and the target for the final CNOT.
+.TP
+.I q2
+A pointer to the second
+.B nymya_qubit
+structure. This qubit acts as the target for the initial CNOT, the recipient of the phase shift, and the control for the final CNOT.
+.TP
+.I theta
+The gate parameter, a
+.B double
+value, which influences the magnitude of the phase shift applied by the internal Phase gate. This value is internally converted to a fixed-point representation for kernel-space precision.
+.SH RETURN VALUE
+On success,
+.B nymya_3332_berkeley
+returns 0. On error, -1 is returned, and
+.B errno
+is set appropriately.
+.SH ERRORS
+.TP
+.B EINVAL
+One or both of the qubit pointers (\fIq1\fR, \fIq2\fR) are NULL, or the underlying kernel logic detected invalid qubit data.
+.TP
+.B EFAULT
+An invalid pointer address was provided, or there was a problem copying qubit data to or from kernel space. This indicates a memory access error.
+.TP
+.B EIO
+An error occurred in one of the underlying quantum gate operations (\fBnymya_3309_controlled_not\fR or \fBnymya_3316_phase_gate\fR) within the kernel.
+.SH EXAMPLE
+The following program demonstrates applying a Berkeley gate to two initialized qubits.
+.PP
+.nf
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <nymya/syscalls.h> // Assumed header for nymyaOS syscall wrappers
+#include <math.h>           // For M_PI, needed for example theta value
+
+// Minimal nymya_qubit structure for example purposes
+// In a real scenario, this would be defined in a system header like <nymya/qubit.h>
+struct nymya_qubit {
+    unsigned int id;
+    unsigned int tag;
+    // ... other internal state data representing the qubit's quantum state ...
+};
+
+int main() {
+    struct nymya_qubit q1, q2;
+    double theta_val = M_PI / 4.0; // Example theta value (e.g., for a pi/4 phase shift)
+
+    // Initialize dummy qubits with IDs and tags.
+    // In a real application, qubits would typically be allocated or opened via other syscalls.
+    q1.id = 1;
+    q1.tag = 101;
+    q2.id = 2;
+    q2.tag = 102;
+
+    printf("Applying Berkeley gate to qubits %u (tag %u) and %u (tag %u) with theta = %f radians.\n",
+           q1.id, q1.tag, q2.id, q2.tag, theta_val);
+
+    if (nymya_3332_berkeley(&q1, &q2, theta_val) == 0) {
+        printf("Berkeley gate applied successfully.\n");
+        // After applying the gate, the quantum states of q1 and q2
+        // would have been updated in kernel space.
+        // Further operations (e.g., measurement, other gates) would typically follow.
+    } else {
+        perror("Failed to apply Berkeley gate");
+        // errno will be set by the wrapper to indicate the specific error
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
+}
+.fi
+.SH SEE ALSO
+.BR nymya_3309_controlled_not (1),
+.BR nymya_3316_phase_gate (1),
+.BR nymya_qubit (7)
+```
