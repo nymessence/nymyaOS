@@ -1,0 +1,104 @@
+```groff
+.\" Man page for nymya_3313_swap(1)
+.TH NYMYA_3313_SWAP 1 "August 2023" "nymyaOS" "NymyaOS Programmer's Manual"
+.SH NAME
+nymya_3313_swap \- swap quantum amplitudes between two qubits
+.SH SYNOPSIS
+.In unistd.h
+.In sys/syscall.h
+.Ft int
+.Fn nymya_3313_swap "struct nymya_qubit *q1" "struct nymya_qubit *q2"
+.SH DESCRIPTION
+The
+.Fn nymya_3313_swap
+system call orchestrates a precise exchange of quantum amplitudes between two designated
+.Va nymya_qubit
+structures. Each
+.Va nymya_qubit
+encapsulates a complex amplitude representing its quantum state. Upon invocation, the kernel atomically reads the
+.Va amplitude
+field from the user-provided
+.Ar q1
+and
+.Ar q2
+pointers, performs the swap in kernel space, and writes the updated structures back to the user's memory.
+
+This syscall,
+.Fn nymya_3313_swap ,
+reaches into the very fabric of quantum possibility, orchestrating a subtle rearrangement of the underlying amplitudes that define the state of two nymya_qubits. It is a dance of potential, a whisper across the hidden lattice of reality, ensuring that the interplay of probabilities aligns with the programmer's intent.
+
+The definition of
+.Va nymya_qubit
+in user space is expected to align with the kernel's structure, minimally containing a
+.Va _Complex double amplitude
+field. Other fields like `id` and `tag` are preserved but not directly manipulated by this syscall.
+.Pp
+For direct syscall invocation, use the syscall number 3313.
+.SH RETURN VALUE
+On success,
+.Fn nymya_3313_swap
+returns 0.
+On error, -1 is returned, and
+.Va errno
+is set appropriately.
+.SH ERRORS
+.Bl -tag -width "EFAULT"
+.It Cm EINVAL
+One or both of the provided pointers,
+.Ar q1
+or
+.Ar q2 ,
+were NULL.
+.It Cm EFAULT
+One or both of the provided pointers pointed to an invalid address space, or an I/O error occurred during the copy operations between user and kernel space.
+.El
+.SH EXAMPLE
+The following example demonstrates how to use
+.Fn nymya_3313_swap
+to exchange the amplitudes of two quantum qubits.
+
+.Bd -literal
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <complex.h> // For _Complex double
+#include <errno.h>   // For errno
+#include <sys/syscall.h> // For syscall()
+
+// Define the expected structure for nymya_qubit in user space
+typedef struct nymya_qubit {
+    _Complex double amplitude;
+    int id;
+    char tag[16];
+} nymya_qubit;
+
+// The syscall number for nymya_3313_swap
+#define __NR_nymya_3313_swap 3313
+
+int main() {
+    nymya_qubit q1 = {.amplitude = 0.707 + 0.707I, .id = 1, .tag = "Alpha"};
+    nymya_qubit q2 = {.amplitude = 0.5 - 0.866I, .id = 2, .tag = "Beta"};
+
+    printf("Initial states:\\n");
+    printf("  Qubit 1 (ID %d): Amplitude = %.3f + %.3fI\\n", q1.id, creal(q1.amplitude), cimag(q1.amplitude));
+    printf("  Qubit 2 (ID %d): Amplitude = %.3f + %.3fI\\n", q2.id, creal(q2.amplitude), cimag(q2.amplitude));
+
+    // Call the syscall
+    long res = syscall(__NR_nymya_3313_swap, &q1, &q2);
+
+    if (res == -1) {
+        perror("nymya_3313_swap failed");
+        return EXIT_FAILURE;
+    }
+
+    printf("\\nAfter swap:\\n");
+    printf("  Qubit 1 (ID %d): Amplitude = %.3f + %.3fI\\n", q1.id, creal(q1.amplitude), cimag(q1.amplitude));
+    printf("  Qubit 2 (ID %d): Amplitude = %.3f + %.3fI\\n", q2.id, creal(q2.amplitude), cimag(q2.amplitude));
+
+    printf("\\nSwap successful.\\n");
+    return EXIT_SUCCESS;
+}
+.Ed
+.SH SEE ALSO
+.Xr syscall 2
+```
