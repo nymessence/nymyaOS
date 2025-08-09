@@ -1,0 +1,132 @@
+```groff
+.\" Man page for nymya_3307_sqrt_x_gate
+.TH NYMYA_3307_SQRT_X_GATE 1 "2023-10-27" "NymyaOS" "NymyaOS Kernel Calls"
+.SH NAME
+nymya_3307_sqrt_x_gate \- apply a Square Root X (√X) quantum gate to a qubit
+.SH SYNOPSIS
+.B #include <unistd.h>
+.br
+.B #include <sys/syscall.h>
+.br
+.B #include <stdint.h>
+.PP
+.B int nymya_3307_sqrt_x_gate(struct nymya_qubit *q);
+.SH DESCRIPTION
+The
+.B nymya_3307_sqrt_x_gate
+syscall applies a Square Root X (√X) quantum gate to the quantum state represented by the
+.IR nymya_qubit
+structure pointed to by
+.IR q.
+This gate is a fundamental quantum operation, performing a specific rotation on the qubit's state vector within its computational basis.
+.PP
+Internally, the gate modifies the qubit's complex amplitude \fI(re + i*im)\fP by multiplying it with
+the complex scalar \fI(1/√2)(1 + i)\fP using fixed-point arithmetic.
+This gate, often described as a "half-rotation" on the Bloch sphere, executes a delicate transformation
+upon the qubit's quantum state, shifting its superposition with the precision of a cosmic whisper. It’s an essential operation in unveiling possibilities along the hidden lattice of reality, preparing the qubit for entanglement or measurement.
+.PP
+The
+.IR nymya_qubit
+structure is expected to contain a complex amplitude in a fixed-point format,
+typically with a scale factor of \fI2^32\fP. The caller is responsible for ensuring the
+pointer
+.IR q
+points to a valid, writable
+.IR nymya_qubit
+structure in user-space memory.
+.SH RETURN VALUE
+On success, zero is returned. On error, -1 is returned, and
+.IR errno
+is set appropriately.
+.SH ERRORS
+.TP
+.B EINVAL
+The argument \fIq\fP was NULL.
+.TP
+.B EFAULT
+The address specified by \fIq\fP was outside the accessible address space, or
+the memory it points to is not writable. This indicates a problem with user-space memory access.
+.SH EXAMPLE
+The following program demonstrates the use of
+.B nymya_3307_sqrt_x_gate
+to apply the √X gate to a qubit, initially in the |0> state.
+.PP
+.nf
+.RS
+#define _GNU_SOURCE
+#include <unistd.h>
+#include <sys/syscall.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <math.h> // For M_SQRT1_2, for verification purposes
+
+// Define syscall number for nymya_3307_sqrt_x_gate
+#ifndef __NR_nymya_3307_sqrt_x_gate
+#define __NR_nymya_3307_sqrt_x_gate 3307
+#endif
+
+// Define fixed-point scale factor (matching kernel's 2^32)
+#define FIXED_POINT_SCALE (1LL << 32)
+
+// NymyaOS qubit structure (simplified for user-space example)
+struct nymya_complex_amplitude {
+    int64_t re;
+    int64_t im;
+};
+
+struct nymya_qubit {
+    uint32_t id;
+    uint32_t tag;
+    struct nymya_complex_amplitude amplitude;
+};
+
+int main() {
+    struct nymya_qubit my_qubit;
+    int ret;
+
+    // Initialize qubit to |0> state, which corresponds to an amplitude
+    // of (1.0 + 0.0i). In fixed-point, this is (FIXED_POINT_SCALE + 0i).
+    my_qubit.id = 1;
+    my_qubit.tag = 0; // A tag for grouping or identification
+    my_qubit.amplitude.re = FIXED_POINT_SCALE;
+    my_qubit.amplitude.im = 0;
+
+    printf("Initial qubit state:\n");
+    printf("  Fixed-point (re, im): (%lld, %lld)\n",
+           my_qubit.amplitude.re, my_qubit.amplitude.im);
+    printf("  Floating-point (re, im): (%.4f, %.4f)\n\n",
+           (double)my_qubit.amplitude.re / FIXED_POINT_SCALE,
+           (double)my_qubit.amplitude.im / FIXED_POINT_SCALE);
+
+    // Invoke the syscall
+    ret = syscall(__NR_nymya_3307_sqrt_x_gate, &my_qubit);
+
+    if (ret == 0) {
+        printf("Syscall nymya_3307_sqrt_x_gate successful!\n");
+        printf("Final qubit state:\n");
+        printf("  Fixed-point (re, im): (%lld, %lld)\n",
+               my_qubit.amplitude.re, my_qubit.amplitude.im);
+        printf("  Floating-point (re, im): (%.4f, %.4f)\n",
+               (double)my_qubit.amplitude.re / FIXED_POINT_SCALE,
+               (double)my_qubit.amplitude.im / FIXED_POINT_SCALE);
+
+        // For an initial |0> state (1+0i), applying (1/√2)(1+i)
+        // results in an amplitude of (1/√2 + i/√2).
+        printf("\nExpected floating-point (approx) for |0> after √X: (%.4f, %.4f)\n",
+               M_SQRT1_2, M_SQRT1_2);
+    } else {
+        perror("Syscall nymya_3307_sqrt_x_gate failed");
+        fprintf(stderr, "Error code: %d\n", errno);
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
+}
+.RE
+.fi
+.SH SEE ALSO
+.BR nymya_qubit (7),
+.BR syscalls (2)
+```
