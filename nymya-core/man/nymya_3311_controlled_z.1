@@ -1,0 +1,138 @@
+```groff
+.TH NYMYA_3311_CONTROLLED_Z 1 "October 26, 2023" "NymyaOS Kernel" "NymyaOS System Calls Manual"
+.SH NAME
+nymya_3311_controlled_z \- apply a quantum Controlled-Z gate to qubits
+.SH SYNOPSIS
+.nf
+.B \#include <nymya/syscall.h>
+.PP
+.B struct nymya_qubit {
+.B     /* ... structure details for qubit state, typically amplitude, id, tag ... */
+.B };
+.PP
+.B int nymya_3311_controlled_z(struct nymya_qubit \*q_ctrl, struct nymya_qubit \*q_target);
+.fi
+.SH DESCRIPTION
+The
+.BR nymya_3311_controlled_z ()
+system call performs a Controlled-Z (CZ) quantum gate operation on two
+.IR nymya_qubit
+structures provided from user space. This operation is a foundational element
+in quantum computation, essential for creating entanglement and enabling
+complex quantum algorithms.
+
+The function accepts two pointers to
+.IR nymya_qubit
+structures:
+.IR q_ctrl
+which represents the control qubit, and
+.IR q_target
+which represents the target qubit.
+The operation proceeds by first evaluating the magnitude of the complex
+amplitude of the control qubit (pointed to by
+.IR q_ctrl ).
+If this magnitude exceeds a threshold of 0.5, a Z-gate (or phase flip) is
+applied to the target qubit (pointed to by
+.IR q_target ).
+This Z-gate operation effectively negates the amplitude of the target qubit,
+thereby flipping its quantum phase by \(pi radians. If the control qubit's
+amplitude magnitude is 0.5 or less, the target qubit's state remains
+unaltered by this operation.
+
+This gate, a subtle ballet of interconnectedness, reflects the quantum adage:
+'no observation without interaction.' It gently probes the control's 'presence'
+(its amplitude's resonance) to decide the fate of the target's phase, a whisper
+across the shared lattice of reality, shaping potentials from the void.
+The very act of the control's amplitude crossing a threshold becomes a decision
+point, a bifurcation in the quantum path, mirroring how probabilities
+condense into classical outcomes.
+.SH RETURN VALUE
+On successful completion, zero is returned. On error, \-1 is returned, and
+.IR errno
+is set to indicate the error.
+.SH ERRORS
+.TP
+.B EINVAL
+One or both of the provided qubit pointers,
+.IR q_ctrl
+or
+.IR q_target ,
+were NULL.
+.TP
+.B EFAULT
+An attempt was made to copy qubit data to or from an invalid user-space address.
+This typically indicates that
+.IR q_ctrl
+or
+.IR q_target
+points to memory outside the caller's accessible address space.
+.SH EXAMPLE
+The following example demonstrates how to use the
+.BR nymya_3311_controlled_z ()
+system call to apply a CZ gate to two
+.IR nymya_qubit
+structures.
+
+.nf
+.B \#include <stdio.h>
+.B \#include <stdlib.h>
+.B \#include <errno.h>
+.B \#include <complex.h>    // For complex numbers in user space
+.B \#include <stdint.h.h>   // For uint32_t
+.B \#include <sys/syscall.h>  // For syscall()
+.B \#include <unistd.h>     // Generally where __NR_ syscall numbers might be defined
+
+.PP
+.B // Dummy definition of nymya_qubit for user-space context.
+.B // In a real NymyaOS SDK, this structure would be provided by an official header.
+.B typedef struct {
+.B     double complex amplitude; // Complex amplitude (alpha |0> + beta |1>)
+.B     uint32_t id;              // Unique identifier for the qubit
+.B     char tag[16];             // User-defined tag for descriptive purposes
+.B } nymya_qubit;
+
+.PP
+.B // Define the syscall number, as it might not be in standard headers.
+.B \#ifndef __NR_nymya_3311_controlled_z
+.B \#define __NR_nymya_3311_controlled_z 3311
+.B \#endif
+
+.PP
+.B int main() {
+.B     nymya_qubit q_control = { .amplitude = 0.8 + 0.6I, .id = 1, .tag = "CtrlQ" };
+.B     nymya_qubit q_target  = { .amplitude = 0.5 + 0.0I, .id = 2, .tag = "TgtQ"  };
+.PP
+.B     printf("Initial state of qubits:\\n");
+.B     printf("  Control Qubit (ID %u, Tag '%s'): Amplitude = %.2f + %.2fI (Magnitude = %.2f)\\n",
+.B            q_control.id, q_control.tag, creal(q_control.amplitude), cimag(q_control.amplitude), cabs(q_control.amplitude));
+.B     printf("  Target Qubit  (ID %u, Tag '%s'): Amplitude = %.2f + %.2fI (Magnitude = %.2f)\\n",
+.B            q_target.id, q_target.tag, creal(q_target.amplitude), cimag(q_target.amplitude), cabs(q_target.amplitude));
+.PP
+.B     // Call the nymya_3311_controlled_z syscall
+.B     long res = syscall(__NR_nymya_3311_controlled_z, &q_control, &q_target);
+.PP
+.B     if (res == -1) {
+.B         perror("Error calling nymya_3311_controlled_z");
+.B         return EXIT_FAILURE;
+.B     }
+.PP
+.B     printf("\\nState of qubits after syscall:\\n");
+.B     printf("  Control Qubit (ID %u, Tag '%s'): Amplitude = %.2f + %.2fI (Magnitude = %.2f) (unchanged)\\n",
+.B            q_control.id, q_control.tag, creal(q_control.amplitude), cimag(q_control.amplitude), cabs(q_control.amplitude));
+.B     printf("  Target Qubit  (ID %u, Tag '%s'): Amplitude = %.2f + %.2fI (Magnitude = %.2f)\\n",
+.B            q_target.id, q_target.tag, creal(q_target.amplitude), cimag(q_target.amplitude), cabs(q_target.amplitude));
+.PP
+.B     printf("\\nExplanation:\\n");
+.B     printf("  The control qubit's initial magnitude was %.2f. Since this is > 0.5,\\n", cabs(0.8+0.6I));
+.B     printf("  the target qubit's amplitude (%.2f + %.2fI) was negated.\\n",
+.B            creal(0.5 + 0.0I), cimag(0.5 + 0.0I));
+.B     printf("  Expected target amplitude: %.2f + %.2fI.\\n",
+.B            creal(-(0.5 + 0.0I)), cimag(-(0.5 + 0.0I)));
+.PP
+.B     return EXIT_SUCCESS;
+.B }
+.fi
+.SH SEE ALSO
+.BR syscall (2),
+.BR nymya_qubit (7)
+```
