@@ -1,0 +1,122 @@
+```groff
+.\"
+.\" nymya_3361_qrng_range.1 -- Man page for the nymya_3361_qrng_range kernel syscall
+.\"
+.TH NYMYA_3361_QRNG_RANGE 1 "September 2023" "NYMYAOS Kernel" "NYMYA SYSTEM CALLS"
+.SH NAME
+nymya_3361_qrng_range \- generate quantum-like random numbers within a specified range
+.SH SYNOPSIS
+.B #include <unistd.h>
+.B #include <sys/syscall.h>
+.PP
+.B long syscall(SYS_nymya_3361_qrng_range, uint64_t *
+.I user_out
+.B , uint64_t
+.I min
+.B , uint64_t
+.I max
+.B , size_t
+.I count
+.B );
+.SH DESCRIPTION
+The
+.BR nymya_3361_qrng_range (3361)
+system call orchestrates the generation of numbers within a specified range, employing a process that symbolically engages with the quantum realm. For each number requested, it simulates the operations of a quantum circuit, applying conceptual Hadamard transformations and global phase shifts to a virtual qubit.
+.PP
+While the ultimate value is derived from the kernel's high-entropy pseudo-random number generator \- specifically,
+.BR get_random_u32 () \-
+the framework reflects the elegant dance of quantum mechanics, manifesting a choice between the extreme poles of the given range. It’s a glimpse into the inherent uncertainty that underpins reality, expressed through computational means.
+.PP
+The generated numbers will be either
+.I min
+or
+.I max
+(inclusive), chosen pseudo-randomly for each entry. These values are then copied into the user-space array pointed to by
+.I user_out
+.PP
+.TP
+.I user_out
+A pointer to a user-space array of
+.B uint64_t
+where the generated random numbers will be stored. The array must be large enough to hold
+.I count
+elements.
+.TP
+.I min
+The minimum value for the random numbers (inclusive).
+.TP
+.I max
+The maximum value for the random numbers (inclusive). Must be greater than
+.I min
+.TP
+.I count
+The number of random numbers to generate. Must be greater than 0.
+.SH RETURN VALUE
+On success, zero is returned. On error, \-1 is returned, and
+.B errno
+is set to indicate the error.
+.SH ERRORS
+.TP
+.B EFAULT
+.I user_out
+points to an invalid address, or copying data to user space failed.
+.TP
+.B EINVAL
+One of the input parameters is invalid:
+.I user_out
+is
+.BR NULL ,
+.I min
+is greater than or equal to
+.I max
+, or
+.I count
+is zero.
+.TP
+.B ENOMEM
+Insufficient kernel memory was available to allocate the temporary buffer required for number generation.
+.SH EXAMPLE
+The following program demonstrates how to use the
+.BR nymya_3361_qrng_range
+system call to generate 10 numbers between 1 and 100.
+.PP
+.nf
+.B #include <stdint.h>
+.B #include <stdio.h>
+.B #include <stdlib.h>
+.B #include <unistd.h>
+.B #include <sys/syscall.h>
+.B #include <errno.h>
+
+.B #define __NR_nymya_3361_qrng_range 3361
+
+.B int main() {
+.B     uint64_t numbers[10];
+.B     uint64_t min = 1;
+.B     uint64_t max = 100;
+.B     size_t count = 10;
+.B     long ret;
+
+.B     printf("Attempting to generate %zu quantum-like random numbers ", count);
+.B     printf("between %llu and %llu...\n", (unsigned long long)min, (unsigned long long)max);
+
+.B     ret = syscall(__NR_nymya_3361_qrng_range, numbers, min, max, count);
+
+.B     if (ret == 0) {
+.B         printf("Generated numbers:\n");
+.B         for (size_t i = 0; i < count; i++) {
+.B             printf("Number %zu: %llu\n", i + 1, (unsigned long long)numbers[i]);
+.B         }
+.B     } else {
+.B         perror("Syscall nymya_3361_qrng_range failed");
+.B         fprintf(stderr, "Error code: %ld\n", ret);
+.B     }
+
+.B     return 0;
+.B }
+.fi
+.SH SEE ALSO
+.BR syscall (2),
+.BR errno (3),
+.BR random (4)
+```
