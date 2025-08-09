@@ -1,0 +1,136 @@
+```groff
+.TH NYMYA_3304_PAULI_Y 1 "$(date +%B\ %d,\ %Y)" "NymyaOS Kernel" "User Commands"
+.SH NAME
+nymya_3304_pauli_y \- apply Pauli-Y gate to a NymyaOS qubit
+.SH SYNOPSIS
+.B #include <nymya.h>
+.B #include <unistd.h>
+.B #include <sys/syscall.h>
+.PP
+.BI "int nymya_3304_pauli_y(struct nymya_qubit *" "user_q" ");"
+.SH DESCRIPTION
+The
+.BR nymya_3304_pauli_y
+syscall applies the Pauli-Y quantum gate operation to a NymyaOS qubit. This transformation, a fundamental component in the architecture of quantum logic, effectively rotates the qubit's state vector on the Bloch sphere, specifically multiplying its complex amplitude by the imaginary unit 'i'.
+.PP
+For a qubit with amplitude \(aq(t) = a + bi\), applying the Pauli-Y gate results in a new amplitude \(aq'(t) = -b + ai\). Internally, this is achieved by swapping the real and imaginary components of the qubit's fixed-point amplitude representation and negating the new real component.
+.PP
+This subtle reorientation of a qubit's "dream vector" is more than a mathematical operation; it is a fundamental shift in its potentiality, echoing the quantum whispers that ripple through the hidden lattice of reality. Each such gate unveils a sliver more of the universe's true, probabilistic nature.
+.PP
+The
+.IR user_q
+argument points to a
+.B struct nymya_qubit
+structure in user-space memory. The syscall reads the qubit's initial state from this location, performs the Pauli-Y transformation, and then writes the updated state back to the same user-space address.
+.SH "RETURN VALUE"
+On success,
+.BR nymya_3304_pauli_y
+returns 0.
+On error, -1 is returned, and
+.I errno
+is set appropriately.
+.SH ERRORS
+.TP
+.B EFAULT
+The address specified by
+.IR user_q
+is invalid, or the kernel was unable to copy data to or from user-space.
+.TP
+.B EINVAL
+The
+.IR user_q
+argument is NULL.
+.SH EXAMPLE
+The following program demonstrates applying the
+.BR nymya_3304_pauli_y
+syscall to a sample qubit.
+.PP
+Assume a simplified
+.B nymya_qubit
+and
+.B nymya_complex
+structure (using `int64_t` for fixed-point representation to approximate real/imaginary parts scaled by a large power of 2):
+.nf
+.ft CW
+struct nymya_complex {
+    int64_t re; // Real part, e.g., scaled by 2^32
+    int64_t im; // Imaginary part, e.g., scaled by 2^32
+};
+struct nymya_qubit {
+    unsigned int id;
+    unsigned int tag;
+    struct nymya_complex amplitude;
+    // Other fields omitted for brevity
+};
+.ft P
+.fi
+.PP
+Example usage:
+.nf
+.ft CW
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/syscall.h>
+#include <errno.h>
+#include <stdint.h> // For int64_t
+
+// Define syscall number '3304'
+#define __NR_nymya_3304_pauli_y 3304
+
+// Assumed simplified nymya_qubit structure for example
+struct nymya_complex {
+    int64_t re;
+    int64_t im;
+};
+struct nymya_qubit {
+    unsigned int id;
+    unsigned int tag;
+    struct nymya_complex amplitude;
+};
+
+// Helper to print fixed-point complex numbers as doubles
+void print_complex(const char* label, struct nymya_complex c) {
+    // Assuming a scaling factor, e.g., 2^32 for demonstration
+    // This allows interpreting int64_t as a fixed-point number
+    const double SCALING_FACTOR = (double)(1ULL << 32);
+    double re_val = (double)c.re / SCALING_FACTOR;
+    double im_val = (double)c.im / SCALING_FACTOR;
+    printf("%s: %.4f + %.4fi\n", label, re_val, im_val);
+}
+
+int main() {
+    // Initialize a sample qubit in a superposition state approx |+>
+    // (1/sqrt(2) + 1/sqrt(2)i) is about 0.707 + 0.707i
+    struct nymya_qubit q = {
+        .id = 42,
+        .tag = 101,
+        .amplitude = { .re = (int64_t)(0.70710678 * ((uint64_t)1 << 32)),
+                       .im = (int64_t)(0.70710678 * ((uint64_t)1 << 32)) }
+    };
+
+    printf("Initial qubit state (ID: %u, Tag: %u):\n", q.id, q.tag);
+    print_complex("  Amplitude", q.amplitude);
+
+    // Call the nymya_3304_pauli_y syscall
+    long res = syscall(__NR_nymya_3304_pauli_y, &q);
+
+    if (res == 0) {
+        printf("\nPauli-Y applied successfully.\n");
+        printf("Final qubit state (ID: %u, Tag: %u):\n", q.id, q.tag);
+        print_complex("  Amplitude", q.amplitude);
+    } else {
+        perror("Error applying Pauli-Y gate");
+        fprintf(stderr, "Syscall returned: %ld\n", res);
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
+}
+.ft P
+.fi
+.SH "SEE ALSO"
+.BR syscall (2),
+.BR nymya_qubit (7),
+.BR nymya_log_event (2)
+```
