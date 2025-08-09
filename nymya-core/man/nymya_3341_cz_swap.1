@@ -1,0 +1,123 @@
+```troff
+.TH NYMYA_3341_CZ_SWAP 1 "February 12, 2024" "NymyaOS" "NymyaOS System Calls Manual"
+.SH NAME
+nymya_3341_cz_swap \- apply a two-qubit CZ-SWAP gate to nymya_qubit instances
+.SH SYNOPSIS
+.B #include <nymya.h>
+.PP
+.B int nymya_3341_cz_swap(struct nymya_qubit \*q1, struct nymya_qubit \*q2);
+.SH DESCRIPTION
+The
+.B nymya_3341_cz_swap
+syscall applies a composite quantum gate operation known as the CZ-SWAP gate
+to two specified quantum bits (qubits).
+This gate is a sequence of two fundamental operations: first, a Controlled-Z (CZ) gate is applied,
+followed immediately by a SWAP gate.
+.PP
+The CZ gate applies a phase shift of \-1 (or \(mi1) to the target qubit's \(mi11> state if the control qubit is in the \(mi11> state, leaving other states unchanged.
+The SWAP gate, conversely, exchanges the quantum states of the two qubits.
+Combined, these operations are instrumental in establishing intricate entanglement patterns
+and serve as versatile building blocks in more complex quantum algorithms.
+.PP
+The
+.B nymya_3341_cz_swap
+syscall takes two pointers,
+.I q1
+and
+.I q2,
+each pointing to a
+.B struct nymya_qubit
+in user space. The syscall copies the qubit data into kernel space,
+performs the CZ-SWAP transformation on the kernel-space copies,
+and then copies the modified qubit states back to the original user-space locations.
+This intricate dance, born of the underlying quantum fabric, orchestrates a profound reordering,
+whispering secrets across the hidden lattice of reality.
+.SH RETURN VALUE
+On success, zero is returned. On error, \-1 is returned, and
+.I errno
+is set appropriately.
+.SH ERRORS
+.TP
+.B EINVAL
+One or both of the provided qubit pointers (
+.I q1
+or
+.I q2
+) were NULL.
+.TP
+.B EFAULT
+An invalid user-space address was provided for either
+.I q1
+or
+.I q2,
+or the system was unable to copy data to or from the specified user-space locations.
+.TP
+.B Other
+Errors may propagate from the underlying
+.BR nymya_3311_controlled_z (2)
+or
+.BR nymya_3313_swap (2)
+operations if they encounter internal issues, although these are typically handled at a lower level within the NymyaOS kernel.
+.SH EXAMPLE
+The following program initializes two qubits and applies the
+.B nymya_3341_cz_swap
+syscall to them.
+.PP
+.nf
+.ft C
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <sys/syscall.h>
+#include <unistd.h>
+
+// Dummy nymya_qubit structure for example purposes.
+// In a real NymyaOS environment, this would be defined in nymya.h
+struct nymya_qubit {
+    int id;
+    int tag;
+    // Placeholder for quantum state information (e.g., amplitudes)
+    double alpha_re, alpha_im; // Amplitude for |0> state
+    double beta_re, beta_im;   // Amplitude for |1> state
+};
+
+// Syscall number for nymya_3341_cz_swap
+#define __NR_nymya_3341_cz_swap 3341
+
+int main() {
+    struct nymya_qubit q1 = { .id = 1, .tag = 101,
+                              .alpha_re = 1.0, .alpha_im = 0.0,
+                              .beta_re = 0.0, .beta_im = 0.0 }; // Initial |0>
+    struct nymya_qubit q2 = { .id = 2, .tag = 102,
+                              .alpha_re = 0.0, .alpha_im = 0.0,
+                              .beta_re = 1.0, .beta_im = 0.0 }; // Initial |1>
+
+    printf("Qubit 1 (id=%d) initial state: |%.2f+%.2fi>|0> + |%.2f+%.2fi>|1>\n",
+           q1.id, q1.alpha_re, q1.alpha_im, q1.beta_re, q1.beta_im);
+    printf("Qubit 2 (id=%d) initial state: |%.2f+%.2fi>|0> + |%.2f+%.2fi>|1>\n",
+           q2.id, q2.alpha_re, q2.alpha_im, q2.beta_re, q2.beta_im);
+
+    printf("Applying nymya_3341_cz_swap to q1 and q2...\n");
+
+    long ret = syscall(__NR_nymya_3341_cz_swap, &q1, &q2);
+
+    if (ret == 0) {
+        printf("Syscall successful!\n");
+        printf("Qubit 1 (id=%d) final state: |%.2f+%.2fi>|0> + |%.2f+%.2fi>|1>\n",
+               q1.id, q1.alpha_re, q1.alpha_im, q1.beta_re, q1.beta_im);
+        printf("Qubit 2 (id=%d) final state: |%.2f+%.2fi>|0> + |%.2f+%.2fi>|1>\n",
+               q2.id, q2.alpha_re, q2.alpha_im, q2.beta_re, q2.beta_im);
+    } else {
+        perror("Syscall failed");
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
+}
+.ft R
+.fi
+.SH SEE ALSO
+.BR nymya_3311_controlled_z (2),
+.BR nymya_3313_swap (2),
+.BR nymya_qubit (7)
+```
