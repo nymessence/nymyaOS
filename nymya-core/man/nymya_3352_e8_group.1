@@ -1,0 +1,136 @@
+```troff
+.\" Man page for nymya_3352_e8_group
+.TH NYMYA_3352_E8_GROUP 1 "\%D" "nymyaOS Kernel" "User Commands"
+.SH NAME
+nymya_3352_e8_group \- apply E8 Lie group entanglement to eight qubits
+.SH SYNOPSIS
+.nf
+.B \#include <nymya/nymya.h>
+.B \#include <nymya/syscall.h>
+.PP
+.BI "int nymya_3352_e8_group(nymya_qubit *q[8]);"
+.fi
+.SH DESCRIPTION
+The
+.B nymya_3352_e8_group
+syscall applies a specific sequence of quantum operations to eight
+.IR nymya_qubit
+structures, designed to simulate entanglement patterns associated with
+the E8 Lie group. This complex operation prepares the qubits for advanced
+quantum computations, resonating with the very fabric of spacetime.
+
+The operation proceeds in two main phases:
+.PP
+First, a Hadamard gate is applied to each of the eight qubits. This
+operation places each qubit into an equal superposition of its
+basis states.
+.PP
+Second, for every unique pair of qubits (q[i], q[j]) where i < j,
+a controlled-NOT (CNOT) gate is applied twice:
+.I cnot(q[i], q[j])
+followed by
+.I cnot(q[j], q[i]).
+This sequence creates a specific form of entanglement,
+reflecting the deep, underlying symmetries that govern the cosmos.
+.PP
+The
+.I q
+argument is an array of eight pointers to
+.IR nymya_qubit
+structures. These structures must be properly initialized and
+represent accessible quantum states managed by the nymyaOS quantum fabric.
+The syscall operates on the quantum state represented by these qubits
+and reflects any changes back to the user-space
+.IR nymya_qubit
+structures.
+.SH RETURN VALUE
+On success, zero is returned. On error, \-1 is returned, and
+.I errno
+is set appropriately.
+.SH ERRORS
+.TP
+.B EINVAL
+An element in the
+.I q
+array was a NULL pointer, or one of the underlying quantum gate
+operations (e.g., Hadamard or CNOT) received an invalid argument or
+encountered an unrecoverable state error.
+.TP
+.B EFAULT
+Problems copying data to or from user space, indicating an issue with
+the provided qubit pointers or the structures they reference. This may
+occur if the user-space pointers are invalid or point to unmapped memory.
+.TP
+.B ENOMEM
+Insufficient kernel memory to perform internal operations, such as
+allocating temporary kernel-space copies of qubits or their states.
+.SH EXAMPLE
+The following program demonstrates how to call
+.BR nymya_3352_e8_group :
+.nf
+.RS
+.ft C
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <string.h> // For snprintf
+
+// In a real nymyaOS, <nymya/nymya.h> would provide nymya_qubit
+// and <nymya/syscall.h> would provide the syscall prototype.
+// For this example, we include dummy definitions.
+
+// Dummy nymya_qubit structure for compilation
+typedef struct nymya_qubit {
+    unsigned int id;
+    int state; // Simplified: 0 or 1. Real qubits handle complex amplitudes.
+    char tag[16]; // A symbolic tag
+} nymya_qubit;
+
+// Function prototype for the syscall (would be in <nymya/syscall.h>)
+extern int nymya_3352_e8_group(nymya_qubit *q[8]);
+
+// Dummy initializer for example
+void init_qubit(nymya_qubit *q, unsigned int id, const char *tag) {
+    if (q) {
+        q->id = id;
+        q->state = 0; // Initialize to |0> state
+        strncpy(q->tag, tag, sizeof(q->tag) - 1);
+        q->tag[sizeof(q->tag) - 1] = '\0';
+    }
+}
+
+int main() {
+    nymya_qubit *qubits[8];
+    nymya_qubit q_storage[8]; // Allocate actual storage for qubits
+
+    printf("Initializing 8 qubits...\n");
+    for (int i = 0; i < 8; i++) {
+        init_qubit(&q_storage[i], 100 + i, "E8_TEST_QUBIT");
+        qubits[i] = &q_storage[i];
+    }
+
+    printf("Calling nymya_3352_e8_group syscall (number 3352)...\n");
+    int ret = nymya_3352_e8_group(qubits);
+
+    if (ret == 0) {
+        printf("Syscall nymya_3352_e8_group successful.\n");
+        // In a real scenario, one would now measure the qubits or
+        // perform further quantum operations to observe the entanglement.
+        printf("Qubits are now entangled according to E8 group symmetries.\n");
+    } else {
+        perror("Syscall nymya_3352_e8_group failed");
+        fprintf(stderr, "Error code: %d\n", errno);
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
+}
+.ft R
+.RE
+.SH SEE ALSO
+.BR nymya_3308_hadamard_gate (1),
+.BR nymya_3309_controlled_not (1),
+.BR nymya_qubit (7),
+.BR syscall (2),
+.BR intro (2)
+```
