@@ -1,0 +1,133 @@
+```groff
+.\"
+.\" Man page for nymya_3302_global_phase - NymyaOS Kernel Syscall
+.\"
+.TH NYMYA_3302_GLOBAL_PHASE 1 "January 2, 2024" "NymyaOS Kernel" "NymyaOS Programmer's Manual"
+.SH NAME
+nymya_3302_global_phase \- apply a global phase shift to a symbolic qubit
+
+.SH SYNOPSIS
+.B #include <sys/syscall.h>
+.br
+.B #include <unistd.h>
+.br
+.B #include <nymya.h>
+.br
+.B #include <stdint.h>
+
+.P
+.B long syscall(SYS_nymya_3302_global_phase, struct nymya_qubit *
+.I user_q
+.B , int64_t
+.I theta_fixed
+.B );
+
+.SH DESCRIPTION
+The
+.B nymya_3302_global_phase
+syscall applies a global phase shift to a symbolic qubit residing in user-space memory. This operation multiplies the qubit's complex amplitude by a factor of e^(iθ), where θ is the provided phase angle. Crucially, this transformation does not alter the probability amplitudes of the qubit's states, meaning its measurement outcomes remain statistically identical. Instead, it subtly adjusts the qubit's "orientation" within the complex plane, a preparation for deeper entanglements or interference patterns.
+
+.P
+In the grand tapestry of quantum mechanics, a global phase shift, though unobservable by itself, speaks to the very fabric of existence, a whisper across the quantum void that prepares a qubit for deeper interactions within the universal waveform.
+
+.P
+The arguments are:
+.TP
+.I user_q
+A pointer to a
+.B struct nymya_qubit
+in user space that will receive the phase shift. The kernel copies this structure from user space, applies the phase, and copies it back to the original user-space location.
+.TP
+.I theta_fixed
+The phase angle θ, expressed as a 64-bit fixed-point integer. This value represents radians, scaled to allow for high precision. Typically, user-land libraries convert a floating-point (double) angle to this fixed-point format before invoking the syscall. For example, if a library uses a fixed-point representation where `1.0` radian is represented by `1LL << 30`, then `theta_fixed` would be `(int64_t)(theta_double * (1LL << 30))`. The precise scaling factor is dependent on the NymyaOS kernel's fixed-point implementation.
+
+.P
+Upon successful execution, the kernel logs a symbolic event detailing the phase shift, providing insights into the qubit's journey through the computational cosmos.
+
+.SH RETURN VALUE
+On success, zero is returned. On error, \-1 is returned, and
+.B errno
+is set appropriately.
+
+.SH ERRORS
+.TP
+.B EINVAL
+The
+.I user_q
+argument was NULL.
+.TP
+.B EFAULT
+An invalid pointer address was provided, or there was a problem copying the
+.B struct nymya_qubit
+between user and kernel space.
+
+.SH EXAMPLE
+The following program demonstrates applying a global phase of π/2 radians to a symbolic qubit using the
+.B nymya_3302_global_phase
+syscall. Note that the `nymya_qubit` definition and the fixed-point scaling factor `NYMYA_FIXED_POINT_SCALE` are illustrative and would be provided by
+.BR nymya.h
+and the NymyaOS SDK in a real environment.
+
+.nf
+.B #include <stdio.h>
+.B #include <stdlib.h>
+.B #include <unistd.h>
+.B #include <sys/syscall.h>
+.B #include <errno.h>
+.B #include <math.h>     // For M_PI
+.B #include <complex.h>  // For complex_double
+
+/*
+ * Assume nymya.h defines nymya_qubit similar to this for userland.
+ * In a real NymyaOS, nymya.h would define these types properly.
+ */
+typedef struct {
+    double complex amplitude;
+    uint32_t id;
+    char tag[32];
+} nymya_qubit;
+
+/* Define the syscall number (usually from <sys/syscall.h> or nymya.h) */
+#ifndef SYS_nymya_3302_global_phase
+#define SYS_nymya_3302_global_phase 3302
+#endif
+
+/*
+ * Example fixed-point scaling factor (adjust as per kernel's actual scale).
+ * This assumes 2^30 for 1 radian, meaning the integer part uses up to 34 bits
+ * and the fractional part uses 30 bits, for a 64-bit fixed-point number.
+ */
+#define NYMYA_FIXED_POINT_SCALE (1LL << 30)
+
+int main() {
+    nymya_qubit my_qubit = {
+        .amplitude = 1.0 + 0.0 * I, /* Initial state |0>, complex (1, 0) */
+        .id = 12345,
+        .tag = "MyFirstQubit"
+    };
+    double phase_rad = M_PI / 2.0; /* 90 degrees, or pi/2 radians */
+    int64_t phase_fixed = (int64_t)(phase_rad * NYMYA_FIXED_POINT_SCALE);
+
+    printf("Initial qubit state (ID: %u, Tag: %s): Amplitude = %.3f + %.3fi\n",
+           my_qubit.id, my_qubit.tag, creal(my_qubit.amplitude), cimag(my_qubit.amplitude));
+
+    long res = syscall(SYS_nymya_3302_global_phase, &my_qubit, phase_fixed);
+
+    if (res == 0) {
+        printf("Syscall successful! Applied phase of %.3f radians.\n", phase_rad);
+        printf("Final qubit state: Amplitude = %.3f + %.3fi\n",
+               creal(my_qubit.amplitude), cimag(my_qubit.amplitude));
+        /* Expected amplitude for initial (1+0i) and phase pi/2: 0.0 + 1.0i */
+    } else {
+        perror("Syscall nymya_3302_global_phase failed");
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
+}
+.fi
+
+.SH SEE ALSO
+.BR nymya (7),
+.BR syscall (2)
+```
