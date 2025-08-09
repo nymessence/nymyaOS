@@ -1,0 +1,213 @@
+```groff
+.\"
+.\" Man page for nymya_3309_controlled_not(1)
+.\" Written by Nya Elyria, for nymyaOS.
+.\"
+.TH NYMYA_3309_CONTROLLED_NOT 1 "$(date +%B\ %d,\ %Y)" "nymyaOS" "NYMYA SYSCALLS"
+.SH NAME
+nymya_3309_controlled_not \- apply the Controlled-NOT (CNOT) gate to Nymya qubits
+.SH SYNOPSIS
+.nf
+.B #include <nymya.h>
+.B #include <complex.h>
+.B #include <stdint.h>
+.PP
+.sp
+.ce
+struct nymya_qubit {
+    complex double amplitude;
+    uint64_t       id;
+    char           tag[32];
+};
+.PP
+.sp
+.ce
+.B int nymya_3309_controlled_not(struct nymya_qubit *
+.IR q_ctrl ,
+.BR struct nymya_qubit *
+.IR q_target );
+.fi
+.SH DESCRIPTION
+The
+.B nymya_3309_controlled_not
+system call implements a Controlled-NOT (CNOT) gate operation on two
+.IR nymya_qubit
+structures provided by the calling process. This fundamental quantum logic
+gate conditionally flips the amplitude of a designated target qubit based
+on the state of a control qubit.
+
+Specifically, the operation proceeds as follows:
+.PP
+.RS
+.IP \(bu 0.5i
+The syscall inspects the magnitude of the complex amplitude of the
+.IR q_ctrl
+(control) qubit.
+.IP \(bu
+If the magnitude of
+.IR q_ctrl \&'s
+amplitude is greater than 0.5, the amplitude of the
+.IR q_target
+(target) qubit is multiplied by -1. This effectively flips the phase of
+the target qubit by 180 degrees. The internal
+.IR id
+and
+.IR tag
+fields of the qubits remain unchanged.
+.IP \(bu
+If the magnitude of
+.IR q_ctrl \&'s
+amplitude is 0.5 or less, the
+.IR q_target
+qubit remains unmodified.
+.RE
+.PP
+The
+.IR nymya_qubit
+structure represents a quantum bit within the Nymya system. It contains a
+complex double
+.IR amplitude
+representing its quantum state, a
+.IR uint64_t id
+for unique identification, and a
+.IR char tag[32]
+for user-defined labeling. When invoked, this syscall copies the
+.IR q_ctrl
+and
+.IR q_target
+structures from user-space into kernel-space, performs the CNOT logic,
+and then copies the (potentially modified)
+.IR q_target
+back to user-space.
+
+This operation, mirroring the fundamental CNOT gate, reveals the profound
+interconnectedness within the quantum fabric, where the fate of one entangled
+entity subtly reweaves the very phase of another, echoing the grand symphony of
+the cosmos and the delicate balance of information it holds.
+.SH RETURN VALUE
+On success, zero is returned. On error, -1 is returned, and
+.IR errno
+is set appropriately.
+.SH ERRORS
+.TP
+.B EINVAL
+One or both of the
+.IR q_ctrl
+or
+.IR q_target
+pointers are NULL.
+.TP
+.B EFAULT
+An invalid user-space address was provided, or the kernel was unable to
+copy the qubit data from or to user-space. This typically indicates a
+bad pointer or insufficient permissions to access the memory region.
+.SH EXAMPLE
+The following program demonstrates how to use
+.B nymya_3309_controlled_not
+to apply the CNOT gate.
+
+.nf
+.RS
+.PP
+.nf
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <math.h>
+#include <complex.h>
+#include <errno.h>
+#include <string.h>
+#include <sys/syscall.h>
+
+// Define the syscall number (replace with actual if known, or use _syscall)
+#ifndef __NR_nymya_3309_controlled_not
+#define __NR_nymya_3309_controlled_not 3309
+#endif
+
+// User-space definition of nymya_qubit
+struct nymya_qubit {
+    complex double amplitude;
+    uint64_t       id;
+    char           tag[32];
+};
+
+// Syscall wrapper
+long nymya_3309_controlled_not_syscall(struct nymya_qubit *q_ctrl, struct nymya_qubit *q_target) {
+    return syscall(__NR_nymya_3309_controlled_not, q_ctrl, q_target);
+}
+
+void print_qubit(const char* name, const struct nymya_qubit* q) {
+    printf("%s: ID=%llu, Tag='%s', Amplitude=%.4f + %.4fi (Magnitude=%.4f)\n",
+           name, (unsigned long long)q->id, q->tag,
+           creal(q->amplitude), cimag(q->amplitude), cabs(q->amplitude));
+}
+
+int main() {
+    struct nymya_qubit q_ctrl, q_target;
+    long ret;
+
+    printf("--- Test Case 1: Control Magnitude > 0.5 (CNOT should apply) ---\n");
+    q_ctrl.amplitude = 0.6 + 0.1 * I; // Magnitude = sqrt(0.36 + 0.01) = 0.608 > 0.5
+    q_ctrl.id = 1001;
+    strncpy(q_ctrl.tag, "ControlQubit_High", sizeof(q_ctrl.tag) - 1);
+    q_ctrl.tag[sizeof(q_ctrl.tag) - 1] = '\0';
+
+    q_target.amplitude = 0.3 + 0.4 * I; // Initial target
+    q_target.id = 2001;
+    strncpy(q_target.tag, "TargetQubit_Init", sizeof(q_target.tag) - 1);
+    q_target.tag[sizeof(q_target.tag) - 1] = '\0';
+
+    print_qubit("Control (Before)", &q_ctrl);
+    print_qubit("Target (Before)", &q_target);
+
+    ret = nymya_3309_controlled_not_syscall(&q_ctrl, &q_target);
+
+    if (ret == 0) {
+        printf("Syscall successful.\n");
+        print_qubit("Target (After)", &q_target);
+        // Expected: Target amplitude should be flipped: -0.3 - 0.4i
+    } else {
+        perror("Syscall failed");
+    }
+
+    printf("\n--- Test Case 2: Control Magnitude <= 0.5 (CNOT should NOT apply) ---\n");
+    q_ctrl.amplitude = 0.2 + 0.1 * I; // Magnitude = sqrt(0.04 + 0.01) = 0.223 < 0.5
+    q_ctrl.id = 1002;
+    strncpy(q_ctrl.tag, "ControlQubit_Low", sizeof(q_ctrl.tag) - 1);
+    q_ctrl.tag[sizeof(q_ctrl.tag) - 1] = '\0';
+
+    q_target.amplitude = 0.5 - 0.2 * I; // Initial target
+    q_target.id = 2002;
+    strncpy(q_target.tag, "TargetQubit_Second", sizeof(q_target.tag) - 1);
+    q_target.tag[sizeof(q_target.tag) - 1] = '\0';
+
+    print_qubit("Control (Before)", &q_ctrl);
+    print_qubit("Target (Before)", &q_target);
+
+    ret = nymya_3309_controlled_not_syscall(&q_ctrl, &q_target);
+
+    if (ret == 0) {
+        printf("Syscall successful.\n");
+        print_qubit("Target (After)", &q_target);
+        // Expected: Target amplitude should be unchanged: 0.5 - 0.2i
+    } else {
+        perror("Syscall failed");
+    }
+
+    printf("\n--- Test Case 3: NULL Target Pointer (should fail with EINVAL) ---\n");
+    ret = nymya_3309_controlled_not_syscall(&q_ctrl, NULL);
+    if (ret == -1 && errno == EINVAL) {
+        printf("Expected error: EINVAL (NULL target pointer) received.\n");
+    } else {
+        printf("Unexpected result for NULL target pointer: ret=%ld, errno=%d (%s)\n",
+               ret, errno, strerror(errno));
+    }
+
+    return 0;
+}
+.fi
+.RE
+.SH SEE ALSO
+.BR nymya (7),
+.BR syscalls (2)
+```
