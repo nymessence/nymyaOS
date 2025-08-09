@@ -1,0 +1,172 @@
+```groff
+.\" Standard man page header for NymyaOS syscalls.
+.\" Section 1: User Commands
+.TH NYMYA_3346_TRIANGULAR_LATTICE 1 "April 1, 2024" "NymyaOS" "NymyaOS System Calls Manual"
+.SH NAME
+nymya_3346_triangular_lattice \- applies a triangular lattice quantum gate operation to three qubits
+.SH SYNOPSIS
+.B #include <nymya.h>
+.B #include <sys/syscall.h>
+.B #include <unistd.h>
+.PP
+.B int nymya_3346_triangular_lattice(nymya_qubit *q1, nymya_qubit *q2, nymya_qubit *q3);
+.SH DESCRIPTION
+The
+.B nymya_3346_triangular_lattice
+syscall applies a composite quantum gate operation to three specified qubits,
+.IR q1 ,
+.IR q2 ,
+and
+.IR q3 .
+This operation simulates an interaction pattern characteristic of a triangular lattice,
+aiming to establish entanglement across the three qubits in a cyclic manner.
+.PP
+The sequence of quantum transformations applied is as follows:
+.RS
+.IP \(bu 1.
+A Hadamard gate is applied to
+.IR q1 .
+.IP \(bu 2.
+A CNOT (Controlled-NOT) gate is applied with
+.IR q1
+as the control qubit and
+.IR q2
+as the target qubit.
+.IP \(bu 3.
+A CNOT gate is applied with
+.IR q2
+as the control qubit and
+.IR q3
+as the target qubit.
+.IP \(bu 4.
+A CNOT gate is applied with
+.IR q3
+as the control qubit and
+.IR q1
+as the target qubit.
+.RE
+.PP
+This intricate dance of quantum states, orchestrated across the specified qubits, seeks to entwine their destinies, much like the hidden threads that bind the cosmos into an emergent tapestry. The syscall directly modifies the state of the qubits pointed to by
+.IR q1 ,
+.IR q2 ,
+and
+.IR q3
+in place. It is the user's responsibility to ensure that these pointers are valid and that the memory they refer to is accessible and writable.
+.PP
+Applications typically invoke this operation via a userland wrapper function (as shown in the SYNOPSIS) which, in turn, makes the underlying
+.B syscall(2)
+call. The syscall number for
+.B nymya_3346_triangular_lattice
+is 3346.
+.SH RETURN VALUE
+On success,
+.B nymya_3346_triangular_lattice
+returns 0.
+On error, \-1 is returned, and
+.B errno
+is set appropriately.
+.SH ERRORS
+.TP
+.B EINVAL
+One or more of the provided user-space qubit pointers (
+.IR q1 ,
+.IR q2 ,
+.IR q3 )
+were NULL, or the underlying quantum gate operations detected an invalid qubit state or configuration.
+.TP
+.B EFAULT
+An attempt to copy qubit data from or to user space failed. This indicates a bad address provided by the user, or insufficient permissions for memory access.
+.TP
+.B EPERM
+The calling process does not have the necessary permissions or capabilities to perform privileged quantum operations on the system's quantum hardware.
+.TP
+.B ENOMEM
+Insufficient kernel memory to allocate temporary structures or perform computations required for the operation.
+.SH EXAMPLE
+The following example demonstrates how to call
+.B nymya_3346_triangular_lattice
+from user space. It assumes a
+.B nymya_qubit
+structure and basic initialization/printing functions exist (e.g.,
+.B nymya_init_qubit()
+and
+.B nymya_print_qubit_state()).
+.PP
+.nf
+.ft CR
+#include <nymya.h> // Defines nymya_qubit, __NR_nymya_3346_triangular_lattice
+#include <sys/syscall.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <errno.h>
+#include <string.h> // For strerror
+#include <complex.h> // For complex numbers like 1.0 + 0.0I
+
+// Assume nymya_qubit definition and helper functions for demonstration:
+/*
+typedef struct {
+    int id;
+    int tag;
+    double complex alpha; // Amplitude of |0> state
+    double complex beta;  // Amplitude of |1> state
+} nymya_qubit;
+
+// Simple placeholder init/print functions for example clarity
+int nymya_init_qubit(nymya_qubit *q, int id, int tag, double complex alpha, double complex beta) {
+    if (!q) return -1;
+    q->id = id;
+    q->tag = tag;
+    q->alpha = alpha;
+    q->beta = beta;
+    return 0;
+}
+
+int nymya_print_qubit_state(const nymya_qubit *q) {
+    if (!q) return -1;
+    printf("Qubit ID %d (Tag %d): |0> amplitude = %.3f%+.3fi, |1> amplitude = %.3f%+.3fi\n",
+           q->id, q->tag, creal(q->alpha), cimag(q->alpha), creal(q->beta), cimag(q->beta));
+    return 0;
+}
+*/
+
+int main() {
+    nymya_qubit q_a, q_b, q_c;
+    int ret;
+
+    // Initialize qubits to a known state, e.g., |0>, |0>, |0>
+    if (nymya_init_qubit(&q_a, 101, 1, 1.0 + 0.0I, 0.0 + 0.0I) != 0 ||
+        nymya_init_qubit(&q_b, 102, 1, 1.0 + 0.0I, 0.0 + 0.0I) != 0 ||
+        nymya_init_qubit(&q_c, 103, 1, 1.0 + 0.0I, 0.0 + 0.0I) != 0) {
+        fprintf(stderr, "Failed to initialize qubits.\n");
+        return 1;
+    }
+
+    printf("Initial states:\n");
+    nymya_print_qubit_state(&q_a);
+    nymya_print_qubit_state(&q_b);
+    nymya_print_qubit_state(&q_c);
+
+    printf("\nCalling nymya_3346_triangular_lattice syscall...\n");
+    // Call the syscall directly. The __NR_nymya_3346_triangular_lattice macro
+    // is defined in nymya.h, typically mapping to the kernel's syscall number.
+    ret = syscall(__NR_nymya_3346_triangular_lattice, &q_a, &q_b, &q_c);
+
+    if (ret == 0) {
+        printf("Syscall successful! Qubits entangled. Final states:\n");
+        nymya_print_qubit_state(&q_a);
+        nymya_print_qubit_state(&q_b);
+        nymya_print_qubit_state(&q_c);
+    } else {
+        fprintf(stderr, "Syscall failed with error: %d (%s)\n", errno, strerror(errno));
+    }
+
+    return ret == 0 ? 0 : 1;
+}
+.ft P
+.fi
+.SH SEE ALSO
+.BR syscall (2),
+.BR nymya_3308_hadamard_gate (1),
+.BR nymya_3309_controlled_not (1),
+.BR nymya_qubit (7)
+```
