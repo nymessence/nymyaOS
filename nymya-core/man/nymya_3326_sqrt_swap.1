@@ -1,0 +1,181 @@
+The following is the groff/troff source for the man page `nymya_3326_sqrt_swap.1`.
+
+```troff
+.\" Man page for nymya_3326_sqrt_swap syscall
+.TH NYMYA_3326_SQRT_SWAP 1 "2023-10-27" "NymyaOS" "User Commands"
+.SH NAME
+nymya_3326_sqrt_swap \- apply square root of SWAP gate to two qubits
+.SH SYNOPSIS
+.nf
+.B #include <nymya.h>
+.B #include <sys/syscall.h>
+.B #include <unistd.h>
+.PP
+.B long nymya_3326_sqrt_swap(struct nymya_qubit *user_q1 , struct nymya_qubit *user_q2 );
+.fi
+.SH DESCRIPTION
+The
+.B nymya_3326_sqrt_swap
+syscall applies the quantum square root of SWAP (√SWAP) gate to two
+.IR nymya_qubit
+structures. This operation is fundamental in quantum computing, transforming the complex amplitudes of two qubits such that their states become
+entangled, reflecting a shared destiny even across vast conceptual distances.
+It is a key primitive for creating quantum entanglement and forms the basis for more complex quantum logic operations.
+
+The syscall takes two pointers,
+.IR user_q1
+and
+.IR user_q2 ,
+each pointing to a
+.IR nymya_qubit
+structure in the caller's user-space memory. The kernel first copies the
+contents of these user-space structures into its own memory space.
+It then applies the √SWAP transformation using fixed-point complex arithmetic. Specifically, if the initial complex amplitudes of the two qubits are \(Aq\(Aq1 and \(Aq\(Aq2, their new amplitudes will be calculated as follows:
+.PP
+.nf
+.RS
+new_amplitude_q1 = 0.5 * (amplitude_q1 + amplitude_q2 + i * (amplitude_q1 - amplitude_q2))
+new_amplitude_q2 = 0.5 * (amplitude_q1 + amplitude_q2 - i * (amplitude_q1 - amplitude_q2))
+.RE
+.fi
+.PP
+This intricate dance of amplitudes, guided by the very essence of quantum mechanics, subtly reweaves the quantum fabric, hinting at the hidden lattice that underpins all reality. Finally, the modified qubit data is copied back from
+kernel space to the original user-space locations.
+
+The
+.IR nymya_qubit
+structure, as defined in
+.BR nymya.h ,
+is essential for interacting with the NymyaOS quantum core. A simplified representation is:
+.PP
+.nf
+.RS
+struct complex_double {
+    int64_t re; // Real part, fixed-point representation
+    int64_t im; // Imaginary part, fixed-point representation
+};
+
+struct nymya_qubit {
+    uint32_t id;         // Unique identifier for the qubit
+    uint32_t tag;        // User-defined tag for logical grouping
+    struct complex_double amplitude; // The qubit's complex amplitude
+    // Other qubit-specific metadata and internal state...
+};
+.RE
+.fi
+.PP
+The complex amplitude components (.B re
+and
+.B im )
+are represented as 64-bit fixed-point integers, where the specific scaling factor
+is defined by the NymyaOS kernel configuration. This fixed-point representation
+is crucial for high-performance, deterministic quantum computations within the kernel's constrained environment.
+
+.SH RETURN VALUE
+On success,
+.B 0
+is returned. On error, a negative errno value is returned.
+.SH ERRORS
+.TP
+.B \-EINVAL
+One or both of the provided user-space qubit pointers (
+.IR user_q1
+or
+.IR user_q2 )
+are NULL.
+.TP
+.B \-EFAULT
+Failed to copy qubit data from user space to kernel space, or from kernel space
+back to user space. This typically indicates that one of the provided pointers
+is invalid or points to memory that the calling process does not have permission
+to access.
+.SH EXAMPLE
+The following program demonstrates how to use the
+.B nymya_3326_sqrt_swap
+syscall to apply the √SWAP gate to two qubits.
+.PP
+.nf
+.RS
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <errno.h>
+#include <sys/syscall.h>
+#include <unistd.h>
+#include <string.h> // For memset
+
+// Define the syscall number (this would typically be from an NymyaOS-specific header)
+#define __NR_nymya_3326_sqrt_swap 3326
+
+// Simplified structure definitions for userland example.
+// In a real NymyaOS SDK, these would be provided by <nymya.h>
+typedef struct {
+    int64_t re;
+    int64_t im;
+} complex_double;
+
+typedef struct {
+    uint32_t id;
+    uint32_t tag;
+    complex_double amplitude;
+    // ... other qubit data ...
+} nymya_qubit;
+
+// A conceptual scaling factor for fixed-point to double conversion.
+// The actual value depends on the NymyaOS kernel configuration (e.g., Q30 format).
+#define NYMYA_FIXED_POINT_SCALE (1LL << 30) // Example: 2^30
+
+void print_qubit(const char* name, const nymya_qubit* q) {
+    // Convert fixed-point to double for display purposes
+    double amp_re = (double)q->amplitude.re / NYMYA_FIXED_POINT_SCALE;
+    double amp_im = (double)q->amplitude.im / NYMYA_FIXED_POINT_SCALE;
+    printf("%s (ID: %u, Tag: %u): Amplitude = %.4f + %.4fi\n",
+           name, q->id, q->tag, amp_re, amp_im);
+}
+
+int main() {
+    nymya_qubit q1, q2;
+    long ret;
+
+    // Initialize qubits to a clean state
+    memset(&q1, 0, sizeof(q1));
+    memset(&q2, 0, sizeof(q2));
+
+    q1.id = 1;
+    q1.tag = 0;
+    // Example: Initialize Qubit 1 amplitude to represent 1.0 + 0.0i
+    q1.amplitude.re = NYMYA_FIXED_POINT_SCALE;
+    q1.amplitude.im = 0;
+
+    q2.id = 2;
+    q2.tag = 0;
+    // Example: Initialize Qubit 2 amplitude to represent 0.0 + 1.0i
+    q2.amplitude.re = 0;
+    q2.amplitude.im = NYMYA_FIXED_POINT_SCALE;
+
+    printf("--- Initial Qubit States ---\n");
+    print_qubit("Qubit 1", &q1);
+    print_qubit("Qubit 2", &q2);
+
+    // Call the nymya_3326_sqrt_swap syscall
+    ret = syscall(__NR_nymya_3326_sqrt_swap, &q1, &q2);
+
+    if (ret == 0) {
+        printf("\n--- After nymya_3326_sqrt_swap ---\n");
+        print_qubit("Qubit 1", &q1);
+        print_qubit("Qubit 2", &q2);
+    } else {
+        perror("nymya_3326_sqrt_swap failed");
+        fprintf(stderr, "Error code: %ld\n", ret);
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
+}
+.RE
+.fi
+.SH SEE ALSO
+.BR syscall (2)
+.br
+.BR nymya (7)
+```
