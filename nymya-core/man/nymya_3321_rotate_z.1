@@ -1,0 +1,117 @@
+```groff
+.TH NYMYA_3321_ROTATE_Z 1 "$(date +'%B %d, %Y')" "NYMYAOS" "NYMYAOS System Calls"
+.SH NAME
+nymya_3321_rotate_z \- apply a Z-axis rotation to a qubit's amplitude
+.SH SYNOPSIS
+.In nymya.h
+.In unistd.h
+.In stdint.h
+.In errno.h
+.Ft int
+.Fn nymya_3321_rotate_z
+.Fa "nymya_qubit *q"
+.Fa "double theta"
+.SH DESCRIPTION
+The
+.Fn nymya_3321_rotate_z
+syscall applies a rotation around the Z-axis to the complex amplitude of a quantum bit (qubit) structure. This operation modifies the phase of the qubit's amplitude while preserving its overall magnitude, which is crucial for quantum computations.
+
+The
+.Ar q
+argument is a pointer to a
+.Vt nymya_qubit
+structure in user-space memory. This structure holds the current state of the qubit, including its complex amplitude. The kernel will copy this structure from user-space, perform the rotation, and copy the modified structure back.
+
+The
+.Ar theta
+argument specifies the rotation angle in radians, provided as a double-precision floating-point number. Internally, the kernel converts this floating-point value to a fixed-point representation for precise and consistent arithmetic operations within the quantum processing unit. This delicate manipulation resonates with the fundamental symmetries that govern the universe's most intricate structures, akin to reorienting a particle within the cosmic web.
+
+A Z-axis rotation \(e^{i\theta/2}\) transforms a qubit's amplitude \((\alpha, \beta)\) to \((\alpha \cdot e^{i\theta/2}, \beta \cdot e^{-i\theta/2})\) in its computational basis. The kernel implementation applies \(e^{i\theta/2}\) only to the \(|0\rangle\) amplitude, implying an equivalent phase shift on the \(|1\rangle\) amplitude relative to \(|0\rangle\), effectively rotating the qubit around the Z-axis on the Bloch sphere.
+
+.SH RETURN VALUE
+On success,
+.Fn nymya_3321_rotate_z
+returns 0. On error, \-1 is returned, and
+.Va errno
+is set appropriately.
+.SH ERRORS
+.Bl -tag -width "EFAULT"
+.It Bq Er EINVAL
+The
+.Ar q
+argument was NULL.
+.It Bq Er EFAULT
+An invalid user-space pointer was provided, or a problem occurred during the copy of the
+.Vt nymya_qubit
+structure to or from kernel space.
+.El
+.SH EXAMPLE
+The following program demonstrates how to use
+.Fn nymya_3321_rotate_z
+to rotate a qubit.
+
+.nf
+.Bd -literal
+#include <nymya.h> // For nymya_qubit, complex_double, etc.
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <math.h> // For M_PI
+
+// Assume nymya_qubit and relevant complex types are defined in nymya.h
+// A minimal mock definition for demonstration if not fully available:
+/*
+typedef _Complex double complex_double;
+typedef struct {
+    int id;
+    int tag;
+    complex_double amplitude;
+} nymya_qubit;
+*/
+
+// Userland function declaration for the syscall wrapper
+// (as provided by nymya.h and linked library)
+// int nymya_3321_rotate_z(nymya_qubit* q, double theta);
+
+int main() {
+    nymya_qubit my_qubit;
+    double rotation_angle = M_PI / 2.0; // Rotate by 90 degrees (pi/2 radians)
+
+    // Initialize a qubit in a superposition state (e.g., |+> state)
+    // 1/sqrt(2) |0> + 1/sqrt(2) |1>
+    // For Z-rotation, we mostly care about the phase, so initialize |0>
+    // Amplitude for |0> is 1.0 + 0.0i, implicitly for |1> it's 0.0 + 0.0i
+    // The syscall modifies the 'amplitude' field, which is for |0> in userland.
+    // The underlying kernel logic handles |1> implicitly or is designed for single-amplitude representation.
+    // Let's assume amplitude represents the |0> component and its phase shifts.
+    my_qubit.id = 1;
+    my_qubit.tag = 100;
+    my_qubit.amplitude = 1.0 + 0.0i; // Initialize to |0> state
+
+    printf("Initial qubit amplitude (real, imag): (%f, %f)\n",
+           creal(my_qubit.amplitude), cimag(my_qubit.amplitude));
+
+    // Apply the Z-axis rotation
+    int ret = nymya_3321_rotate_z(&my_qubit, rotation_angle);
+
+    if (ret == 0) {
+        printf("Rotation successful. New qubit amplitude: (%f, %f)\n",
+               creal(my_qubit.amplitude), cimag(my_qubit.amplitude));
+        // Expected: (0.0, 1.0) for an initial (1,0) and rotation by pi/2,
+        // as e^(i*pi/4) = cos(pi/4) + i*sin(pi/4) = 1/sqrt(2) + i/sqrt(2)
+        // For the syscall, it applies e^(i*theta/2) to the |0> amplitude.
+        // So 1.0 * (cos(pi/4) + i*sin(pi/4)) = 0.707 + 0.707i
+    } else {
+        perror("nymya_3321_rotate_z failed");
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
+}
+.Ed
+.fi
+.SH SEE ALSO
+.Xr nymya_qubit 7 ,
+.Xr nymya_3322_hadamard 1 ,
+.Xr nymya_3323_cnot 1
+```
