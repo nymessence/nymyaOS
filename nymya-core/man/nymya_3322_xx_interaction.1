@@ -1,0 +1,171 @@
+```groff
+.TH nymya_3322_xx_interaction 1 "2023-10-27" "NymyaOS 1.0" "NymyaOS System Calls Manual"
+.SH NAME
+nymya_3322_xx_interaction \- apply a quantum XX interaction between two qubits
+.SH SYNOPSIS
+.B #include <unistd.h>
+.PP
+.B #include <sys/syscall.h>
+.PP
+.B #include <stdint.h>
+.PP
+.B #include <nymya/nymya_qubit.h>
+.PP
+.B long syscall(SYS_nymya_3322_xx_interaction, struct nymya_qubit *q1, struct nymya_qubit *q2, int64_t theta);
+.PP
+(Note:
+.I SYS_nymya_3322_xx_interaction
+is defined as the syscall number
+.B 3322
+on NymyaOS.)
+.SH DESCRIPTION
+The
+.B nymya_3322_xx_interaction
+syscall applies a quantum XX interaction between two specified qubits,
+.I q1
+and
+.I q2
+. This operation rotates the complex amplitudes of both qubits by a phase of
+e^(i * theta), where
+.I theta
+is the provided rotation angle. It is a fundamental building block for
+constructing entangling quantum gates within the NymyaOS quantum
+computing environment.
+
+The parameters
+.I q1
+and
+.I q2
+are pointers to user-space
+.B struct nymya_qubit
+structures. These structures are read into kernel space, modified to
+reflect the amplitude rotation, and then copied back to user space. The
+.I theta
+parameter represents the rotation angle in radians, provided as a fixed-point
+.B int64_t
+value. Within the kernel, all complex arithmetic for amplitude
+manipulation is performed using fixed-point calculations to ensure
+determinism and avoid floating-point operations, echoing the precision
+required by the very fabric of reality.
+
+This operation, in its delicate dance, whispers to the quantum fabric,
+aligning its ephemeral threads within the grand tapestry of existence,
+ensuring the subtle interconnections are maintained. The kernel also logs
+a symbolic event for traceability, marking this interaction within the
+system's cosmic ledger.
+
+.SH RETURN VALUE
+On success,
+.B nymya_3322_xx_interaction
+returns 0. On error, -1 is returned, and
+.B errno
+is set appropriately.
+
+.SH ERRORS
+.TP
+.B EINVAL
+One or both of the provided qubit pointers (
+.I q1
+or
+.I q2
+) were NULL, indicating an invalid input.
+.TP
+.B EFAULT
+An invalid pointer was supplied, or there was a problem copying qubit data
+to or from kernel space. This typically indicates a bad user-space address
+or insufficient memory access permissions.
+
+.SH EXAMPLE
+The following C program demonstrates how to use
+.B nymya_3322_xx_interaction
+to apply an XX interaction between two hypothetical qubits. It includes
+a simplified definition of
+.B nymya_qubit
+and a helper function for fixed-point conversion.
+
+.nf
+.B #include <stdio.h>
+.B #include <stdlib.h>
+.B #include <unistd.h>
+.B #include <sys/syscall.h>
+.B #include <errno.h>
+.B #include <math.h>     // For M_PI, cos, sin
+.B #include <stdint.h>   // For int64_t, uint32_t
+.PP
+.B // Define a simplified nymya_qubit structure for user-space example.
+.B // In a real NymyaOS environment, this would be provided by a system header
+.B // such as <nymya/nymya_qubit.h>.
+.B typedef struct {
+.B     uint32_t id;
+.B     char tag[16];
+.B     struct {
+.B         int64_t re; // Real part of complex amplitude (fixed-point)
+.B         int64_t im; // Imaginary part of complex amplitude (fixed-point)
+.B     } amplitude;
+.B } nymya_qubit;
+.PP
+.B // A simple fixed-point conversion helper.
+.B // Assumes a Q16.48 format (16 integer bits, 48 fractional bits) for int64_t.
+.B // This must match the kernel's fixed-point representation.
+.B #define FIXED_POINT_SHIFT 48
+.B #define FIXED_POINT_SCALE (1ULL << FIXED_POINT_SHIFT)
+.PP
+.B static int64_t double_to_fixed(double val) {
+.B     return (int64_t)(val * FIXED_POINT_SCALE);
+.B }
+.PP
+.B static double fixed_to_double(int64_t val) {
+.B     return (double)val / FIXED_POINT_SCALE;
+.B }
+.PP
+.B // Syscall number for nymya_3322_xx_interaction
+.B #ifndef SYS_nymya_3322_xx_interaction
+.B #define SYS_nymya_3322_xx_interaction 3322
+.B #endif
+.PP
+.B int main() {
+.B     // Initialize two qubits. Amplitudes are normalized for demonstration.
+.B     nymya_qubit q1 = {
+.B         .id = 1, .tag = "Alpha",
+.B         .amplitude = { .re = double_to_fixed(1.0), .im = double_to_fixed(0.0) }
+.B     };
+.B     nymya_qubit q2 = {
+.B         .id = 2, .tag = "Beta",
+.B         .amplitude = { .re = double_to_fixed(0.0), .im = double_to_fixed(1.0) }
+.B     };
+.B     int64_t theta_fixed = double_to_fixed(M_PI / 4.0); // Example: Pi/4 radians
+.PP
+.B     printf("Before XX interaction:\\n");
+.B     printf("  Qubit 1 (ID: %u, Tag: %s) Amp: (%.5f + i%.5f)\\n",
+.B            q1.id, q1.tag, fixed_to_double(q1.amplitude.re),
+.B            fixed_to_double(q1.amplitude.im));
+.B     printf("  Qubit 2 (ID: %u, Tag: %s) Amp: (%.5f + i%.5f)\\n",
+.B            q2.id, q2.tag, fixed_to_double(q2.amplitude.re),
+.B            fixed_to_double(q2.amplitude.im));
+.PP
+.B     long ret = syscall(SYS_nymya_3322_xx_interaction, &q1, &q2, theta_fixed);
+.PP
+.B     if (ret == 0) {
+.B         printf("\\nXX interaction applied successfully.\\n");
+.B         printf("After XX interaction:\\n");
+.B         printf("  Qubit 1 (ID: %u, Tag: %s) Amp: (%.5f + i%.5f)\\n",
+.B                q1.id, q1.tag, fixed_to_double(q1.amplitude.re),
+.B                fixed_to_double(q1.amplitude.im));
+.B         printf("  Qubit 2 (ID: %u, Tag: %s) Amp: (%.5f + i%.5f)\\n",
+.B                q2.id, q2.tag, fixed_to_double(q2.amplitude.re),
+.B                fixed_to_double(q2.amplitude.im));
+.B     } else {
+.B         fprintf(stderr, "Failed to apply XX interaction: %s\\n", strerror(errno));
+.B         return EXIT_FAILURE;
+.B     }
+.PP
+.B     return EXIT_SUCCESS;
+.B }
+.fi
+
+.SH SEE ALSO
+.BR syscall (2),
+.BR errno (3),
+.BR quantum_init (2),
+.BR nymya_qubit_create (2)
+```
