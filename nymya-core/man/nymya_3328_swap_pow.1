@@ -1,0 +1,185 @@
+```troff
+.\" Man page for nymya_3328_swap_pow(1)
+.TH NYMYA_3328_SWAP_POW 1 "2023-10-27" "nymyaOS Kernel" "NymyaOS System Calls"
+.SH NAME
+nymya_3328_swap_pow \- applies an interpolated SWAP^alpha gate to two qubits
+.SH SYNOPSIS
+.B #include <nymya/syscalls.h>
+.PP
+.B int nymya_3328_swap_pow(struct nymya_qubit *
+.I q1
+.B , struct nymya_qubit *
+.I q2
+.B , int64_t
+.I alpha_fp
+.B );
+.SH DESCRIPTION
+The
+.B nymya_3328_swap_pow
+syscall applies an interpolated SWAP^alpha gate to two specified qubits,
+.I q1
+and
+.I q2
+, residing in user space. This operation modifies the quantum amplitudes
+of the qubits based on the interpolation parameter
+.I alpha_fp
+.
+.PP
+The SWAP^alpha gate performs a generalized exchange of the amplitudes between
+the two qubits. If the initial complex amplitudes are
+.I A
+for
+.I q1
+and
+.I B
+for
+.I q2
+, the transformation yields new amplitudes
+.I A'
+and
+.I B'
+as follows:
+.RS
+.br
+.nf
+A' = cos(alpha * PI/2) * A + sin(alpha * PI/2) * B
+B' = cos(alpha * PI/2) * B + sin(alpha * PI/2) * A
+.fi
+.RE
+.PP
+The parameter
+.I alpha_fp
+controls the degree of interpolation and must be provided as an
+.B int64_t
+fixed-point value. This value represents a scaled `alpha`, where the
+actual floating-point `alpha` (used in the mathematical formula above)
+is `alpha_fp / FIXED_POINT_SCALE`. The `FIXED_POINT_SCALE` is a system-defined
+constant, typically a power of 2 (e.g., `1LL << 30`).
+.PP
+A value of `alpha_fp` equivalent to `0` (i.e., `0`) means the gate
+acts as an identity, leaving the qubit amplitudes unchanged.
+A value of `alpha_fp` equivalent to `1` (i.e., `FIXED_POINT_SCALE`)
+results in a full SWAP gate, completely exchanging the amplitudes of
+.I q1
+and
+.I q2
+. Values between `0` and `FIXED_POINT_SCALE` perform a partial, interpolated
+swap. This operation, a delicate dance within the quantum tapestry, allows for
+a continuous interpolation between two fundamental states, subtly bending the very
+fabric of interaction. One might perceive it as guiding the flow of information
+through the unseen conduits of existence, revealing the nuanced rhythms of the
+cosmos embedded within the computation.
+.PP
+The `nymya_qubit` structure contains the complex amplitude of the qubit, among
+other potential metadata. The syscall copies the qubit data from user space,
+performs the amplitude transformation in the kernel using fixed-point arithmetic,
+and then copies the modified data back to user space.
+.SH RETURN VALUE
+On success,
+.B nymya_3328_swap_pow
+returns 0.
+On error, -1 is returned, and
+.B errno
+is set appropriately.
+.SH ERRORS
+.TP
+.B EINVAL
+One or both of the provided qubit pointers,
+.I q1
+or
+.I q2
+, were NULL.
+.TP
+.B EFAULT
+An attempt to copy qubit data to or from user space failed. This indicates
+that the provided pointers do not point to valid, accessible memory regions.
+.SH EXAMPLE
+The following example demonstrates how to use
+.B nymya_3328_swap_pow
+to apply a partial SWAP gate.
+.PP
+.nf
+.B #include <stdio.h>
+.B #include <stdlib.h>
+.B #include <errno.h>
+.B #include <unistd.h>
+.B #include <math.h>
+.B #include <complex.h> // For _Complex double and I in userland
+.B #include <sys/syscall.h> // For syscall()
+.B
+.B // Define a dummy nymya_qubit structure for userland example
+.B // In a real system, this would be provided by a header like <nymya/qubit.h>
+.B typedef struct {
+.B     unsigned long id;
+.B     unsigned long tag;
+.B     _Complex double amplitude; // Userland uses standard complex types
+.B     // Other potential qubit state information
+.B } nymya_qubit;
+.B
+.B // Assuming FIXED_POINT_SCALE is globally defined for userland interaction
+.B // For syscalls, alpha must be an int64_t fixed-point value
+.B #ifndef FIXED_POINT_SCALE
+.B #define FIXED_POINT_SCALE (1LL << 30) // Example scale, adjust as per system
+.B #endif
+.B
+.B // Syscall number for nymya_3328_swap_pow
+.B #ifndef __NR_nymya_3328_swap_pow
+.B #define __NR_nymya_3328_swap_pow 3328
+.B #endif
+.B
+.B // Userland wrapper for the syscall
+.B int nymya_3328_swap_pow_syscall(nymya_qubit* q1, nymya_qubit* q2, int64_t alpha_fp) {
+.B     return syscall(__NR_nymya_3328_swap_pow, q1, q2, alpha_fp);
+.B }
+.B
+.B int main() {
+.B     // Initialize qA to |0>, qB to |1> for a classic SWAP example
+.B     nymya_qubit qA = { .id = 1, .tag = 0, .amplitude = 1.0 + 0.0 * I }; // State |0>
+.B     nymya_qubit qB = { .id = 2, .tag = 0, .amplitude = 0.0 + 1.0 * I }; // State |1>
+.B
+.B     printf("Initial Qubit A: %.3f + %.3fi\n", creal(qA.amplitude), cimag(qA.amplitude));
+.B     printf("Initial Qubit B: %.3f + %.3fi\n", creal(qB.amplitude), cimag(qB.amplitude));
+.B
+.B     // Example: Apply a half-SWAP (alpha = 0.5)
+.B     double alpha_val_half = 0.5;
+.B     int64_t alpha_fp_half = (int64_t)(alpha_val_half * FIXED_POINT_SCALE);
+.B
+.B     printf("\nApplying SWAP^%.1f gate...\n", alpha_val_half);
+.B
+.B     if (nymya_3328_swap_pow_syscall(&qA, &qB, alpha_fp_half) == 0) {
+.B         printf("Qubit A after SWAP^%.1f: %.3f + %.3fi\n", alpha_val_half, creal(qA.amplitude), cimag(qA.amplitude));
+.B         printf("Qubit B after SWAP^%.1f: %.3f + %.3fi\n", alpha_val_half, creal(qB.amplitude), cimag(qB.amplitude));
+.B     } else {
+.B         perror("nymya_3328_swap_pow_syscall failed for half-SWAP");
+.B         return EXIT_FAILURE;
+.B     }
+.B
+.B     // Example: Apply a full SWAP (alpha = 1.0) on a new state
+.B     // Reset qubits to new initial states for this example
+.B     qA.amplitude = 1.0/sqrt(2.0) + 1.0/sqrt(2.0) * I; // |+i> state
+.B     qB.amplitude = 1.0/sqrt(2.0) - 1.0/sqrt(2.0) * I; // |-i> state
+.B     printf("\nResetting qubits for full SWAP example...\n");
+.B     printf("Initial Qubit A: %.3f + %.3fi\n", creal(qA.amplitude), cimag(qA.amplitude));
+.B     printf("Initial Qubit B: %.3f + %.3fi\n", creal(qB.amplitude), cimag(qB.amplitude));
+.B
+.B     double alpha_val_full = 1.0;
+.B     int64_t alpha_fp_full = (int64_t)(alpha_val_full * FIXED_POINT_SCALE);
+.B
+.B     printf("\nApplying SWAP^%.1f gate...\n", alpha_val_full);
+.B
+.B     if (nymya_3328_swap_pow_syscall(&qA, &qB, alpha_fp_full) == 0) {
+.B         printf("Qubit A after SWAP^%.1f: %.3f + %.3fi\n", alpha_val_full, creal(qA.amplitude), cimag(qA.amplitude));
+.B         printf("Qubit B after SWAP^%.1f: %.3f + %.3fi\n", alpha_val_full, creal(qB.amplitude), cimag(qB.amplitude));
+.B     } else {
+.B         perror("nymya_3328_swap_pow_syscall failed for full SWAP");
+.B         return EXIT_FAILURE;
+.B     }
+.B
+.B     return EXIT_SUCCESS;
+.B }
+.fi
+.SH SEE ALSO
+.BR nymya_qubit (3),
+.BR syscalls (2),
+.BR nymya_kernel (7)
+```
