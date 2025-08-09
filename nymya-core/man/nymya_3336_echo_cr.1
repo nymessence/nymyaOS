@@ -1,0 +1,132 @@
+```troff
+.\"
+.\" Man page for nymya_3336_echo_cr syscall (section 1)
+.\"
+.TH nymya_3336_echo_cr 1 "May 25, 2024" "NymyaOS Kernel" "NymyaOS Man Pages"
+.SH NAME
+nymya_3336_echo_cr \- apply an Echo Cross-Resonance (CR) gate to quantum bits
+.SH SYNOPSIS
+.In nymya.h
+.Ft int
+.Fn nymya_3336_echo_cr "nymya_qubit *q1" "nymya_qubit *q2" "double theta"
+.SH DESCRIPTION
+The
+.Fn nymya_3336_echo_cr
+system call applies an Echo Cross-Resonance (CR) gate to two specified quantum bits,
+.Ar q1
+and
+.Ar q2 .
+This gate is a fundamental operation in quantum computation, designed to induce conditional phase shifts between qubits without direct resonant interaction, fostering entanglement and enabling complex quantum algorithms. The
+.Ar theta
+parameter specifies the gate's rotational angle in radians, influencing the degree of quantum interaction.
+
+Internally, the system call first copies the
+.Aq nymya_qubit
+structures from user space into the kernel's secure memory. The
+.Ar theta
+parameter, initially a
+.Vt double
+in user space, is translated into a fixed-point
+.Vt int64_t
+format for precise, high-performance kernel calculations. The core logic then applies a sequence of complex phase rotations to the qubits' amplitudes. These operations, a meticulously choreographed dance of quantum phases, are akin to observing ripples on the fabric of reality, allowing the system to sculpt the very probabilities of existence.
+
+A peculiar aspect of this gate's implementation involves applying phase factors
+.Aq p
+,
+.Aq conj(p)
+,
+.Aq conj(p)
+, and
+.Aq p
+sequentially to the qubits' amplitudes. For a unit complex number
+.Aq p
+, the net effect of
+.Aq p * conj(p) * conj(p) * p
+on a single amplitude effectively reduces to
+.Aq |p|^4 = 1 ,
+suggesting that the gate's true power lies not in a direct change to individual amplitudes, but in the subtle interplay and cancellation of phases across the two entangled qubits, echoing deeper principles of symmetry and conservation within the quantum realm.
+
+After the gate operation, the modified
+.Aq nymya_qubit
+data is securely copied back to the user's address space, reflecting the updated quantum state.
+.SH RETURN VALUE
+On successful completion, 0 is returned.
+Otherwise, -1 is returned and
+.Va errno
+is set to indicate the error.
+.SH ERRORS
+.Bl -tag -width EFAULT
+.It Bq Er EFAULT
+An attempt was made to access an invalid user space address for
+.Ar q1
+or
+.Ar q2 ,
+or the copy operation between user and kernel space failed.
+.It Bq Er EINVAL
+Either
+.Ar q1
+or
+.Ar q2
+was specified as
+.Dv NULL
+by the user program, indicating an invalid pointer.
+.El
+.SH EXAMPLE
+The following example demonstrates how to use
+.Fn nymya_3336_echo_cr
+to apply a gate to two qubits.
+.Pp
+.Dl
+#include <nymya.h> // Assumed to define nymya_qubit, etc.
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <string.h> // For strerror
+#include <complex.h> // For _Complex double
+#include <math.h>    // For M_PI
+
+// Assume nymya_qubit is defined in nymya.h
+// For illustration:
+// typedef struct {
+//     _Complex double amplitude;
+//     int id;
+//     char tag[16];
+// } nymya_qubit;
+
+// Assume nymya_3336_echo_cr is a userland library function
+// that wraps the kernel syscall.
+extern int nymya_3336_echo_cr(nymya_qubit* q1, nymya_qubit* q2, double theta);
+
+int main() {
+    nymya_qubit qubitA = {.amplitude = 1.0 + 0.0 * I, .id = 1, .tag = "QubitA"};
+    nymya_qubit qubitB = {.amplitude = 0.0 + 1.0 * I, .id = 2, .tag = "QubitB"};
+    double gate_angle = M_PI / 4.0; // Example angle (45 degrees)
+
+    printf("Initial amplitudes:\\n");
+    printf("  Qubit A: %.2f + %.2fi\\n", creal(qubitA.amplitude), cimag(qubitA.amplitude));
+    printf("  Qubit B: %.2f + %.2fi\\n", creal(qubitB.amplitude), cimag(qubitB.amplitude));
+
+    printf("Applying nymya_3336_echo_cr gate with theta = %.2f (rad)...\\n", gate_angle);
+    if (nymya_3336_echo_cr(&qubitA, &qubitB, gate_angle) == -1) {
+        perror("Error applying echo CR gate");
+        return EXIT_FAILURE;
+    }
+
+    printf("Amplitudes after gate application:\\n");
+    printf("  Qubit A: %.2f + %.2fi\\n", creal(qubitA.amplitude), cimag(qubitA.amplitude));
+    printf("  Qubit B: %.2f + %.2fi\\n", creal(qubitB.amplitude), cimag(qubitB.amplitude));
+
+    // Example with invalid pointer
+    printf("\\nAttempting to call with a NULL qubit pointer:\\n");
+    if (nymya_3336_echo_cr(NULL, &qubitB, gate_angle) == -1) {
+        printf("Expected error applying echo CR gate with NULL (errno: %d - %s).\\n", errno, strerror(errno));
+    }
+
+    return EXIT_SUCCESS;
+}
+.Dl
+.SH SEE ALSO
+.Xr nymya_qubit 3 ,
+.Xr syscall 2 ,
+.Xr intro 2
+```
