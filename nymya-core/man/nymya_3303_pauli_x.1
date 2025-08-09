@@ -1,0 +1,111 @@
+```groff
+.TH NYMYA_3303_PAULI_X 1 "$(date +%Y-%m-%d)" "nymyaOS Kernel" "NymyaOS System Calls Manual"
+.SH NAME
+nymya_3303_pauli_x \- apply a Pauli-X gate to a NymyaOS qubit
+
+.SH SYNOPSIS
+.B #include <nymya/syscalls.h>
+.PP
+.B int nymya_3303_pauli_x(struct nymya_qubit *
+.I q
+.B );
+
+.SH DESCRIPTION
+The
+.B nymya_3303_pauli_x
+syscall applies a Pauli-X quantum gate operation to a NymyaOS qubit.
+This gate, often referred to as a "bit-flip" in quantum computation,
+transforms the state of a qubit by mirroring its imaginary amplitude component.
+Specifically, if the qubit's amplitude is represented as \(re + i \cdot im\),
+this operation changes it to \(re - i \cdot im\).
+.PP
+The
+.I q
+argument is a pointer to a
+.B struct nymya_qubit
+residing in user space, whose state is to be modified.
+Upon successful execution, the kernel logs a symbolic event,
+noting the qubit's transformation.
+.PP
+In the grand tapestry of reality, this operation performs a fundamental reflection, altering a quantum polarity as if glimpsing its mirror image within the hidden lattice of existence. A subtle twist, indeed.
+
+.SH RETURN VALUE
+On success, zero is returned.
+On error, -1 is returned, and
+.B errno
+is set appropriately.
+
+.SH ERRORS
+.TP
+.B EINVAL
+The pointer
+.I q
+was NULL.
+.TP
+.B EFAULT
+The address specified by
+.I q
+was outside the accessible address space of the process, or otherwise invalid for
+copying data to or from the kernel.
+
+.SH EXAMPLE
+The following program demonstrates the use of
+.B nymya_3303_pauli_x
+to flip the imaginary part of a qubit's amplitude.
+
+.PP
+.nf
+.RS
+#include <stdio.h>
+#include <errno.h>
+#include <complex.h> // For double complex
+#include <nymya/syscalls.h> // Assumed header for nymya_qubit and syscall wrappers
+
+// Simplified nymya_qubit structure for example purposes.
+// In a real NymyaOS SDK, 'struct nymya_qubit' or a typedef like 'nymya_qubit_t'
+// would be defined in <nymya/qubit.h> or similar.
+typedef struct nymya_qubit {
+    int id;
+    int tag;
+    double complex amplitude; // Represents the fixed-point amplitude in userland
+} nymya_qubit_t;
+
+int main() {
+    nymya_qubit_t my_qubit = {
+        .id = 101,
+        .tag = 202,
+        .amplitude = 0.5 + 0.75i // Initial amplitude (real + imaginary)
+    };
+
+    printf("Initial qubit (ID:%d, TAG:%d): Amplitude = %.2f + %.2fi\n",
+           my_qubit.id, my_qubit.tag, creal(my_qubit.amplitude), cimag(my_qubit.amplitude));
+
+    // Call the syscall (or its userland wrapper).
+    // The syscall expects a pointer to 'struct nymya_qubit'.
+    if (nymya_3303_pauli_x((struct nymya_qubit *)&my_qubit) == 0) {
+        printf("After Pauli-X (ID:%d, TAG:%d): Amplitude = %.2f + %.2fi\n",
+               my_qubit.id, my_qubit.tag, creal(my_qubit.amplitude), cimag(my_qubit.amplitude));
+    } else {
+        perror("nymya_3303_pauli_x failed");
+        return 1;
+    }
+
+    // Example demonstrating error handling for a NULL pointer.
+    printf("\nAttempting to call with NULL pointer...\n");
+    if (nymya_3303_pauli_x(NULL) != 0) {
+        if (errno == EINVAL) {
+            printf("Successfully caught EINVAL for NULL pointer.\n");
+        } else {
+            perror("nymya_3303_pauli_x failed unexpectedly with another error");
+        }
+    }
+
+    return 0;
+}
+.RE
+.fi
+
+.SH SEE ALSO
+.BR nymya_qubit (7),
+.BR nymya_syscalls (2)
+```
