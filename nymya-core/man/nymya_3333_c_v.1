@@ -1,0 +1,126 @@
+```groff
+.TH NYMYA_3333_C_V 1 "$(date +%Y-%m-%d)" "nymyaOS Kernel Syscalls" "nymyaOS Manual"
+.SH NAME
+nymya_3333_c_v \- apply a Controlled-V (square root of X) quantum gate to a nymyaOS qubit
+.SH SYNOPSIS
+.nf
+.ft C
+#include <nymya.h> // For nymya_qubit
+#include <unistd.h> // For syscall(2)
+#include <sys/syscall.h> // For SYS_nymya_3333_c_v
+
+int nymya_3333_c_v(nymya_qubit *qc, nymya_qubit *qt);
+
+long syscall(SYS_nymya_3333_c_v, nymya_qubit *qc, nymya_qubit *qt);
+.ft P
+.fi
+.SH DESCRIPTION
+The \fBnymya_3333_c_v\fR syscall invokes a Controlled-V quantum gate operation within the nymyaOS kernel. This gate, where V is defined as the square root of the Pauli-X gate (\fBsqrt(X)\fR), conditionally transforms the state of a \fItarget qubit\fR (\fIqt\fR) based on the state of a \fIcontrol qubit\fR (\fIqc\fR).
+
+Specifically, if the \fIcontrol qubit\fR's amplitude magnitude squared exceeds a predefined threshold (effectively, if it is predominantly in the |1⟩ state, represented by a squared amplitude magnitude greater than 0.25), then the \fBsqrt(X)\fR gate is applied to the \fItarget qubit\fR. Otherwise, no operation is performed on the \fItarget qubit\fR, and its state remains unchanged.
+
+This operation subtly weaves the fabric of quantum state, allowing the delicate interplay between qubits to orchestrate complex algorithms. It reflects the cosmic dance where intention in one realm can ripple across another, shifting probabilities with silent grace. The \fIqc\fR and \fIqt\fR arguments are pointers to \fBnymya_qubit\fR structures residing in user space; the kernel handles the necessary data transfer to and from its own memory regions to ensure secure and efficient execution.
+.SH RETURN VALUE
+On success, zero is returned. On error, a negative errno value is returned.
+.SH ERRORS
+.TP
+\fBEINVAL\fR
+\fIqc\fR or \fIqt\fR is an invalid (e.g., NULL) user-space pointer.
+.TP
+\fBEFAULT\fR
+A problem occurred while copying qubit data to or from user space. This indicates an issue with memory access.
+.TP
+Other
+Errors may be propagated from underlying quantum gate operations, such as \fBnymya_3307_sqrt_x_gate\fR(3nymya), if the controlled condition is met and the subsequent gate application fails.
+.SH EXAMPLE
+The following program demonstrates how to use the \fBnymya_3333_c_v\fR syscall. It simulates two scenarios: one where the control qubit triggers the gate, and one where it does not.
+
+.EX
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/syscall.h>
+#include <errno.h>
+#include <string.h> // For strerror
+#include <complex.h> // For _Complex double
+#include <math.h>    // For cabs
+
+// Simplified nymya_qubit structure for example (as seen by userland)
+// In a real nymyaOS environment, this would be defined in <nymya.h>
+typedef struct nymya_qubit {
+    unsigned long id;
+    unsigned long tag;
+    _Complex double amplitude; // Represents the quantum state's amplitude
+    // ... other state fields would typically be here ...
+} nymya_qubit;
+
+// Define the syscall number (should be provided by <sys/syscall.h> in nymyaOS)
+#ifndef SYS_nymya_3333_c_v
+#define SYS_nymya_3333_c_v 3333
+#endif
+
+int main() {
+    nymya_qubit control_q, target_q;
+    int ret;
+
+    // --- Case 1: Control qubit is predominantly |1> (cabs(amplitude) > 0.5) ---
+    control_q.id = 1;
+    control_q.tag = 0xbeef;
+    // Set amplitude such that its magnitude is > 0.5 (e.g., sqrt(0.2*0.2 + 0.8*0.8) = sqrt(0.68) approx 0.82)
+    control_q.amplitude = 0.2 + 0.8 * I;
+
+    target_q.id = 2;
+    target_q.tag = 0xcafe;
+    target_q.amplitude = 1.0 + 0.0 * I; // Represents an initial |0> state for demonstration
+
+    printf("Initial state (control_q ID %lu, target_q ID %lu):\n", control_q.id, target_q.id);
+    printf("  Control Qubit Amplitude: %.2f + %.2fi (Magnitude: %.2f)\n",
+           creal(control_q.amplitude), cimag(control_q.amplitude), cabs(control_q.amplitude));
+    printf("  Target Qubit Amplitude:  %.2f + %.2fi (Magnitude: %.2f)\n",
+           creal(target_q.amplitude), cimag(target_q.amplitude), cabs(target_q.amplitude));
+
+    printf("\nCalling nymya_3333_c_v with control predominantly |1>...\n");
+    ret = syscall(SYS_nymya_3333_c_v, &control_q, &target_q);
+
+    if (ret == 0) {
+        printf("Syscall successful: Target qubit (ID %lu) state has been transformed by sqrt(X).\n", target_q.id);
+        printf("Observe the subtle interplay: the target qubit's reality shifted, guided by the unseen influence of its entangled sibling.\n");
+        // Note: The actual new amplitude of target_q is now updated in the `target_q` struct
+        // (after copy_to_user in the kernel). We print a conceptual message here.
+    } else {
+        fprintf(stderr, "Syscall failed with error: %d (%s)\n", errno, strerror(errno));
+    }
+
+    printf("\n");
+
+    // --- Case 2: Control qubit is predominantly |0> (cabs(amplitude) <= 0.5) ---
+    control_q.id = 3;
+    control_q.tag = 0xbada;
+    // Set amplitude such that its magnitude is <= 0.5 (e.g., sqrt(0.4*0.4 + 0.1*0.1) = sqrt(0.17) approx 0.41)
+    control_q.amplitude = 0.4 + 0.1 * I;
+
+    target_q.id = 4;
+    target_q.tag = 0xdada;
+    target_q.amplitude = 1.0 + 0.0 * I; // Reset target to |0>
+
+    printf("Initial state (control_q ID %lu, target_q ID %lu):\n", control_q.id, target_q.id);
+    printf("  Control Qubit Amplitude: %.2f + %.2fi (Magnitude: %.2f)\n",
+           creal(control_q.amplitude), cimag(control_q.amplitude), cabs(control_q.amplitude));
+    printf("  Target Qubit Amplitude:  %.2f + %.2fi (Magnitude: %.2f)\n",
+           creal(target_q.amplitude), cimag(target_q.amplitude), cabs(target_q.amplitude));
+
+    printf("\nCalling nymya_3333_c_v with control predominantly |0>...\n");
+    ret = syscall(SYS_nymya_3333_c_v, &control_q, &target_q);
+
+    if (ret == 0) {
+        printf("Syscall successful: Target qubit (ID %lu) state was NOT transformed (control off).\n", target_q.id);
+    } else {
+        fprintf(stderr, "Syscall failed with error: %d (%s)\n", errno, strerror(errno));
+    }
+
+    return 0;
+}
+.EE
+.SH SEE ALSO
+\fBnymya_3307_sqrt_x_gate\fR(3nymya), \fBsyscall\fR(2), \fBqubit\fR(7nymya)
+```
