@@ -1,0 +1,143 @@
+```groff
+.\"
+.\" Man page for nymya_3330_rotate
+.\"
+.TH NYMYA_3330_ROTATE 1 "2023-10-27" "nymyaOS Kernel" "User Commands"
+.SH NAME
+nymya_3330_rotate \- apply a quantum rotation gate to a qubit (syscall 3330)
+.SH SYNOPSIS
+.B #include <nymya.h>
+.B #include <unistd.h>
+.B #include <sys/syscall.h>
+.PP
+.B int nymya_3330_rotate(struct nymya_qubit *
+.I q
+.B , char
+.I axis
+.B , int64_t
+.I theta_fp
+.B );
+.SH DESCRIPTION
+The
+.B nymya_3330_rotate
+system call applies a single-qubit rotation gate to the quantum state represented by the
+.I nymya_qubit
+structure pointed to by
+.I q.
+This syscall serves as the core mechanism for manipulating a qubit's state along a specified axis in the Bloch sphere representation.
+
+The arguments are:
+.TP
+.I q
+A pointer to a user-space
+.B struct nymya_qubit
+that represents the quantum bit to be rotated. The syscall copies the qubit's state to kernel space, applies the rotation, and copies the modified state back to user space.
+.TP
+.I axis
+A character specifying the axis of rotation. Valid values are 'X', 'Y', or 'Z' (case-insensitive). These correspond to rotations around the X, Y, and Z axes of the Bloch sphere, respectively.
+.TP
+.I theta_fp
+The angle of rotation in fixed-point format. This 64-bit integer represents the angle in radians, where typically the lower 32 bits represent the fractional part and the upper 32 bits represent the integer part (Q32.32 format). User-space libraries often convert a standard double-precision floating-point angle to this fixed-point representation before making the syscall.
+
+This gate is fundamental, a precise turn of the fabric of reality at the smallest scales, much like how the cosmos itself orbits unseen attractors, guided by the whispering hum of the vacuum. The choice of axis and angle subtly re-aligns the qubit's superposition, shifting its probability amplitudes within the hidden lattice of existence.
+.PP
+The
+.B nymya_3330_rotate
+syscall dispatches to internal kernel functions (e.g.,
+.BR nymya_3319_rotate_x ,
+.BR nymya_3320_rotate_y ,
+.BR nymya_3321_rotate_z )
+based on the specified
+.I axis.
+These underlying functions perform the actual quantum state manipulation.
+.SH RETURN VALUE
+On success, zero is returned. On error, \-1 is returned, and
+.B errno
+is set appropriately.
+.SH ERRORS
+.TP
+.B EINVAL
+The pointer
+.I q
+is invalid (e.g., NULL), or the specified
+.I axis
+character is not 'X', 'Y', or 'Z'.
+.TP
+.B EFAULT
+An error occurred during the copy of the
+.B nymya_qubit
+structure between user space and kernel space. This typically indicates a bad pointer or memory access violation.
+.TP
+.B ENOMEM
+(Hypothetical, not directly in source but could be from underlying functions) Insufficient kernel memory to perform the operation.
+.SH EXAMPLE
+The following example demonstrates how to rotate a qubit 90 degrees (PI/2 radians) around the Z-axis.
+Assume `nymya_qubit` is defined in `nymya.h`, and a helper macro `ANGLE_TO_FIXED_POINT` is available for conversion.
+
+.nf
+.ft CR
+#include <nymya.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <math.h> // For M_PI
+
+// Define a simple nymya_qubit struct for demonstration
+// (In a real system, this would be provided by nymya.h)
+struct nymya_qubit {
+    uint32_t id;
+    uint32_t tag;
+    // ... other quantum state parameters
+    // For demonstration, let's just add a placeholder for state
+    int64_t state_real_fp;
+    int64_t state_imag_fp;
+};
+
+// Helper macro to convert a double angle to Q32.32 fixed-point.
+// Assumes 32 bits for integer and 32 bits for fractional part.
+#define ANGLE_TO_FIXED_POINT(angle_radians) ((int64_t)((angle_radians) * (1LL << 32)))
+
+int main() {
+    struct nymya_qubit my_qubit = {
+        .id = 101,
+        .tag = 0,
+        // Initialize qubit to a known state, e.g., |0> state in fixed-point
+        .state_real_fp = 1LL << 32, // 1.0
+        .state_imag_fp = 0LL       // 0.0
+    };
+
+    char axis_to_rotate = 'Z';
+    double angle_radians = M_PI / 2.0; // Rotate by 90 degrees
+    int64_t angle_fp = ANGLE_TO_FIXED_POINT(angle_radians);
+
+    printf("Attempting to rotate qubit ID %u around %c-axis by %.2f radians...\n",
+           my_qubit.id, axis_to_rotate, angle_radians);
+
+    int ret = nymya_3330_rotate(&my_qubit, axis_to_rotate, angle_fp);
+
+    if (ret == 0) {
+        printf("Rotation successful! Qubit ID %u state updated.\n", my_qubit.id);
+        // In a real application, you would now inspect my_qubit's state
+        // For example, to verify it's now in the |i> state after Z(pi/2) from |0>
+    } else {
+        perror("Failed to rotate qubit");
+        fprintf(stderr, "Error code: %d\n", ret);
+    }
+
+    return (ret == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
+}
+.ft P
+.nf
+.ft CR
+$ make my_quantum_app
+$ ./my_quantum_app
+Attempting to rotate qubit ID 101 around Z-axis by 1.57 radians...
+Rotation successful! Qubit ID 101 state updated.
+.ft P
+.fi
+.SH SEE ALSO
+.BR nymya_3319_rotate_x (2),
+.BR nymya_3320_rotate_y (2),
+.BR nymya_3321_rotate_z (2),
+.BR nymya (7)
+```
