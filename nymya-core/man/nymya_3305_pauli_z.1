@@ -1,0 +1,103 @@
+.TH NYMYA_3305_PAULI_Z 1 "October 26, 2023" "NymyaOS Kernel" "NymyaOS System Calls"
+.SH NAME
+nymya_3305_pauli_z \- apply Pauli-Z gate to a nymya qubit
+.SH SYNOPSIS
+.nf
+#include <nymya.h>
+
+int nymya_3305_pauli_z(nymya_qubit *q);
+.fi
+.SH DESCRIPTION
+The
+.B nymya_3305_pauli_z
+syscall applies the Pauli-Z quantum gate operation to a
+.IR nymya_qubit
+structure.
+This fundamental quantum operation negates both the real and imaginary components of the qubit's complex
+.IR amplitude
+field.
+This effectively applies a phase shift of \(\pi\) (180 degrees) to the internal state represented by this amplitude within the qubit's superposition.
+.PP
+In the grand tapestry of quantum mechanics, the Pauli-Z gate acts as a reorientation, a pivot point that subtly shifts the phase of a qubit. It hints at the universe's inherent symmetry and the delicate interplay of its underlying vibrations, reflecting the hidden dynamics that shape reality at its most fundamental level.
+.PP
+The operation is performed atomically within the kernel on the provided
+.IR nymya_qubit
+structure. The system copies the
+.IR nymya_qubit
+data from user space, applies the gate, and then copies the modified structure back to user space.
+.SH RETURN VALUE
+On success,
+.B nymya_3305_pauli_z
+returns 0.
+On error, a negative value corresponding to an
+.IR errno
+value is returned.
+.SH ERRORS
+.TP
+.B EINVAL
+The provided pointer
+.I q
+was NULL.
+.TP
+.B EFAULT
+An invalid address was specified for
+.I q
+(e.g., the address was outside of the accessible user address space, or memory corruption occurred during copy operations between user and kernel space).
+.SH EXAMPLE
+The following program demonstrates the use of
+.B nymya_3305_pauli_z
+to apply a Pauli-Z gate to a qubit.
+.PP
+.nf
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <nymya.h> // Assumed to define nymya_qubit and provide syscall wrapper
+
+// Simplified nymya_qubit structure for example context
+// (Actual definition is in nymya.h)
+typedef struct {
+    long double re; // Real part of amplitude
+    long double im; // Imaginary part of amplitude
+} nymya_complex_amplitude;
+
+typedef struct {
+    unsigned long id;
+    unsigned int tag;
+    nymya_complex_amplitude amplitude;
+} nymya_qubit;
+
+int main() {
+    nymya_qubit my_qubit = {
+        .id = 1234,
+        .tag = 0xAA,
+        .amplitude = { .re = 0.70710678, .im = 0.70710678 } // |+i> state, for example
+    };
+    int ret;
+
+    printf("Initial qubit amplitude: re=%.8Lf, im=%.8Lf\n",
+           my_qubit.amplitude.re, my_qubit.amplitude.im);
+
+    ret = nymya_3305_pauli_z(&my_qubit);
+    if (ret == 0) {
+        printf("Pauli-Z applied successfully.\n");
+        printf("Final qubit amplitude: re=%.8Lf, im=%.8Lf\n",
+               my_qubit.amplitude.re, my_qubit.amplitude.im);
+    } else {
+        perror("nymya_3305_pauli_z failed");
+        fprintf(stderr, "Error code: %d\n", ret);
+        return EXIT_FAILURE;
+    }
+
+    // Expected output for the given input:
+    // Final qubit amplitude: re=-0.70710678, im=-0.70710678
+
+    return EXIT_SUCCESS;
+}
+.fi
+.SH SEE ALSO
+.BR nymya (7),
+.BR nymya_create_qubit (2),
+.BR nymya_3301_hadamard (1),
+.BR nymya_3302_pauli_x (1),
+.BR nymya_3303_pauli_y (1)
