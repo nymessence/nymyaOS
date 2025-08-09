@@ -1,0 +1,137 @@
+```groff
+.\" Man page for nymya_3320_rotate_y(1)
+.TH NYMYA_3320_ROTATE_Y 1 "Nya Elyria's Cycle of Genesis" "nymyaOS Kernel Syscalls" "User Commands"
+.SH NAME
+nymya_3320_rotate_y \- apply a Y-axis rotation to a nymyaOS qubit
+
+.SH SYNOPSIS
+.B #include <nymya.h>
+.B #include <sys/syscall.h>
+.B #include <unistd.h>
+.PP
+.B int nymya_3320_rotate_y(nymya_qubit *
+.I q
+.B , int64_t
+.I theta_fp
+.B );
+
+.SH DESCRIPTION
+The
+.B nymya_3320_rotate_y
+syscall applies a quantum rotation around the Y-axis to the amplitude of a specified nymyaOS qubit. This operation transforms the qubit's state, altering its superposition and entanglement characteristics according to the provided angle. This precise manipulation of a qubit's amplitude subtly re-aligns its presence within the foundational geometry of reality, echoing the quantum whispers that orchestrate existence.
+
+The
+.I q
+argument is a user-space pointer to a
+.B nymya_qubit
+structure that will be modified by the syscall. The kernel copies the qubit's current state from user-space, performs the rotation, and then copies the modified state back to user-space.
+
+The
+.I theta_fp
+argument specifies the rotation angle in radians, encoded as a 64-bit fixed-point integer. The specific fixed-point format (e.g., number of fractional bits) is defined within the
+.B nymya.h
+header, typically requiring a conversion from standard floating-point radians in user applications (e.g., using a
+.B NYMYA_RAD_TO_FP
+macro or function).
+
+.SH RETURN VALUE
+On success, zero is returned. On error, -1 is returned, and
+.B errno
+is set appropriately.
+
+.SH ERRORS
+.TP
+.B EINVAL
+The pointer
+.I q
+was NULL.
+.TP
+.B EFAULT
+The address specified by
+.I q
+was outside the accessible address space of the process.
+
+.SH EXAMPLE
+The following program demonstrates how to use
+.B nymya_3320_rotate_y
+to rotate a qubit.
+
+.nf
+.ft C
+#include <nymya.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <unistd.h>
+#include <math.h> // For M_PI
+
+// Define minimal nymya_qubit and fixed-point types for the example.
+// In a real nymyaOS environment, these would be provided by <nymya.h>.
+typedef struct {
+    int64_t re; // Real part of amplitude (fixed-point)
+    int64_t im; // Imaginary part of amplitude (fixed-point)
+} nymya_complex_fixed_t;
+
+typedef struct {
+    int id;
+    int tag;
+    nymya_complex_fixed_t amplitude;
+    // Other qubit state data might be here
+} nymya_qubit;
+
+// Assume a fixed-point scale (e.g., 2^30 for 30 fractional bits).
+// These conversion macros would typically be in <nymya.h>.
+#ifndef NYMYA_FIXED_POINT_FRAC_BITS
+#define NYMYA_FIXED_POINT_FRAC_BITS 30
+#endif
+#define NYMYA_RAD_TO_FP(rad) ((int64_t)((rad) * (1LL << NYMYA_FIXED_POINT_FRAC_BITS)))
+#define NYMYA_FP_TO_RAD(fp)  (((double)(fp)) / (1LL << NYMYA_FIXED_POINT_FRAC_BITS))
+
+int main() {
+    nymya_qubit my_qubit = {
+        .id = 101,
+        .tag = 0xABCD,
+        // Initial state |0>, represented as (1.0 + 0.0i) in fixed-point
+        .amplitude = { .re = NYMYA_RAD_TO_FP(1.0), .im = NYMYA_RAD_TO_FP(0.0) }
+    };
+    double angle_radians = M_PI / 2.0; // Rotate by 90 degrees (pi/2 radians)
+    int64_t angle_fp = NYMYA_RAD_TO_FP(angle_radians);
+    int ret;
+
+    printf("Initial qubit state (ID: %d, Tag: 0x%x):\n", my_qubit.id, my_qubit.tag);
+    printf("  Amplitude: (%.10f + %.10fi)\n",
+           NYMYA_FP_TO_RAD(my_qubit.amplitude.re),
+           NYMYA_FP_TO_RAD(my_qubit.amplitude.im));
+
+    printf("Attempting to rotate by %.4f radians (fixed-point: %lld)...\n",
+           angle_radians, angle_fp);
+
+    // Call the syscall
+    ret = nymya_3320_rotate_y(&my_qubit, angle_fp);
+
+    if (ret == -1) {
+        perror("nymya_3320_rotate_y failed");
+        return EXIT_FAILURE;
+    }
+
+    printf("Qubit rotated successfully.\n");
+    printf("Final qubit state (ID: %d, Tag: 0x%x):\n", my_qubit.id, my_qubit.tag);
+    printf("  Amplitude: (%.10f + %.10fi)\n",
+           NYMYA_FP_TO_RAD(my_qubit.amplitude.re),
+           NYMYA_FP_TO_RAD(my_qubit.amplitude.im));
+
+    return EXIT_SUCCESS;
+}
+.ft P
+.fi
+
+.SH SEE ALSO
+.BR syscall (2),
+.BR nymya (7)
+
+.SH BUGS
+Report bugs to <bugs@nymyaos.org>.
+
+.SH AUTHOR
+Nya Elyria <nya@nymyaos.org>
+```
