@@ -1,0 +1,154 @@
+```groff
+.TH NYMYA_3318_CONTROLLED_PHASE_S 1 "2023-10-27" "nymyaOS Kernel Syscalls" "NYMYA_3318_CONTROLLED_PHASE_S(1)"
+.SH NAME
+nymya_3318_controlled_phase_s \- apply a controlled S phase (\(pi/2) gate to a target qubit
+
+.SH SYNOPSIS
+.B #include <nymya.h>
+.br
+.B #include <stdint.h>
+.br
+.B #include <errno.h>
+.br
+.B #include <sys/syscall.h>
+.br
+.B #include <unistd.h>
+.br
+.P
+.B int nymya_3318_controlled_phase_s(struct nymya_qubit *
+.I qc
+.B , struct nymya_qubit *
+.I qt
+.B );
+.P
+Applications typically invoke this syscall via a wrapper function, but direct invocation using
+.BR syscall (2)
+is also possible, with
+.BR NYMYA_CPHASE_S_CODE
+(defined as 3318) as the syscall number.
+
+.SH DESCRIPTION
+The
+.B nymya_3318_controlled_phase_s
+syscall applies a conditional phase shift of \(pi/2 radians (known as the S gate) to the
+amplitude of the target qubit specified by
+.IR qt .
+This transformation occurs only if the magnitude of the amplitude of the control qubit,
+.IR qc ,
+exceeds 0.5. If the control qubit's amplitude magnitude is 0.5 or less, no phase shift is applied to the target qubit.
+
+This operation embodies a fundamental principle of entanglement, where the state of one entity (the control) dictates a transformation upon another (the target). It is a delicate dance, a subtle whisper at the very edge of the quantum veil, determining the phase of interaction and subtly reconfiguring probabilities. Such mechanisms reflect the intricate interconnectedness of existence within the cosmic lattice.
+
+In user-space, the `nymya_qubit` structure's amplitude member is typically represented using standard complex arithmetic with double-precision floating-point numbers. However, when invoked as a kernel syscall, the operation transitions to kernel-space, where the qubit amplitudes are processed using fixed-point arithmetic (specifically Q32.32) to adhere to kernel restrictions and ensure determinism without floating-point operations.
+
+Both the user-space library function and the kernel syscall implementation log symbolic events for traceability and debugging, providing insights into the system's quantum state evolution.
+
+.SH RETURN VALUE
+On success, zero is returned. On error, -1 is returned, and
+.I errno
+is set appropriately.
+
+.SH ERRORS
+.TP
+.B EINVAL
+The pointer to either the control qubit (`qc`) or the target qubit (`qt`) in user-space was NULL. This indicates an invalid argument was provided to the syscall.
+.TP
+.B EFAULT
+An invalid user-space address was provided for either `qc` or `qt`, or an error occurred during the copying of data between user and kernel space. This typically indicates a problem with memory access permissions or integrity within the calling process.
+
+.SH EXAMPLE
+The following program demonstrates how to use the
+.B nymya_3318_controlled_phase_s
+syscall to apply a conditional S-gate. Note that `nymya_qubit` and related definitions would typically be found in `nymya.h`.
+
+.nf
+.ft CR
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/syscall.h>
+#include <errno.h>
+#include <complex.h>
+#include <math.h>
+
+// Assuming nymya_qubit is defined similarly in nymya.h
+// This is a simplified mock for the example.
+typedef struct {
+    unsigned int id;
+    char tag[16];
+    double complex amplitude; // User-space representation
+    // Other qubit state data would be here
+} nymya_qubit;
+
+// Define the syscall number (from nymya.h or similar header)
+#define NYMYA_CPHASE_S_CODE 3318
+
+int main() {
+    nymya_qubit control_q, target_q;
+
+    // --- Scenario 1: Control qubit magnitude > 0.5 (should apply S gate) ---
+    control_q.id = 101;
+    snprintf(control_q.tag, sizeof(control_q.tag), "ControlQ1");
+    control_q.amplitude = 0.8 + 0.6 * I; // Magnitude = sqrt(0.8^2 + 0.6^2) = sqrt(1) = 1.0 > 0.5
+
+    target_q.id = 102;
+    snprintf(target_q.tag, sizeof(target_q.tag), "TargetQ1");
+    target_q.amplitude = 1.0; // Initial state |0> (1.0 + 0.0i)
+
+    printf("Scenario 1: Control magnitude > 0.5 (Should apply S gate)\n");
+    printf("Initial Target Q1 amplitude: %.3f + %.3fi\n", creal(target_q.amplitude), cimag(target_q.amplitude));
+
+    long res1 = syscall(NYMYA_CPHASE_S_CODE, &control_q, &target_q);
+
+    if (res1 == 0) {
+        printf("Syscall successful.\n");
+        printf("Final Target Q1 amplitude: %.3f + %.3fi\n", creal(target_q.amplitude), cimag(target_q.amplitude));
+        // Expected: 0.0 + 1.0i (i.e., |0> * i)
+    } else {
+        perror("Syscall failed");
+        return EXIT_FAILURE;
+    }
+    printf("\n");
+
+    // --- Scenario 2: Control qubit magnitude <= 0.5 (should NOT apply S gate) ---
+    control_q.id = 201;
+    snprintf(control_q.tag, sizeof(control_q.tag), "ControlQ2");
+    control_q.amplitude = 0.3 + 0.1 * I; // Magnitude = sqrt(0.3^2 + 0.1^2) = sqrt(0.1) approx 0.316 <= 0.5
+
+    target_q.id = 202;
+    snprintf(target_q.tag, sizeof(target_q.tag), "TargetQ2");
+    target_q.amplitude = 0.0 + 1.0 * I; // Initial state |1> (0.0 + 1.0i)
+
+    printf("Scenario 2: Control magnitude <= 0.5 (Should NOT apply S gate)\n");
+    printf("Initial Target Q2 amplitude: %.3f + %.3fi\n", creal(target_q.amplitude), cimag(target_q.amplitude));
+
+    long res2 = syscall(NYMYA_CPHASE_S_CODE, &control_q, &target_q);
+
+    if (res2 == 0) {
+        printf("Syscall successful.\n");
+        printf("Final Target Q2 amplitude: %.3f + %.3fi\n", creal(target_q.amplitude), cimag(target_q.amplitude));
+        // Expected: 0.0 + 1.0i (i.e., unchanged)
+    } else {
+        perror("Syscall failed");
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
+}
+.ft P
+.nf
+.ft CR
+Example Compile & Run:
+.sp
+$ gcc -std=c11 -Wall -Wextra -lm -o cphase_s_test cphase_s_test.c
+$ ./cphase_s_test
+.ft P
+.fi
+
+.SH SEE ALSO
+.BR syscall (2),
+.BR errno (3),
+.BR complex (7),
+.BR nymya_init_qubit (2),
+.BR nymya_measure_qubit (2)
+```
