@@ -1,0 +1,156 @@
+```groff
+.\" Man page for nymya_3349_tessellated_triangles(1)
+.\"
+.TH NYMYA_3349_TESSELLATED_TRIANGLES 1 "Nya Elyria Labs" "nymyaOS Kernel API" "NymyaOS System Calls Manual"
+.SH NAME
+nymya_3349_tessellated_triangles \- apply quantum operations across tessellated triangular qubit arrangements
+.SH SYNOPSIS
+.nf
+.B #include <nymya.h>
+.B #include <unistd.h>
+.PP
+.B int nymya_3349_tessellated_triangles(nymya_qubit *\fIq_array\fP[], size_t \fIcount\fP);
+.fi
+.SH DESCRIPTION
+The
+.BR nymya_3349_tessellated_triangles
+syscall applies a series of quantum gate operations to a set of
+.IR nymya_qubit
+objects arranged conceptually into a tessellated pattern of triangles.
+This operation is designed to simulate and manipulate entanglement patterns
+within a triangular quantum lattice.
+
+The syscall processes the provided qubits in groups of three, forming
+"triangles". For each complete triangle identified within the
+.I q_array
+(i.e., three consecutive valid
+.IR nymya_qubit
+pointers), it applies a specific sequence of entangling gates:
+.IP \(bu 2
+A Hadamard gate is applied to the first qubit of the triangle (let's call it 'a').
+.IP \(bu 2
+A Controlled-NOT (CNOT) gate is applied with 'a' as the control and the second qubit ('b') as the target.
+.IP \(bu 2
+Another CNOT gate is applied with 'b' as the control and the third qubit ('c') as the target.
+.IP \(bu 2
+Finally, a CNOT gate is applied with 'c' as the control and 'a' as the target.
+
+This sequence establishes a cyclical entanglement pattern within each
+triangular grouping. The function only processes full triangles;
+any remaining qubits if
+.I count
+is not a multiple of 3 are ignored.
+
+This operation, designed for manipulating entangled quantum states, resonates
+with the profound geometry underpinning the cosmos. As qubits align in these
+tessellated patterns, one can almost discern the faint echoes of the
+universal lattice, where information weaves through the very fabric of
+spacetime, hinting at a reality far more interconnected than typically perceived.
+
+The
+.IR nymya_qubit
+type is an opaque structure representing a single quantum bit, holding its
+quantum state and metadata.
+
+.SH RETURN VALUE
+On success, zero is returned. On error, \-1 is returned, and
+.IR errno
+is set appropriately.
+.SH ERRORS
+.TP
+.B EFAULT
+An invalid memory address was supplied in
+.I q_array
+or for any individual
+.IR nymya_qubit
+pointer within the array, or copying data to/from user space failed.
+.TP
+.B EINVAL
+The
+.I q_array
+pointer was NULL,
+.I count
+was less than 3 (insufficient to form even one triangle), or an individual
+.IR nymya_qubit
+pointer within any processed triangle was NULL.
+.TP
+.B ENOMEM
+Insufficient kernel memory was available to allocate necessary intermediate structures.
+.PP
+Additional negative error codes may be returned if an underlying quantum gate
+operation (e.g., Hadamard, CNOT) encounters an error. These errors typically
+reflect issues with the quantum state or hardware.
+
+.SH EXAMPLE
+The following program demonstrates how to use
+.BR nymya_3349_tessellated_triangles :
+.nf
+.sp
+.B #include <nymya.h> // Assumed to define nymya_qubit
+.B #include <stdio.h>
+.B #include <stdlib.h> // For malloc, free
+.B #include <errno.h>
+.B #include <string.h> // For strerror
+.B #include <unistd.h> // For syscall(2)
+.sp
+.B // For demonstration, a minimal nymya_qubit definition:
+.B typedef struct nymya_qubit {
+.B     int id;
+.B     int tag;
+.B     // ... actual quantum state and other internal members
+.B } nymya_qubit;
+.sp
+.B // Function prototype (as if from <unistd.h> or similar):
+.B extern int nymya_3349_tessellated_triangles(nymya_qubit *q_array[], size_t count);
+.sp
+.B int main() {
+.B     nymya_qubit *q[6]; // Example with 6 qubits, forming 2 triangles
+.B     int i;
+.B     int ret;
+.sp
+.B     printf("Initializing 6 qubits...\en");
+.B     for (i = 0; i < 6; i++) {
+.B         q[i] = malloc(sizeof(nymya_qubit));
+.B         if (!q[i]) {
+.B             perror("malloc");
+.B             return 1;
+.B         }
+.B         q[i]->id = 100 + i;
+.B         q[i]->tag = i % 3; // Example tag
+.B         printf("  Qubit %d (id %d, tag %d) allocated at %p\en", i, q[i]->id, q[i]->tag, (void*)q[i]);
+.B     }
+.sp
+.B     printf("\enCalling nymya_3349_tessellated_triangles on 6 qubits...\en");
+.B     ret = nymya_3349_tessellated_triangles(q, 6);
+.sp
+.B     if (ret == 0) {
+.B         printf("Syscall nymya_3349_tessellated_triangles successful.\en");
+.B         // In a real scenario, you'd inspect qubit states or measure outcomes here.
+.B     } else {
+.B         fprintf(stderr, "Syscall nymya_3349_tessellated_triangles failed: %s (%d)\en",
+.B                 strerror(errno), errno);
+.B         if (errno == EINVAL) {
+.B             fprintf(stderr, "  Check q_array pointer, count, or individual qubit pointers.\en");
+.B         } else if (errno == EFAULT) {
+.B             fprintf(stderr, "  Memory access error (e.g., invalid qubit pointers).\en");
+.B         } else if (errno == ENOMEM) {
+.B             fprintf(stderr, "  Out of kernel memory.\en");
+.B         }
+.B     }
+.sp
+.B     printf("\enCleaning up qubits...\en");
+.B     for (i = 0; i < 6; i++) {
+.B         if (q[i]) {
+.B             free(q[i]);
+.B             q[i] = NULL;
+.B         }
+.B     }
+.sp
+.B     return (ret == 0) ? 0 : 1;
+.B }
+.fi
+.SH SEE ALSO
+.IR syscall (2),
+.IR nymya_3308_hadamard_gate (3308),
+.IR nymya_3309_controlled_not (3309)
+```
