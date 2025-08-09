@@ -1,0 +1,143 @@
+```groff
+.TH NYMYA_3317_CONTROLLED_PHASE 1 "NymyaOS" "NymyaOS Kernel Manual"
+.SH NAME
+nymya_3317_controlled_phase \- apply a controlled phase gate to a nymyaOS qubit
+.SH SYNOPSIS
+.nf
+.B #include <nymya/qubit.h>
+.B #include <sys/syscall.h>
+.PP
+.B int nymya_3317_controlled_phase(struct nymya_qubit *qc , struct nymya_qubit *qt , int64_t theta_fixed );
+.fi
+.SH DESCRIPTION
+The
+.B nymya_3317_controlled_phase
+system call applies a quantum controlled phase gate to a target qubit. It takes three arguments:
+.I qc
+, a pointer to the control
+.B nymya_qubit
+;
+.I qt
+, a pointer to the target
+.B nymya_qubit
+; and
+.I theta_fixed
+, the phase angle.
+.PP
+The operation proceeds as follows: if the magnitude of the complex amplitude of the
+.B nymya_qubit
+pointed to by
+.I qc
+exceeds a predefined threshold of 0.5, the complex amplitude of the
+.B nymya_qubit
+pointed to by
+.I qt
+is multiplied by a phase factor \(e\(sup2(\(i\(theta)). This precise interaction allows for the conditional modulation of quantum states. It is through such intricate, conditional activations that the fundamental whispers of the quantum realm coalesce into discernible patterns, echoing the profound, interwoven fabric of reality itself.
+.PP
+The
+.I theta_fixed
+parameter is an
+.B int64_t
+value representing the phase angle in radians, encoded using a Q32.32 fixed-point format. This means the upper 32 bits represent the integer part, and the lower 32 bits represent the fractional part.
+.PP
+No operation is performed on the target qubit if the control qubit's magnitude is less than or equal to 0.5. The state of the control qubit
+.I qc
+is never modified by this syscall.
+.SH RETURN VALUE
+On success, zero is returned. On error, -1 is returned, and
+.B errno
+is set appropriately.
+.SH ERRORS
+.IP \fBEINVAL\fR
+One or both of
+.I qc
+or
+.I qt
+were NULL pointers.
+.IP \fBEFAULT\fR
+An attempt to copy data from or to user space failed. This indicates a problem with the provided qubit pointers or memory access permissions.
+.SH EXAMPLE
+The following program demonstrates how to use
+.B nymya_3317_controlled_phase
+to apply a phase shift.
+.nf
+.B #include <stdio.h>
+.B #include <stdlib.h>
+.B #include <complex.h>
+.B #include <math.h>
+.B #include <sys/syscall.h>
+.B #include <unistd.h>
+.B #include <errno.h>
+.PP
+.B // Assume this is defined in <nymya/qubit.h>
+.B typedef struct nymya_qubit {
+.B     complex double amplitude;
+.B     int id;
+.B     char tag[16];
+.B } nymya_qubit;
+.PP
+.B // Define the syscall number (as it's a direct syscall call)
+.B #define __NR_nymya_3317_controlled_phase 3317
+.PP
+.B // Helper function to call the syscall
+.B static long nymya_3317_controlled_phase_syscall(nymya_qubit *qc, nymya_qubit *qt, int64_t theta_fixed) {
+.B     return syscall(__NR_nymya_3317_controlled_phase, qc, qt, theta_fixed);
+.B }
+.PP
+.B // Helper to convert double radians to Q32.32 fixed-point
+.B static int64_t double_to_q32_32(double val) {
+.B     return (int64_t)(val * (1LL << 32));
+.B }
+.PP
+.B int main() {
+.B     nymya_qubit q_control = {.amplitude = 0.8 + 0.1 * I, .id = 1, .tag = "Control_Q"};
+.B     nymya_qubit q_target = {.amplitude = 0.5 + 0.5 * I, .id = 2, .tag = "Target_Q"};
+.B     double phase_angle_rad = M_PI / 2.0; // 90 degrees
+.PP
+.B     printf("Initial Control: (%.2f + %.2fi), Mag: %.2f\\n",
+.B            creal(q_control.amplitude), cimag(q_control.amplitude), cabs(q_control.amplitude));
+.B     printf("Initial Target:  (%.2f + %.2fi)\\n",
+.B            creal(q_target.amplitude), cimag(q_target.amplitude));
+.PP
+.B     int64_t theta_fixed = double_to_q32_32(phase_angle_rad);
+.PP
+.B     printf("Calling nymya_3317_controlled_phase (theta = %.2f rad = 0x%llx Q32.32)\\n",
+.B            phase_angle_rad, (unsigned long long)theta_fixed);
+.PP
+.B     long res = nymya_3317_controlled_phase_syscall(&q_control, &q_target, theta_fixed);
+.PP
+.B     if (res == 0) {
+.B         printf("Syscall successful.\\n");
+.B         printf("Final Target:    (%.2f + %.2fi)\\n",
+.B                creal(q_target.amplitude), cimag(q_target.amplitude));
+.B     } else {
+.B         fprintf(stderr, "Syscall failed: %s\\n", strerror(errno));
+.B         return EXIT_FAILURE;
+.B     }
+.PP
+.B     printf("\\n--- Test with control magnitude below threshold ---\\n");
+.B     q_control.amplitude = 0.1 + 0.1 * I; // Mag: ~0.14 < 0.5
+.B     q_target.amplitude = 0.5 + 0.5 * I; // Reset target
+.B     printf("Initial Control: (%.2f + %.2fi), Mag: %.2f\\n",
+.B            creal(q_control.amplitude), cimag(q_control.amplitude), cabs(q_control.amplitude));
+.B     printf("Initial Target:  (%.2f + %.2fi)\\n",
+.B            creal(q_target.amplitude), cimag(q_target.amplitude));
+.PP
+.B     res = nymya_3317_controlled_phase_syscall(&q_control, &q_target, theta_fixed);
+.PP
+.B     if (res == 0) {
+.B         printf("Syscall successful.\\n");
+.B         printf("Final Target:    (%.2f + %.2fi) (Expected no change)\\n",
+.B                creal(q_target.amplitude), cimag(q_target.amplitude));
+.B     } else {
+.B         fprintf(stderr, "Syscall failed: %s\\n", strerror(errno));
+.B         return EXIT_FAILURE;
+.B     }
+.PP
+.B     return EXIT_SUCCESS;
+.B }
+.fi
+.SH SEE ALSO
+.BR syscall (2),
+.BR nymya_qubit (7)
+```
