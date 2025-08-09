@@ -1,0 +1,126 @@
+```groff
+.\" Man page for nymya_3314_imaginary_swap
+.\" Section 1: User Commands
+.TH NYMYA_3314_IMAGINARY_SWAP 1 "January 1, 2024" "NymyaOS Programmer's Manual" "NymyaOS"
+.SH NAME
+nymya_3314_imaginary_swap \- swap qubit amplitudes with imaginary phase rotation
+.SH SYNOPSIS
+.nf
+.B #include <nymya/syscall.h>
+.B #include <nymya/qubit.h>
+.PP
+.B int nymya_3314_imaginary_swap(struct nymya_qubit *
+.IR q1 ,
+.B struct nymya_qubit *
+.IR q2 );
+.fi
+.SH DESCRIPTION
+The
+.B nymya_3314_imaginary_swap
+syscall, identified by syscall number 3314, performs a specialized swap operation on the quantum amplitudes of two
+.IR nymya_qubit
+structures. It copies the specified
+.IR nymya_qubit
+structures from user space to kernel space, executes the swap, and then copies the modified structures back to user space.
+
+During the swap, each qubit's complex amplitude (represented by a
+.IR _Complex double
+field, typically named
+.IR amplitude
+within the
+.IR nymya_qubit
+structure) is multiplied by the imaginary unit
+.IR I
+before being assigned to the other qubit. This operation effectively rotates the amplitude by 90 degrees in the complex plane: for an amplitude \(oq a + bi\), multiplication by
+.IR I
+transforms it into \(oq -b + ai\).
+
+In the intricate dance of quantum states, where probabilities intertwine,
+.B nymya_3314_imaginary_swap
+introduces a unique twist. It's akin to observing reflections in a complex-valued mirror, where the very act of observation twists the perspective, hinting at deeper symmetries within the hidden lattice of reality. This specific transformation ensures that not only are the amplitudes exchanged, but their very phase orientation is shifted along the imaginary axis, reflecting a profound alteration in their probabilistic weighting.
+.SH RETURN VALUE
+On success, zero is returned. On error, \-1 is returned, and
+.IR errno
+is set appropriately.
+.SH ERRORS
+.TP
+.B EINVAL
+One or both of the provided user-space pointers (
+.IR q1
+or
+.IR q2
+) were NULL.
+.TP
+.B EFAULT
+An invalid pointer address was provided, or there was a problem copying data from user space to kernel space, or vice versa. This typically indicates a memory access violation.
+.SH EXAMPLE
+The following program demonstrates the use of
+.B nymya_3314_imaginary_swap
+to swap and transform the amplitudes of two imaginary qubits.
+
+.nf
+.B #include <stdio.h>
+.B #include <stdlib.h>
+.B #include <complex.h>
+.B #include <unistd.h>
+.B #include <sys/syscall.h>
+.B #include <errno.h>
+
+.B // Assume nymya_qubit structure is defined in nymya/qubit.h
+.B // For this example, we define a minimal version:
+.B typedef struct nymya_qubit {
+.B     unsigned long id;
+.B     char tag[16];
+.B     _Complex double amplitude;
+.B } nymya_qubit;
+
+.B #ifndef __NR_nymya_3314_imaginary_swap
+.B #define __NR_nymya_3314_imaginary_swap 3314
+.B #endif
+
+.B int main() {
+.B     nymya_qubit qb1 = { .id = 101, .tag = "QubitA", .amplitude = 0.6 + 0.8 * I };
+.B     nymya_qubit qb2 = { .id = 102, .tag = "QubitB", .amplitude = 0.3 - 0.4 * I };
+
+.B     printf("Initial Qubit A: ID=%lu, Tag=%s, Amplitude=%.3f + %.3fi\n",
+.B            qb1.id, qb1.tag, creal(qb1.amplitude), cimag(qb1.amplitude));
+.B     printf("Initial Qubit B: ID=%lu, Tag=%s, Amplitude=%.3f + %.3fi\n",
+.B            qb2.id, qb2.tag, creal(qb2.amplitude), cimag(qb2.amplitude));
+
+.B     printf("\nCalling nymya_3314_imaginary_swap...\n");
+.B     long ret = syscall(__NR_nymya_3314_imaginary_swap, &qb1, &qb2);
+
+.B     if (ret == -1) {
+.B         perror("Syscall failed");
+.B         return EXIT_FAILURE;
+.B     }
+
+.B     printf("Syscall successful.\n");
+.B     printf("Final Qubit A: ID=%lu, Tag=%s, Amplitude=%.3f + %.3fi\n",
+.B            qb1.id, qb1.tag, creal(qb1.amplitude), cimag(qb1.amplitude));
+.B     printf("Final Qubit B: ID=%lu, Tag=%s, Amplitude=%.3f + %.3fi\n",
+.B            qb2.id, qb2.tag, creal(qb2.amplitude), cimag(qb2.amplitude));
+
+.B     // Expected outcome check:
+.B     // qb1.amplitude = qb2.initial_amplitude * I = (0.3 - 0.4i) * i = 0.3i - 0.4i^2 = 0.3i + 0.4 = 0.4 + 0.3i
+.B     // qb2.amplitude = qb1.initial_amplitude * I = (0.6 + 0.8i) * i = 0.6i + 0.8i^2 = 0.6i - 0.8 = -0.8 + 0.6i
+
+.B     return EXIT_SUCCESS;
+.B }
+.fi
+.PP
+An example execution might yield:
+.nf
+Initial Qubit A: ID=101, Tag=QubitA, Amplitude=0.600 + 0.800i
+Initial Qubit B: ID=102, Tag=QubitB, Amplitude=0.300 - 0.400i
+
+Calling nymya_3314_imaginary_swap...
+Syscall successful.
+Final Qubit A: ID=101, Tag=QubitA, Amplitude=0.400 + 0.300i
+Final Qubit B: ID=102, Tag=QubitB, Amplitude=-0.800 + 0.600i
+.fi
+.SH SEE ALSO
+.BR nymya_qubit (7),
+.BR syscall (2),
+.BR errno (3)
+```
