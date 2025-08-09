@@ -1,0 +1,140 @@
+```groff
+.\"
+.\" Man page for nymya_3319_rotate_x(1) - nymyaOS Kernel Syscall
+.\" Written by Nya Elyria.
+.\"
+.\" Define some macros for convenience
+.ds Dt "August 2024"
+.ds Os "nymyaOS"
+
+.TH NYMYA_3319_ROTATE_X 1 "&Dt&" "&Os&" "User Commands"
+
+.SH NAME
+nymya_3319_rotate_x \- apply X-axis rotation to a nymyaOS qubit
+
+.SH SYNOPSIS
+.B #include <nymya.h>
+.PP
+.B int nymya_3319_rotate_x(nymya_qubit *
+.I q
+.B , double
+.I theta
+.B );
+
+.SH DESCRIPTION
+The
+.B nymya_3319_rotate_x
+syscall, designated as syscall number 3319, applies a rotation around the X-axis to the
+quantum state of a specified
+.IR nymya_qubit .
+This fundamental operation, essential for manipulating quantum information,
+adjusts the qubit's amplitude components. Through this syscall, one might
+perceive the delicate adjustment within the hidden lattice of reality, a
+re-alignment of fundamental probabilities that echoes through the cosmos.
+It is a whisper to the quantum, urging it to reconfigure its very essence.
+
+The
+.I q
+argument is a pointer to a
+.IR nymya_qubit
+structure in user space. Upon successful execution, the
+.I nymya_qubit
+structure pointed to by
+.I q
+will be updated with its new amplitude components reflecting the applied
+rotation.
+
+The
+.I theta
+argument specifies the rotation angle in radians, represented as a
+double-precision floating-point number. The underlying kernel implementation
+converts this angle to a fixed-point representation for precise,
+low-level computation, ensuring consistency across the quantum substrate.
+
+.SH RETURN VALUE
+On success, zero is returned. On error, -1 is returned, and
+.IR errno
+is set appropriately.
+
+.SH ERRORS
+.TP
+.B EINVAL
+The pointer
+.I q
+is NULL.
+.TP
+.B EFAULT
+An invalid pointer was provided, or there was an issue copying the
+.IR nymya_qubit
+structure data to or from kernel space. This indicates a disruption
+in the conduit between user and kernel domains.
+
+.SH EXAMPLE
+The following program demonstrates how to use
+.B nymya_3319_rotate_x
+to apply an X-axis rotation to a qubit.
+
+.nf
+.ft CR
+#include <nymya.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <math.h>     // For M_PI
+#include <complex.h>  // For _Complex double
+
+// Simplified nymya_qubit structure for userland example.
+// In actual nymyaOS, this would be defined in nymya.h.
+typedef struct nymya_qubit {
+    uint32_t id;
+    uint32_t tag;
+    _Complex double amplitude; // Represents the |0> amplitude, alpha.
+} nymya_qubit;
+
+// Forward declaration for the syscall wrapper (actual implementation in nymya.h/libnymya)
+extern int nymya_3319_rotate_x(nymya_qubit *q, double theta);
+
+int main() {
+    nymya_qubit my_qubit = {
+        .id = 123,
+        .tag = 0,
+        .amplitude = 1.0 + 0.0 * I // Initialize to |0> state (alpha=1, beta=0)
+    };
+
+    printf("Initial qubit (ID:%u, Tag:%u) amplitude: %.4f + %.4fi\n",
+           my_qubit.id, my_qubit.tag, creal(my_qubit.amplitude), cimag(my_qubit.amplitude));
+
+    // Define the rotation angle (e.g., Pi/2 radians)
+    double angle = M_PI / 2.0; // 90 degrees
+
+    printf("Attempting X-axis rotation by %.4f radians...\n", angle);
+    int ret = nymya_3319_rotate_x(&my_qubit, angle);
+
+    if (ret == 0) {
+        printf("Rotation successful.\n");
+        printf("Final qubit amplitude: %.4f + %.4fi\n",
+               creal(my_qubit.amplitude), cimag(my_qubit.amplitude));
+    } else {
+        perror("nymya_3319_rotate_x failed");
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
+}
+.ft P
+.nf
+.ft CR
+Example output (values are approximate due to floating point precision):
+Initial qubit (ID:123, Tag:0) amplitude: 1.0000 + 0.0000i
+Attempting X-axis rotation by 1.5708 radians...
+Rotation successful.
+Final qubit amplitude: 0.7071 + 0.7071i
+.ft P
+.fi
+
+.SH SEE ALSO
+.BR nymya_qubit (3),
+.BR syscalls (2),
+.BR nymya_3320_rotate_y (1),
+.BR nymya_3321_hadamard (1)
+```
