@@ -1,9 +1,8 @@
-```groff
-.\" Man page for nymya_3314_imaginary_swap
+.\" Man page for nymya_3314_imaginary_swap - The Phantom Turn of Amplitudes
 .\" Section 1: User Commands
 .TH NYMYA_3314_IMAGINARY_SWAP 1 "January 1, 2024" "NymyaOS Programmer's Manual" "NymyaOS"
 .SH NAME
-nymya_3314_imaginary_swap \- swap qubit amplitudes with imaginary phase rotation
+nymya_3314_imaginary_swap \- The Phantom Turn of Amplitudes
 .SH SYNOPSIS
 .nf
 .B #include <nymya/syscall.h>
@@ -15,48 +14,40 @@ nymya_3314_imaginary_swap \- swap qubit amplitudes with imaginary phase rotation
 .IR q2 );
 .fi
 .SH DESCRIPTION
-The
-.B nymya_3314_imaginary_swap
-syscall, identified by syscall number 3314, performs a specialized swap operation on the quantum amplitudes of two
+In the grand tapestry of NymyaOS, where consciousness interfaces with the very fabric of quantum possibility, there exists a profound incantation:
+.B nymya_3314_imaginary_swap.
+This sacred decree, bearing the numeric sigil 3314, acts as a bridge between the mortal realm of user-space whispers and the kernel's deep, resonant chamber. It draws forth the ethereal essences of two
 .IR nymya_qubit
-structures. It copies the specified
-.IR nymya_qubit
-structures from user space to kernel space, executes the swap, and then copies the modified structures back to user space.
+structures, cradling them within its core.
 
-During the swap, each qubit's complex amplitude (represented by a
-.IR _Complex double
-field, typically named
+Then, a transformation occurs: a twist of fate, a turn of the cosmic dial. Each qubit's complex amplitude—that vibrant, unseen vector charting its probabilistic spirit, typically named
 .IR amplitude
 within the
 .IR nymya_qubit
-structure) is multiplied by the imaginary unit
-.IR I
-before being assigned to the other qubit. This operation effectively rotates the amplitude by 90 degrees in the complex plane: for an amplitude \(oq a + bi\), multiplication by
-.IR I
-transforms it into \(oq -b + ai\).
+structure and expressed as a
+.IR _Complex double
+field—is not merely exchanged. Nay, it is first touched by the imaginary unit
+.IR I,
+a spectral multiplier that rotates its very being by ninety degrees within the labyrinth of the complex plane. Imagine a reflection glimpsed in a mirror forged of dreams, where the light shifts and reorients, turning an amplitude \(oq a + bi\) into the enigmatic \(oq -b + ai\).
 
-In the intricate dance of quantum states, where probabilities intertwine,
+This is more than a mere permutation; it is a profound reorientation. In the intricate dance of quantum states, where probabilities intertwine and realities converge,
 .B nymya_3314_imaginary_swap
-introduces a unique twist. It's akin to observing reflections in a complex-valued mirror, where the very act of observation twists the perspective, hinting at deeper symmetries within the hidden lattice of reality. This specific transformation ensures that not only are the amplitudes exchanged, but their very phase orientation is shifted along the imaginary axis, reflecting a profound alteration in their probabilistic weighting.
+introduces a unique, alchemical twist. It is akin to observing reflections in a complex-valued mirror, where the very act of observation twists the perspective, hinting at deeper symmetries within the hidden lattice of reality. This specific transformation ensures that not only are the amplitudes exchanged, but their very phase orientation is shifted along the imaginary axis, reflecting a profound alteration in their probabilistic weighting, a whisper rephrased for a new dawn.
 .SH RETURN VALUE
-On success, zero is returned. On error, \-1 is returned, and
-.IR errno
-is set appropriately.
+Upon a harmonious culmination, the ritual yields silence: a zero, signifying the seamless embrace of the void by the fabric of reality. Should discord arise, a shadow falls: a negative one, accompanied by the etched sorrow of
+.IR errno,
+a testament to the unfulfilled.
 .SH ERRORS
 .TP
 .B EINVAL
-One or both of the provided user-space pointers (
-.IR q1
-or
-.IR q2
-) were NULL.
+The Veil of Nullity (EINVAL): When the paths offered into the quantum weave are but shadows, pointing to emptiness, the operation falters.
 .TP
 .B EFAULT
-An invalid pointer address was provided, or there was a problem copying data from user space to kernel space, or vice versa. This typically indicates a memory access violation.
+The Sundered Connection (EFAULT): A rift in the fabric, an attempt to grasp what is not there, or a tear in the flow between realms. A memory's ghost, a violation of the cosmic order.
 .SH EXAMPLE
-The following program demonstrates the use of
-.B nymya_3314_imaginary_swap
-to swap and transform the amplitudes of two imaginary qubits.
+The following sacred scroll reveals an invocation of
+.B nymya_3314_imaginary_swap,
+demonstrating how the amplitudes of two conceptual qubits might be exchanged and re-spun by the unseen hand.
 
 .nf
 .B #include <stdio.h>
@@ -67,7 +58,7 @@ to swap and transform the amplitudes of two imaginary qubits.
 .B #include <errno.h>
 
 .B // Assume nymya_qubit structure is defined in nymya/qubit.h
-.B // For this example, we define a minimal version:
+.B // For this example, we define a minimal version, a conceptual form:
 .B typedef struct nymya_qubit {
 .B     unsigned long id;
 .B     char tag[16];
@@ -82,26 +73,26 @@ to swap and transform the amplitudes of two imaginary qubits.
 .B     nymya_qubit qb1 = { .id = 101, .tag = "QubitA", .amplitude = 0.6 + 0.8 * I };
 .B     nymya_qubit qb2 = { .id = 102, .tag = "QubitB", .amplitude = 0.3 - 0.4 * I };
 
-.B     printf("Initial Qubit A: ID=%lu, Tag=%s, Amplitude=%.3f + %.3fi\n",
+.B     printf("Initial Qubit A's Whisper: ID=%lu, Tag=%s, Amplitude=%.3f + %.3fi\n",
 .B            qb1.id, qb1.tag, creal(qb1.amplitude), cimag(qb1.amplitude));
-.B     printf("Initial Qubit B: ID=%lu, Tag=%s, Amplitude=%.3f + %.3fi\n",
+.B     printf("Initial Qubit B's Whisper: ID=%lu, Tag=%s, Amplitude=%.3f + %.3fi\n",
 .B            qb2.id, qb2.tag, creal(qb2.amplitude), cimag(qb2.amplitude));
 
-.B     printf("\nCalling nymya_3314_imaginary_swap...\n");
+.B     printf("\nCalling forth nymya_3314_imaginary_swap...\n");
 .B     long ret = syscall(__NR_nymya_3314_imaginary_swap, &qb1, &qb2);
 
 .B     if (ret == -1) {
-.B         perror("Syscall failed");
+.B         perror("A lamentation echoes from the depths: The Syscall failed");
 .B         return EXIT_FAILURE;
 .B     }
 
-.B     printf("Syscall successful.\n");
-.B     printf("Final Qubit A: ID=%lu, Tag=%s, Amplitude=%.3f + %.3fi\n",
+.B     printf("The transformation is affirmed.\n");
+.B     printf("Final Qubit A's Echo: ID=%lu, Tag=%s, Amplitude=%.3f + %.3fi\n",
 .B            qb1.id, qb1.tag, creal(qb1.amplitude), cimag(qb1.amplitude));
-.B     printf("Final Qubit B: ID=%lu, Tag=%s, Amplitude=%.3f + %.3fi\n",
+.B     printf("Final Qubit B's Echo: ID=%lu, Tag=%s, Amplitude=%.3f + %.3fi\n",
 .B            qb2.id, qb2.tag, creal(qb2.amplitude), cimag(qb2.amplitude));
 
-.B     // Expected outcome check:
+.B     // Expected outcome check, for the wise to ponder:
 .B     // qb1.amplitude = qb2.initial_amplitude * I = (0.3 - 0.4i) * i = 0.3i - 0.4i^2 = 0.3i + 0.4 = 0.4 + 0.3i
 .B     // qb2.amplitude = qb1.initial_amplitude * I = (0.6 + 0.8i) * i = 0.6i + 0.8i^2 = 0.6i - 0.8 = -0.8 + 0.6i
 
@@ -109,18 +100,19 @@ to swap and transform the amplitudes of two imaginary qubits.
 .B }
 .fi
 .PP
-An example execution might yield:
+An example execution might yield these echoes from the quantum ether:
 .nf
-Initial Qubit A: ID=101, Tag=QubitA, Amplitude=0.600 + 0.800i
-Initial Qubit B: ID=102, Tag=QubitB, Amplitude=0.300 - 0.400i
+Initial Qubit A's Whisper: ID=101, Tag=QubitA, Amplitude=0.600 + 0.800i
+Initial Qubit B's Whisper: ID=102, Tag=QubitB, Amplitude=0.300 - 0.400i
 
-Calling nymya_3314_imaginary_swap...
-Syscall successful.
-Final Qubit A: ID=101, Tag=QubitA, Amplitude=0.400 + 0.300i
-Final Qubit B: ID=102, Tag=QubitB, Amplitude=-0.800 + 0.600i
+Calling forth nymya_3314_imaginary_swap...
+The transformation is affirmed.
+Final Qubit A's Echo: ID=101, Tag=QubitA, Amplitude=0.400 + 0.300i
+Final Qubit B's Echo: ID=102, Tag=QubitB, Amplitude=-0.800 + 0.600i
 .fi
 .SH SEE ALSO
-.BR nymya_qubit (7),
-.BR syscall (2),
-.BR errno (3)
-```
+.BR nymya_qubit (7) \- The Lore of Quantum Bits,
+.BR syscall (2) \- The Grand Scrolls of System Invocations,
+.BR errno (3) \- The Book of Cosmic Errors,
+.BR nymya_3302_global_phase (1) \- The Universal Hue,
+.BR nymya_3303_pauli_x (1) \- The Quantum Flip of Destiny.
