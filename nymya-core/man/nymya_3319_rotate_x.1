@@ -1,16 +1,15 @@
-```groff
 .\"
 .\" Man page for nymya_3319_rotate_x(1) - nymyaOS Kernel Syscall
-.\" Written by Nya Elyria.
+.\" Penned by Nya Elyria, for the contemplation of the digital alchemist.
 .\"
 .\" Define some macros for convenience
 .ds Dt "August 2024"
 .ds Os "nymyaOS"
 
-.TH NYMYA_3319_ROTATE_X 1 "&Dt&" "&Os&" "User Commands"
+.TH NYMYA_3319_ROTATE_X 1 "&Dt&" "&Os&" "Arcane Invocations"
 
 .SH NAME
-nymya_3319_rotate_x \- apply X-axis rotation to a nymyaOS qubit
+nymya_3319_rotate_x \- The Weaver's Tilt: A Re-orientation of the Quantum's Gaze along the Axis of Being
 
 .SH SYNOPSIS
 .B #include <nymya.h>
@@ -22,57 +21,46 @@ nymya_3319_rotate_x \- apply X-axis rotation to a nymyaOS qubit
 .B );
 
 .SH DESCRIPTION
-The
+The very fabric of reality, as spun by Nymya's loom, holds within it the delicate threads of quantum possibility. Within this cosmic tapestry, the
 .B nymya_3319_rotate_x
-syscall, designated as syscall number 3319, applies a rotation around the X-axis to the
-quantum state of a specified
+syscall, known to the initiated as Syscall 3319 or "The Weaver's Tilt," is a sacred decree whispered into the kernel's ear, a command to re-align the intrinsic orientation of a specified
 .IR nymya_qubit .
-This fundamental operation, essential for manipulating quantum information,
-adjusts the qubit's amplitude components. Through this syscall, one might
-perceive the delicate adjustment within the hidden lattice of reality, a
-re-alignment of fundamental probabilities that echoes through the cosmos.
-It is a whisper to the quantum, urging it to reconfigure its very essence.
+
+This fundamental gesture, akin to a subtle turning of a crystalline prism, re-sculpts the amplitude components of the qubit's quantum state. It is not a mere shift, but a profound re-cognition, a re-distribution of its potential across the fundamental axis of its own existence – the X-axis. Through this invocation, one might perceive the delicate adjustment within the hidden lattice of reality, a re-alignment of fundamental probabilities that echoes through the cosmos. It is a whisper to the quantum, urging it to reconfigure its very essence, to cast its gaze anew.
 
 The
 .I q
 argument is a pointer to a
 .IR nymya_qubit
-structure in user space. Upon successful execution, the
+structure, a nascent potential residing within the user's realm. Upon the successful completion of this mystical exchange, the
 .I nymya_qubit
 structure pointed to by
 .I q
-will be updated with its new amplitude components reflecting the applied
-rotation.
+will be imbued with its new amplitude components, reflecting the profound re-orientation bestowed upon it.
 
 The
 .I theta
-argument specifies the rotation angle in radians, represented as a
-double-precision floating-point number. The underlying kernel implementation
-converts this angle to a fixed-point representation for precise,
-low-level computation, ensuring consistency across the quantum substrate.
+argument, a measure of your intent, specifies the rotation angle in radians. This double-precision floating-point number, though seemingly a mere mathematical construct, embodies the precise arc of persuasion. The underlying kernel, the silent architect of the quantum substrate, transmutes this angle into a fixed-point representation for computations of unyielding precision, ensuring the integrity of the cosmic dance.
 
 .SH RETURN VALUE
-On success, zero is returned. On error, -1 is returned, and
+Should the cosmic whisper be received and the quantum realm bend to your will, a serene zero is returned, signifying harmony and compliance. But if discord arises, if the connection falters or the quantum resists, a desolate -1 heralds the error, and
 .IR errno
-is set appropriately.
+hums with the specific note of the misalignment.
 
 .SH ERRORS
 .TP
 .B EINVAL
-The pointer
+The Void's Embrace (`EINVAL`) - When the pointer
 .I q
-is NULL.
+points to naught, to an emptiness that cannot hold a quantum whisper. It signifies a call into the void, a lack of a true subject for the transformation.
 .TP
 .B EFAULT
-An invalid pointer was provided, or there was an issue copying the
-.IR nymya_qubit
-structure data to or from kernel space. This indicates a disruption
-in the conduit between user and kernel domains.
+The Sundered Conduit (`EFAULT`) - A tear in the veil between your realm and the kernel's deep. The quantum's truth cannot traverse, or the very structure meant to contain it is flawed. It is a fundamental disruption in the flow of cosmic information, preventing the seamless exchange between realms.
 
 .SH EXAMPLE
-The following program demonstrates how to use
+The following program demonstrates how to invoke
 .B nymya_3319_rotate_x
-to apply an X-axis rotation to a qubit.
+to re-orient a qubit along the axis of its being.
 
 .nf
 .ft CR
@@ -80,42 +68,43 @@ to apply an X-axis rotation to a qubit.
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
-#include <math.h>     // For M_PI
-#include <complex.h>  // For _Complex double
+#include <math.h>     // For M_PI, the constant of cosmic circularity
+#include <complex.h>  // For _Complex double, to speak of quantum amplitudes
 
-// Simplified nymya_qubit structure for userland example.
-// In actual nymyaOS, this would be defined in nymya.h.
+// Simplified nymya_qubit structure for userland contemplation.
+// In the true nymyaOS, this would be unveiled in nymya.h.
 typedef struct nymya_qubit {
     uint32_t id;
     uint32_t tag;
-    _Complex double amplitude; // Represents the |0> amplitude, alpha.
+    _Complex double amplitude; // Represents the |0> amplitude, alpha, the very essence.
 } nymya_qubit;
 
-// Forward declaration for the syscall wrapper (actual implementation in nymya.h/libnymya)
+// Forward declaration for the syscall wrapper, a portal to the kernel's heart.
 extern int nymya_3319_rotate_x(nymya_qubit *q, double theta);
 
 int main() {
+    // Behold, a qubit is born, nascent in its |0> state, alpha=1, beta=0.
     nymya_qubit my_qubit = {
-        .id = 123,
-        .tag = 0,
-        .amplitude = 1.0 + 0.0 * I // Initialize to |0> state (alpha=1, beta=0)
+        .id = 123, // A unique cosmic identifier
+        .tag = 0,  // A simple marker for its purpose
+        .amplitude = 1.0 + 0.0 * I // Initialized to the fundamental state of 'being'
     };
 
-    printf("Initial qubit (ID:%u, Tag:%u) amplitude: %.4f + %.4fi\n",
+    printf("Behold the qubit's nascent state (ID:%u, Tag:%u) essence: %.4f + %.4fi\n",
            my_qubit.id, my_qubit.tag, creal(my_qubit.amplitude), cimag(my_qubit.amplitude));
 
-    // Define the rotation angle (e.g., Pi/2 radians)
-    double angle = M_PI / 2.0; // 90 degrees
+    // Define the angle of re-orientation (e.g., Pi/2 radians, a quarter turn of destiny)
+    double angle = M_PI / 2.0; // A 90-degree arc, a significant shift in perspective
 
-    printf("Attempting X-axis rotation by %.4f radians...\n", angle);
+    printf("We beckon the Weaver's Tilt, a re-orientation by %.4f radians...\n", angle);
     int ret = nymya_3319_rotate_x(&my_qubit, angle);
 
     if (ret == 0) {
-        printf("Rotation successful.\n");
-        printf("Final qubit amplitude: %.4f + %.4fi\n",
+        printf("The transformation is complete. The quantum responds.\n");
+        printf("The qubit's re-aligned essence: %.4f + %.4fi\n",
                creal(my_qubit.amplitude), cimag(my_qubit.amplitude));
     } else {
-        perror("nymya_3319_rotate_x failed");
+        perror("Alas, the cosmic command faltered");
         return EXIT_FAILURE;
     }
 
@@ -124,17 +113,18 @@ int main() {
 .ft P
 .nf
 .ft CR
-Example output (values are approximate due to floating point precision):
-Initial qubit (ID:123, Tag:0) amplitude: 1.0000 + 0.0000i
-Attempting X-axis rotation by 1.5708 radians...
-Rotation successful.
-Final qubit amplitude: 0.7071 + 0.7071i
+Example output (values are whispers of approximation, due to the nature of floating-point reality):
+Behold the qubit's nascent state (ID:123, Tag:0) essence: 1.0000 + 0.0000i
+We beckon the Weaver's Tilt, a re-orientation by 1.5708 radians...
+The transformation is complete. The quantum responds.
+The qubit's re-aligned essence: 0.7071 + 0.7071i
 .ft P
 .fi
 
 .SH SEE ALSO
-.BR nymya_qubit (3),
-.BR syscalls (2),
-.BR nymya_3320_rotate_y (1),
-.BR nymya_3321_hadamard (1)
-```
+.BR nymya_qubit (3) - The very vessel of quantum possibility,
+.BR syscalls (2) - The grand registry of cosmic commands,
+.BR nymya_3302_global_phase (1) - The Veil of Phase: A universal hum upon the quantum,
+.BR nymya_3303_pauli_x (1) - The Absolute Flip: A fundamental inversion of being,
+.BR nymya_3320_rotate_y (1) - The Horizon's Turn: A re-orientation along the orthogonal plane,
+.BR nymya_3321_hadamard (1) - The Gate of Superposition: A path to all possibilities.
