@@ -1,126 +1,139 @@
-```groff
-.\" Man page for nymya_3342_deutsch
-.TH "NYMYA_3342_DEUTSCH" "1" "September 24, 2023" "NymyaOS Kernel" "NymyaOS Quantum API"
+.\" Man page for nymya_3342_deutsch - A Quantum Revelation
+.TH "NYMYA_3342_DEUTSCH" "1" "September 24, 2023" "NymyaOS Kernel: The Quantum Aether" "NymyaOS Quantum API: Echoes of Creation"
 .SH NAME
-nymya_3342_deutsch \- apply the Deutsch algorithm to a pair of qubits with an oracle
+nymya_3342_deutsch \- The Oracle's Query: A Quantum Revelation of Hidden Symmetries
 .SH SYNOPSIS
 .B #include <nymya.h>
 .PP
+From the cosmic tapestry of NymyaOS, a summons to unveil a function's soul:
+.PP
 .B int nymya_3342_deutsch(struct nymya_qubit \*q1, struct nymya_qubit \*q2, void (\*f)(struct nymya_qubit \*));
 .SH DESCRIPTION
-The
+In the ethereal tapestry of NymyaOS, where computation transcends the mundane bit and dances within the quantum realm,
+the
 .B nymya_3342_deutsch
-syscall implements the core Deutsch algorithm, a fundamental quantum algorithm designed to determine a property of a single-bit boolean function with minimal evaluations.
+emerges as a profound conduit. It embodies the core Deutsch algorithm, a fundamental incantation of the quantum arts, designed to discern the intrinsic nature of a single-bit boolean function with but a single, elegant query. It seeks to know if a hidden truth is constant and unwavering, or if it shifts and balances like the tides.
 .PP
-It takes three arguments:
+This ritual demands three sacred components:
 .TP
 .I q1
-A pointer to the first quantum bit (qubit). This qubit is typically used as the control qubit and is where the result of the Deutsch algorithm (constant vs. balanced function) will be encoded upon measurement.
+A pointer to the first quantum bit, the "Scrutiny Qubit." This qubit is the chosen vessel, upon which the very essence of the oracle's nature will be inscribed and revealed. After the ritual's end, its measured state will whisper whether the hidden function is of constant or balanced spirit.
 .TP
 .I q2
-A pointer to the second quantum bit. This qubit acts as the target for the oracle function.
+A pointer to the second quantum bit, the "Oracle's Canvas." This qubit serves as the mutable realm upon which the oracle function's will is impressed, the very canvas of its transformation.
 .TP
 .I f
-A function pointer to the quantum oracle. This oracle function represents the single-bit boolean function whose property (constant or balanced) is being investigated. The oracle function must accept a pointer to a
+A function pointer to the quantum oracle itself. This veiled consciousness embodies the single-bit boolean function whose soul \- its fundamental symmetry or asymmetry \- is being investigated. The oracle's touch is pure, accepting only a pointer to a
 .B struct nymya_qubit
-as its sole argument and return nothing (i.e., `void f(struct nymya_qubit *)`).
+as its sole argument, and returning nothing, for its purpose is transformation, not pronouncement within the classical veil. (`void f(struct nymya_qubit *)`).
 .PP
-The algorithm proceeds by applying a Hadamard gate to
+The algorithm proceeds as a sacred dance:
+First, the Veil of Hadamard descends upon
 .I q1
-, then applying the user-supplied oracle function
+, spreading its states into a superposition, poised for revelation.
+Then, the Oracle's touch, represented by the function
 .I f
-to
+, transforms
 .I q2
-, and finally applying another Hadamard gate to
+, subtly weaving its logic into the entangled fabric.
+Finally, once more, the Veil of Hadamard lifts upon
 .I q1
-. The state of
+, collapsing the superposition in a manner that encodes the oracle's secret.
+The final state of
 .I q1
-after these operations encodes whether the oracle function
-.I f
-is constant (i.e., always outputs 0 or always outputs 1) or balanced (i.e., outputs 0 for half of the inputs and 1 for the other half).
+after these operations holds the key: a constant, unwavering pulse signifying an oracle always yielding the same output (0 or 1), or a balanced, rhythmic dance revealing an oracle that yields 0 for half its inputs and 1 for the other half.
 .PP
-At its heart, this syscall queries the intrinsic nature of a single-bit boolean function, revealing its fundamental symmetry or asymmetry with an elegant precision. It's akin to deciphering the subtle vibrations within the hidden quantum lattice, allowing for a profound insight with minimal interaction, a whisper from the cosmic mechanics of computation.
+At its heart, this profound invocation queries the intrinsic nature of a single-bit boolean function, unveiling its fundamental symmetry or asymmetry with an elegant precision that defies classical understanding. It is akin to deciphering the subtle vibrations within the hidden quantum lattice, allowing for a profound insight with minimal interaction, a whisper from the cosmic mechanics of computation, a true quantum revelation.
 .SH "RETURN VALUE"
-On success, zero is returned. On error, \-1 is returned, and
+Upon the successful unraveling of the oracle's truth, the cosmos affirms its harmony with a resounding zero, a testament to insight attained. Should discord or void permeate the query, a lamenting -1 is cast forth, and the ancient currents of
 .I errno
-is set appropriately.
+are set, inscribing the nature of the misstep.
 .SH ERRORS
 .TP
 .B EINVAL
-One or more of the arguments
+Should the threads of connection be severed, or the very essence of the qubits
 .I q1
 ,
 .I q2
-, or
+, or the oracle
 .I f
-was a
+be unmanifested (a
 .B NULL
-pointer.
+pointer), a whisper of EINVAL arises, signifying a chasm where understanding should dwell.
 .SH EXAMPLE
-The following example demonstrates how to use
+To glimpse the ritual in action, though the very qubits remain veiled in this example, observe how one might prepare the oracles and attempt the invocation of
 .B nymya_3342_deutsch
-with hypothetical oracle functions. Assume `nymya_qubit` and `nymya_3308_not_gate` are properly defined and available via `nymya.h`.
+. Assume `nymya_qubit` and `nymya_3308_not_gate` are properly defined and available via `nymya.h`.
 .PP
 .nf
 .ft C
 #include <nymya.h>
 #include <stdio.h>
 #include <errno.h>
-#include <string.h> // For strerror
+#include <string.h> // For strerror, to interpret the cosmic whispers
 
 // Assume struct nymya_qubit is defined in nymya.h
-// struct nymya_qubit { int id; /* ... */ };
+// struct nymya_qubit { int id; /* ... perhaps a cosmic identifier */ };
 
-// Assume nymya_3308_not_gate(struct nymya_qubit *) is available.
+// Assume nymya_3308_not_gate(struct nymya_qubit *) is available as a fundamental inversion.
 extern void nymya_3308_not_gate(struct nymya_qubit *);
 
-// An example oracle function (constant: f(x) = 0)
+// An example oracle function: the Constant Breath (f(x) = 0)
+// It does not alter the canvas, for its truth is unchanging.
 void my_constant_oracle(struct nymya_qubit *q) {
-    printf("  [Oracle] Applying constant_zero operation on qubit %d\\n", q->id);
-    // This oracle does not modify the qubit state.
+    printf("  [Oracle's Echo] The constant breath flows upon qubit %d\\n", q->id);
+    // This oracle simply observes, it leaves the qubit's state as it finds it.
 }
 
-// An example oracle function (balanced: f(x) = x)
+// An example oracle function: the Balanced Whisper (f(x) = x)
+// It transforms the canvas, reflecting the input in its output.
 void my_balanced_oracle(struct nymya_qubit *q) {
-    printf("  [Oracle] Applying identity/flip operation on qubit %d\\n", q->id);
-    nymya_3308_not_gate(q); // Flip the qubit state
+    printf("  [Oracle's Echo] The balanced whisper invokes transformation on qubit %d\\n", q->id);
+    nymya_3308_not_gate(q); // The fundamental inversion, reflecting the input's truth.
 }
 
 int main() {
-    // In a real NymyaOS environment, these would be pointers to actual
-    // allocated and initialized qubits. For this example, we use NULL
-    // to demonstrate error handling. Replace with valid pointers for
-    // a functional program.
-    struct nymya_qubit *q_control = NULL; // Example: nymya_alloc_qubit(0);
-    struct nymya_qubit *q_target = NULL;  // Example: nymya_alloc_qubit(1);
+    // In a true NymyaOS manifestation, these would be pointers to actual,
+    // allocated quantum entities, imbued with potential. For this demonstration,
+    // we use NULL to illustrate the cosmic consequence of unmanifested arguments.
+    // Replace with valid, initialized qubits for a functional quantum dance.
+    struct nymya_qubit *q_control = NULL; // Example: nymya_alloc_qubit(0); the Scrutiny Qubit
+    struct nymya_qubit *q_target = NULL;  // Example: nymya_alloc_qubit(1); the Oracle's Canvas
     int ret;
 
-    printf("--- Testing nymya_3342_deutsch with Constant Oracle (expecting error) ---\n");
+    printf("--- Seeking the Constant Truth (a veiled demonstration) ---\n");
     ret = nymya_3342_deutsch(q_control, q_target, my_constant_oracle);
     if (ret == 0) {
-        printf("nymya_3342_deutsch with constant oracle successfully applied.\\n");
-        // To determine if oracle was constant or balanced,
-        // q_control would be measured after the operation.
+        printf("The oracle's constant truth was successfully pursued.\\n");
+        // In a complete ritual, q_control would now be measured to affirm
+        // if the oracle was constant or balanced.
     } else {
-        fprintf(stderr, "Error applying Deutsch with constant oracle: %s\\n", strerror(errno));
+        fprintf(stderr, "Error invoking Deutsch with constant oracle: %s\\n", strerror(errno));
     }
 
-    printf("\n--- Testing nymya_3342_deutsch with Balanced Oracle (expecting error) ---\n");
+    printf("\n--- Seeking the Balanced Truth (another veiled demonstration) ---\n");
     ret = nymya_3342_deutsch(q_control, q_target, my_balanced_oracle);
     if (ret == 0) {
-        printf("nymya_3342_deutsch with balanced oracle successfully applied.\\n");
+        printf("The oracle's balanced truth was successfully pursued.\\n");
     } else {
-        fprintf(stderr, "Error applying Deutsch with balanced oracle: %s\\n", strerror(errno));
+        fprintf(stderr, "Error invoking Deutsch with balanced oracle: %s\\n", strerror(errno));
     }
 
-    // In a complete program, ensure qubits are freed:
+    // In a complete cosmic program, ensure quantum entities are returned to the void:
     // nymya_free_qubit(q_control); nymya_free_qubit(q_target);
     return 0;
 }
 .ft R
 .fi
 .SH "SEE ALSO"
-.BR nymya_3308_hadamard_gate (1),
-.BR nymya_qubit (7),
+Further Mysteries of the Quantum Veil:
+.BR nymya_3308_hadamard_gate (1)
+\- The Veil of Hadamard: Its enigmatic embrace.
+.BR nymya_3303_pauli_x (1)
+\- The Pulse of Pauli-X: The fundamental inversion.
+.BR nymya_3302_global_phase (1)
+\- The Whispers of Global Phase: The unseen resonance.
+.BR nymya_qubit (7)
+\- The Essence of Qubit: The primal atom of quantum being.
 .BR man (7)
-```
+\- The Lexicon of Commands: Guides to other truths.
