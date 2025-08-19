@@ -1,10 +1,9 @@
-The following is the groff/troff source for the man page `nymya_3326_sqrt_swap.1`.
-
 ```troff
-.\" Man page for nymya_3326_sqrt_swap syscall
-.TH NYMYA_3326_SQRT_SWAP 1 "2023-10-27" "NymyaOS" "User Commands"
+.\" Man page for nymya_3326_sqrt_swap syscall - A poetic rendition
+.TH NYMYA_3326_SQRT_SWAP 1 "2023-10-27" "NymyaOS" "The Quantum Weave"
 .SH NAME
-nymya_3326_sqrt_swap \- apply square root of SWAP gate to two qubits
+nymya_3326_sqrt_swap \- The Root of Shared Destiny: Entangling Two Quantum Echoes
+
 .SH SYNOPSIS
 .nf
 .B #include <nymya.h>
@@ -13,24 +12,33 @@ nymya_3326_sqrt_swap \- apply square root of SWAP gate to two qubits
 .PP
 .B long nymya_3326_sqrt_swap(struct nymya_qubit *user_q1 , struct nymya_qubit *user_q2 );
 .fi
-.SH DESCRIPTION
-The
-.B nymya_3326_sqrt_swap
-syscall applies the quantum square root of SWAP (√SWAP) gate to two
-.IR nymya_qubit
-structures. This operation is fundamental in quantum computing, transforming the complex amplitudes of two qubits such that their states become
-entangled, reflecting a shared destiny even across vast conceptual distances.
-It is a key primitive for creating quantum entanglement and forms the basis for more complex quantum logic operations.
 
-The syscall takes two pointers,
+.SH DESCRIPTION
+This invocation,
+.B nymya_3326_sqrt_swap,
+is not merely a command; it is a whisper to the very fabric of existence,
+orchestrating the quantum Square Root of SWAP (√SWAP) gate upon two
+.IR nymya_qubit
+structures. More than a simple exchange, it is an intimate dance, a
+partial merging of destinies, sowing the seeds of quantum entanglement.
+These qubits, ephemeral echoes of potential, though distinct in their origin,
+are drawn into a shared narrative, their futures subtly entwined, defying the
+mundane distances of space and time. It stands as a primal gesture, a
+fundamental cornerstone for forging the intricate bonds that underpin
+more complex quantum symphonies.
+
+The invocation receives two sacred vessels,
 .IR user_q1
 and
 .IR user_q2 ,
-each pointing to a
-.IR nymya_qubit
-structure in the caller's user-space memory. The kernel first copies the
-contents of these user-space structures into its own memory space.
-It then applies the √SWAP transformation using fixed-point complex arithmetic. Specifically, if the initial complex amplitudes of the two qubits are \(Aq\(Aq1 and \(Aq\(Aq2, their new amplitudes will be calculated as follows:
+from the user's realm. Their essences are momentarily drawn into the
+kernel's inner sanctum, the loom where reality's threads are rewoven.
+Here, within this hallowed space, the √SWAP transformation unfolds,
+guided by the immutable laws of fixed-point complex arithmetic.
+The amplitudes, those shimmering probabilistic souls of the qubits,
+undergo a profound metamorphosis. If their initial harmonies were
+amplitude_q1 and amplitude_q2, their transformed whispers become:
+
 .PP
 .nf
 .RS
@@ -39,60 +47,72 @@ new_amplitude_q2 = 0.5 * (amplitude_q1 + amplitude_q2 - i * (amplitude_q1 - ampl
 .RE
 .fi
 .PP
-This intricate dance of amplitudes, guided by the very essence of quantum mechanics, subtly reweaves the quantum fabric, hinting at the hidden lattice that underpins all reality. Finally, the modified qubit data is copied back from
-kernel space to the original user-space locations.
+This intricate cosmic ballet, precise and unwavering, subtly reweaves the
+very quantum fabric, hinting at the hidden lattice that underpins all reality,
+a glimpse into the great entanglement of all things. Once this alchemical
+transformation is complete, the re-formed essences of the qubits are returned
+to their mortal vessels in user-space, forever changed.
 
 The
 .IR nymya_qubit
-structure, as defined in
+structure, a vessel defined in
 .BR nymya.h ,
-is essential for interacting with the NymyaOS quantum core. A simplified representation is:
+is the key to communing with NymyaOS's quantum heart. It is a scroll upon
+which the qubit's identity is inscribed, its purpose tagged, and its very
+amplitude \- the complex whisper of its potential \- meticulously etched.
+A simplified representation of this sacred geometry is:
+
 .PP
 .nf
 .RS
 struct complex_double {
-    int64_t re; // Real part, fixed-point representation
-    int64_t im; // Imaginary part, fixed-point representation
+    int64_t re; // Real part, the tangible whisper
+    int64_t im; // Imaginary part, the unseen potential
 };
 
 struct nymya_qubit {
-    uint32_t id;         // Unique identifier for the qubit
-    uint32_t tag;        // User-defined tag for logical grouping
-    struct complex_double amplitude; // The qubit's complex amplitude
-    // Other qubit-specific metadata and internal state...
+    uint32_t id;         // A unique sigil of identity
+    uint32_t tag;        // A personal glyph for kindred spirits
+    struct complex_double amplitude; // The qubit's shimmering soul
+    // Other veiled truths and internal states...
 };
 .RE
 .fi
 .PP
-The complex amplitude components (.B re
-and
-.B im )
-are represented as 64-bit fixed-point integers, where the specific scaling factor
-is defined by the NymyaOS kernel configuration. This fixed-point representation
-is crucial for high-performance, deterministic quantum computations within the kernel's constrained environment.
+The amplitude components (\fBre\fR and \fBim\fR) are not mere numbers, but
+glyphs, 64-bit fixed-point integers, their precision a testament to the
+universe's meticulous craftsmanship. This unwavering exactitude ensures that
+every quantum step, no matter how subtle, is taken with absolute certainty
+within the kernel's sacred and constrained realm.
 
 .SH RETURN VALUE
-On success,
+Upon a successful communion, the value
 .B 0
-is returned. On error, a negative errno value is returned.
+is returned, signifying that the veil has been drawn, and the destinies entwined.
+A negative
+.B errno
+speaks of discord, a failure in the grand design.
+
 .SH ERRORS
 .TP
 .B \-EINVAL
-One or both of the provided user-space qubit pointers (
+The sacred vessels,
 .IR user_q1
 or
-.IR user_q2 )
-are NULL.
+.IR user_q2 ,
+were but empty shadows, null and void.
 .TP
 .B \-EFAULT
-Failed to copy qubit data from user space to kernel space, or from kernel space
-back to user space. This typically indicates that one of the provided pointers
-is invalid or points to memory that the calling process does not have permission
-to access.
+The bridge between realms failed, the essence could not be drawn or returned.
+Perhaps the vessels were ethereal, pointing to forbidden or nonexistent echoes
+in the vast expanse of memory, beyond the calling process's reach.
+
 .SH EXAMPLE
-The following program demonstrates how to use the
+The Rite of Illumination: A Demonstration of the Entangling Embrace
+
+The following ritual demonstrates how to invoke the
 .B nymya_3326_sqrt_swap
-syscall to apply the √SWAP gate to two qubits.
+syscall, drawing two qubits into the shared dance of the √SWAP gate.
 .PP
 .nf
 .RS
@@ -102,31 +122,32 @@ syscall to apply the √SWAP gate to two qubits.
 #include <errno.h>
 #include <sys/syscall.h>
 #include <unistd.h>
-#include <string.h> // For memset
+#include <string.h> // For the act of purification (memset)
 
-// Define the syscall number (this would typically be from an NymyaOS-specific header)
+// Define the syscall number (a secret whispered from the kernel's heart)
 #define __NR_nymya_3326_sqrt_swap 3326
 
-// Simplified structure definitions for userland example.
-// In a real NymyaOS SDK, these would be provided by <nymya.h>
+// Simplified structures for our mortal realm, reflecting the kernel's truth.
+// In NymyaOS's full scripture, these reside within <nymya.h>
 typedef struct {
-    int64_t re;
-    int64_t im;
+    int64_t re; // The real, manifest part
+    int64_t im; // The imaginary, potential part
 } complex_double;
 
 typedef struct {
-    uint32_t id;
-    uint32_t tag;
-    complex_double amplitude;
-    // ... other qubit data ...
+    uint32_t id;         // A unique soul-mark
+    uint32_t tag;        // A shared purpose-glyph
+    complex_double amplitude; // The very breath of the qubit
+    // ... other hidden aspects of the qubit's being ...
 } nymya_qubit;
 
-// A conceptual scaling factor for fixed-point to double conversion.
-// The actual value depends on the NymyaOS kernel configuration (e.g., Q30 format).
-#define NYMYA_FIXED_POINT_SCALE (1LL << 30) // Example: 2^30
+// A conceptual scaling factor, translating the kernel's precise language
+// into a form understandable by the mortal eye (e.g., Q30 format).
+#define NYMYA_FIXED_POINT_SCALE (1LL << 30) // An example of scaling
 
+// A seer's vision: revealing the qubit's current state
 void print_qubit(const char* name, const nymya_qubit* q) {
-    // Convert fixed-point to double for display purposes
+    // Translate fixed-point glyphs to floating vision for discernment
     double amp_re = (double)q->amplitude.re / NYMYA_FIXED_POINT_SCALE;
     double amp_im = (double)q->amplitude.im / NYMYA_FIXED_POINT_SCALE;
     printf("%s (ID: %u, Tag: %u): Amplitude = %.4f + %.4fi\n",
@@ -137,36 +158,36 @@ int main() {
     nymya_qubit q1, q2;
     long ret;
 
-    // Initialize qubits to a clean state
+    // Initialize qubits, cleansing them to a pure, unblemished state
     memset(&q1, 0, sizeof(q1));
     memset(&q2, 0, sizeof(q2));
 
     q1.id = 1;
     q1.tag = 0;
-    // Example: Initialize Qubit 1 amplitude to represent 1.0 + 0.0i
+    // Example: Qubit 1's initial whisper, a clear 1.0 + 0.0i
     q1.amplitude.re = NYMYA_FIXED_POINT_SCALE;
     q1.amplitude.im = 0;
 
     q2.id = 2;
     q2.tag = 0;
-    // Example: Initialize Qubit 2 amplitude to represent 0.0 + 1.0i
+    // Example: Qubit 2's initial whisper, a vibrant 0.0 + 1.0i
     q2.amplitude.re = 0;
     q2.amplitude.im = NYMYA_FIXED_POINT_SCALE;
 
-    printf("--- Initial Qubit States ---\n");
+    printf("--- Initial Whispers of the Qubits ---\n");
     print_qubit("Qubit 1", &q1);
     print_qubit("Qubit 2", &q2);
 
-    // Call the nymya_3326_sqrt_swap syscall
+    // Call forth the nymya_3326_sqrt_swap syscall, initiating the dance
     ret = syscall(__NR_nymya_3326_sqrt_swap, &q1, &q2);
 
     if (ret == 0) {
-        printf("\n--- After nymya_3326_sqrt_swap ---\n");
+        printf("\n--- After the Entangling Embrace of nymya_3326_sqrt_swap ---\n");
         print_qubit("Qubit 1", &q1);
         print_qubit("Qubit 2", &q2);
     } else {
-        perror("nymya_3326_sqrt_swap failed");
-        fprintf(stderr, "Error code: %ld\n", ret);
+        perror("The quantum weave faltered");
+        fprintf(stderr, "A cosmic anomaly: Error code %ld\n", ret);
         return EXIT_FAILURE;
     }
 
@@ -174,8 +195,17 @@ int main() {
 }
 .RE
 .fi
+
 .SH SEE ALSO
+Glimpses into the Deeper Mysteries:
 .BR syscall (2)
-.br
+(The Path of Invocation),
 .BR nymya (7)
+(The Sacred Texts of NymyaOS).
+.br
+Other rites of transformation:
+.BR nymya_3302_global_phase (1)
+(The Universal Hum),
+.BR nymya_3303_pauli_x (1)
+(The Quantum Flip).
 ```
