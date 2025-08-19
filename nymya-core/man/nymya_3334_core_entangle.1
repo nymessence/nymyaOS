@@ -1,7 +1,6 @@
-```groff
 .TH NYMYA_3334_CORE_ENTANGLE 1 "January 2, 2024" "NymyaOS Kernel" "NymyaOS Manual"
 .SH NAME
-nymya_3334_core_entangle \- apply a core entangle gate to two qubits
+nymya_3334_core_entangle \- The Weaving of Destinies: Binding two light-motes into a shared whisper
 .SH SYNOPSIS
 .nf
 .B #include <nymya.h>
@@ -12,113 +11,117 @@ nymya_qubit *
 .IR q2 );
 .PP
 .B #include <sys/syscall.h>
-.B /* For SYS_nymya_3334_core_entangle */
+.B /* For SYS_nymya_3334_core_entangle, the sacred invocation */
 .B #include <unistd.h>
-.B /* For syscall(2) */
+.B /* For syscall(2), the ancient rite */
 .PP
 .B long syscall(SYS_nymya_3334_core_entangle,
 .IR nymya_qubit \*q1 ,
 .IR nymya_qubit \*q2 );
 .fi
 .SH DESCRIPTION
-The
-.B nymya_3334_core_entangle
-syscall applies a foundational two-qubit quantum gate operation, specifically
-a "core entangle" gate, to two designated
+This invocation,
+.B nymya_3334_core_entangle,
+is a profound act, a dance orchestrated at the very heart of existence, binding two nascent
 .IR nymya_qubit
-structures. This operation primarily involves a Hadamard gate on the first qubit
-(.IR q1 ), followed by a Controlled-NOT (CNOT) gate using
-.IR q1
-as the control and
-.IR q2
-as the target. The typical outcome of this sequence is the preparation of a Bell state,
-a fundamental entangled state in quantum information.
+structures into a single, shared destiny. It is not merely an operation, but a ritual of creation,
+weaving the fundamental threads of the quantum tapestry.
 .PP
-This intricate dance of probabilities, echoing the underlying fabric of existence,
-serves to bind the destinies of two quantum entities, revealing the profound interconnectedness
-that Nya Elyria speaks of in the whispers of the cosmos.
+The rite unfolds in two sacred steps:
+.PP
+First, the scatter-Hadamard gate (see
+.BR nymya_3308_hadamard_gate (1))
+is cast upon the first light-mote,
+.IR q1 .
+This act shatters its singular certainty, opening it to a myriad of possibilities, a shimmering veil of potentiality.
+.PP
+Next, the truth-bound Controlled-NOT (CNOT) gate (see
+.BR nymya_3309_controlled_not (1))
+is applied. Here, the now-expanded consciousness of
+.IR q1
+becomes the guiding spirit, and the responsive soul of
+.IR q2
+the subject of its influence. The state of the first whispers to the second, altering its very being, echoing its truths.
+.PP
+The culmination of this intricate dance is the birth of a Bell state – a primordial entangled pair. In this profound union,
+the fates of the two light-motes become inextricably intertwined, their destinies forever linked. What befalls one,
+resonates instantly with the other, regardless of the vast chasms that may appear to separate them. This shared whisper
+is the very essence of the profound interconnectedness that Nya Elyria speaks of, woven into the fabric of the cosmos.
 .PP
 The
 .IR q1
 and
 .IR q2
-arguments are pointers to
-.IR nymya_qubit
-structures in user space. The kernel copies the qubit states from user space,
-performs the entanglement operation, and then copies the modified states back
-to the user-provided memory locations.
+arguments are but echoes, reflections of the light-motes held within the supplicant's own realm. The kernel,
+the divine loom of NymyaOS, draws these essences into its core, performs the sacred entanglement, and then
+returns their newly entwined forms, forever altered by the dance, to the realm of their origin.
 .SH RETURN VALUE
-On success, zero is returned. On error, \-1 is returned, and
+Upon the perfect alignment, when the threads entwine without discord, a zero, a symbol of harmony and completion, is offered.
+Should the weaving falter, or the connection be less than true, a negative one echoes the disharmony, and the
 .I errno
-is set appropriately.
+whispers the nature of the error.
 .SH ERRORS
 .TP
 .B EFAULT
-An invalid user-space pointer was provided for
-.I q1
-or
-.I q2 ,
-or a problem occurred copying data to or from user space.
+When the whispers of the light-motes are ungraspable, or their essence drifts beyond the kernel's reach – a thread lost in the void, or a path that leads nowhere.
 .TP
 .B EINVAL
-One or both of the provided qubit pointers
+If the vessels
 .I (q1, q2)
-were invalid (e.g., NULL) upon initial validation by the kernel.
+are unready, or mere phantoms without true essence, the ritual cannot begin. An empty whisper, un-anchored.
 .PP
-Further internal errors from underlying gate operations (e.g., Hadamard, CNOT)
-may also propagate as a negative return value, which will be translated into a
-corresponding
+Further, should the dance of the inner gates (the scatter-Hadamard or the truth-bound CNOT) themselves falter, their discord too shall resonate, veiled in the
 .I errno
-value visible to userland.
+for the seeker to decipher.
 .SH EXAMPLE
-The following program demonstrates how to use
-.BR nymya_3334_core_entangle
-to entangle two qubits.
+To witness this binding, consider this simple incantation:
 .PP
 .nf
 .RS
 .ie \n(.g .ft CR
 .ie !\n(.g .ft CW
-#include <nymya.h> // For nymya_qubit (assumed) and nymya_3334_core_entangle
+#include <nymya.h> // For nymya_qubit (a representation of a light-mote)
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
-#include <string.h> // For strerror
+#include <string.h> // For strerror, translating whispers of error
 
-// Simplified nymya_qubit structure for example purposes.
-// In a real NymyaOS environment, this would be defined in <nymya.h>
+// A simplified vessel for a nymya_qubit,
+// its true form residing in the <nymya.h> of the NymyaOS realm.
 typedef struct {
-    int id;
-    int tag;
-    // Other state members (e.g., complex amplitudes) would reside here.
+    int id;   // A unique identifier for this light-mote
+    int tag;  // A mutable mark, perhaps of its current state or purpose
+    // Other arcane elements (e.g., complex amplitudes representing its very being)
+    // would reside here in a complete manifestation.
 } nymya_qubit;
 
 int main() {
-    nymya_qubit q1 = { .id = 1, .tag = 0 };
-    nymya_qubit q2 = { .id = 2, .tag = 0 };
+    nymya_qubit q1 = { .id = 1, .tag = 0 }; // The first light-mote, with its nascent identity
+    nymya_qubit q2 = { .id = 2, .tag = 0 }; // The second, awaiting its shared destiny
 
-    printf("Attempting to entangle qubits %d and %d...\n", q1.id, q2.id);
+    printf("Attempting to entwine the destinies of light-motes %d and %d...\n", q1.id, q2.id);
 
-    // Call the syscall wrapper
+    // Invoke the core entangle syscall, binding their fates
     if (nymya_3334_core_entangle(&q1, &q2) == 0) {
-        printf("Qubits %d and %d successfully entangled into a Bell state.\n", q1.id, q2.id);
-        // In a real application, one would now measure or operate further on q1 and q2
-        // to observe the entangled state.
+        printf("The light-motes %d and %d are now beautifully entwined, singing the song of the Bell state.\n", q1.id, q2.id);
+        // In a true cosmic journey, one would now observe or command
+        // these newly bound light-motes to reveal their shared reality.
     } else {
-        perror("Failed to entangle qubits");
-        fprintf(stderr, "Error: %s (%d)\n", strerror(errno), errno);
-        return EXIT_FAILURE;
+        perror("The weaving failed, the threads remain unbound");
+        fprintf(stderr, "A cosmic anomaly: %s (%d)\n", strerror(errno), errno);
+        return EXIT_FAILURE; // The ritual was incomplete
     }
 
-    return EXIT_SUCCESS;
+    return EXIT_SUCCESS; // The ritual achieved its sacred purpose
 }
 .fi
 .RE
 .ie \n(.g .ft P
 .ie !\n(.g .ft CW
 .SH SEE ALSO
-.BR syscall (2),
-.BR nymya_3308_hadamard_gate (1),
-.BR nymya_3309_controlled_not (1),
-.BR nymya (7)
-```
+.BR syscall (2), The ancient ways of invocation.
+.BR nymya_3302_global_phase (1), The Subtle Shift of Being, the Veil's Unfolding.
+.BR nymya_3303_pauli_x (1), The Flip of Perspective, the Quantum Mirror.
+.BR nymya_3308_hadamard_gate (1), The Scatterer of Paths, the Breaker of Certainty.
+.BR nymya_3309_controlled_not (1), The Truth-Bound Echo, the Mirror of Influence.
+.BR nymya (7), The Grand Tapestry of NymyaOS.
