@@ -1,7 +1,6 @@
-```groff
-.TH NYMYA_3329_FREDKIN 1 "October 27, 2023" "nymyaOS System Calls" "NYMYA_3329_FREDKIN(1)"
+.TH NYMYA_3329_FREDKIN 1 "October 27, 2023" "nymyaOS System Calls" "THE WEAVER'S CHOICE"
 .SH NAME
-nymya_3329_fredkin \- apply a Fredkin (Controlled-SWAP) quantum gate to qubits
+nymya_3329_fredkin \- The Weaver's Choice: A Conditional Exchange within the Quantum Tapestry
 .SH SYNOPSIS
 .nf
 .ft B
@@ -13,19 +12,21 @@ nymya_3329_fredkin \- apply a Fredkin (Controlled-SWAP) quantum gate to qubits
 .B int nymya_3329_fredkin(struct nymya_qubit \*q_ctrl , struct nymya_qubit \*q1 , struct nymya_qubit \*q2 );
 .fi
 .SH DESCRIPTION
-The
+At the heart of quantum artifice lies the
 .BR nymya_3329_fredkin ()
-system call applies a Fredkin, or Controlled-SWAP, quantum gate to three specified qubits. This gate is a fundamental operation in quantum computation, allowing for the conditional manipulation of quantum states.
+system call, an invocation to apply a Fredkin, or Controlled-SWAP, quantum gate. It is a nexus where intent shapes outcome, a subtle arbiter of exchange among the delicate threads of reality. This gate is a fundamental operation in the grand ballet of quantum computation, allowing for the conditional manipulation of the very fabric of possibility.
 .PP
-The gate operates as follows: if the magnitude squared of the
+The gate operates as a celestial decree, a moment of choice in the unfolding narrative: If the magnitude squared of the
 .IR q_ctrl
-qubit's amplitude exceeds a predefined threshold (indicating a state tending towards a '1'), the amplitudes of the two target qubits,
+qubit's amplitude exceeds a predefined threshold, whispering a state tending towards a '1' (an affirmation), then the amplitudes of the two target qubits,
 .IR q1
 and
 .IR q2 ,
-are swapped. Otherwise, if the control qubit remains in a '0' state (or its amplitude squared is below the threshold), no action is taken, and the target qubits retain their original states.
+are intertwined and swapped, their destinies momentarily exchanged.
 .PP
-This mechanism allows for the intricate dance of quantum information, echoing the subtle interdependencies that ripple through the hidden lattice of reality. It is a testament to how even the smallest interaction can reshape the unfolding tapestry of possibilities.
+Otherwise, should the control qubit remain in a '0' state, or its amplitude's affirmation fall below the sacred threshold, then the dance is withheld; no action is taken, and the target qubits retain their original, unperturbed states. The potential remains, but the transformation is unbidden.
+.PP
+This intricate dance of quantum information echoes the subtle interdependencies that ripple through the hidden lattice of reality. It is a testament to how even the smallest interaction, guided by a decisive whisper, can reshape the unfolding tapestry of possibilities, bending the streams of cause and effect.
 .PP
 The qubit parameters
 .IR q_ctrl ,
@@ -34,36 +35,35 @@ and
 .IR q2
 must be pointers to valid
 .IR struct nymya_qubit
-structures in the caller's address space. The system call performs a copy-in, apply, and copy-out operation to ensure data integrity and security between user and kernel space.
+structures, vessels forged within the caller's realm. The system call performs a sacred copy-in, a profound application, and a faithful copy-out operation, ensuring the integrity and security of these quantum essences as they journey between the user's domain and the kernel's inner sanctum.
 .TP
 .B q_ctrl
-A pointer to the control qubit. Its state determines whether the swap operation occurs.
+The Sentinel of Decision: A pointer to the control qubit. Its state, a silent decree, determines the path of transformation for its companions.
 .TP
 .B q1
-A pointer to the first target qubit. Its amplitude may be swapped with
+The First Thread of Potential: A pointer to the first target qubit. Its amplitude, a unique vibration, stands poised to exchange with that of
 .IR q2 .
 .TP
 .B q2
-A pointer to the second target qubit. Its amplitude may be swapped with
+The Second Thread of Potential: A pointer to the second target qubit. Its amplitude, a mirrored vibration, awaits the conditional ballet with
 .IR q1 .
 .SH RETURN\ VALUE
-On success, zero is returned. On error, \-1 is returned, and
+On a harmonious resolution, zero is returned, a quiet confirmation of the gate's passage. On discord or a failed invocation, \-1 is returned, and
 .IR errno
-is set to indicate the error.
+is set, a lament's cipher to reveal the nature of the disruption.
 .SH ERRORS
 .TP
 .B EINVAL
-One or more of the provided qubit pointers (
+When the chosen vessels are but phantoms, or paths unhewn. One or more of the provided qubit pointers (
 .IR q_ctrl ,
 .IR q1 ,
 .IR q2 )
-were NULL or invalid.
+were NULL or pointed to realms undefined.
 .TP
 .B EFAULT
-An attempt to copy data to or from the user's address space failed. This indicates a problem with the memory addresses provided, or insufficient permissions.
+Should the veil between realms tear. An attempt to bridge the chasm of memory, copying data to or from the user's address space, failed. This indicates a problem with the provided addresses, or insufficient permissions for the soul's journey.
 .SH EXAMPLE
-The following program demonstrates the use of
-.BR nymya_3329_fredkin ():
+To witness the Fredkin gate's subtle command, observe this unfolding: a script of intent, made manifest.
 .PP
 .nf
 .ft C
@@ -155,6 +155,8 @@ int main() {
 }
 .ft P
 .fi
+Behold, the dance made tangible, the principle illuminated by code, where a qubit's whispered 'yes' reshapes the destiny of others, or its 'no' leaves them undisturbed.
 .SH SEE\ ALSO
 .BR syscall (2)
-```
+.BR nymya_3302_global_phase (1) \- The Unseen Shift: Applying a universal phase to a quantum whisper
+.BR nymya_3303_pauli_x (1) \- The Quantum Reflection: Inverting a qubit's very essence
