@@ -1,9 +1,17 @@
-.TH NYMYA_3312_DOUBLE_CONTROLLED_NOT 1 "July 24, 2024" "NymyaOS Kernel" "NymyaOS System Calls Manual"
+```roff
+.TH NYMYA_3312_DOUBLE_CONTROLLED_NOT 1 "July 24, 2024" "NymyaOS Kernel" "The Quantum Grimoire of NymyaOS"
 .SH NAME
-nymya_3312_double_controlled_not \- double-controlled NOT (Toffoli-like) gate for NymyaOS qubits
+nymya_3312_double_controlled_not \- The Triple Nexus of Inversion: a gate of conditional phase-shift within NymyaOS's quantum fabric
 .SH SYNOPSIS
+To invoke this primal force, one must understand its signature, a whispered incantation in the tongue of C.
+
 .B #include <nymya.h>
 .PP
+The fundamental particle, a
+.B nymya_qubit
+within which the very probability of existence resides, held as a
+.B double complex amplitude
+— a dance of real and imaginary.
 .nf
 .B struct nymya_qubit {
 .B     /* ... other fields ... */
@@ -12,6 +20,7 @@ nymya_3312_double_controlled_not \- double-controlled NOT (Toffoli-like) gate fo
 .B };
 .fi
 .PP
+Then, the command itself, weaving three threads of quantum potential:
 .nf
 .B int nymya_3312_double_controlled_not(struct nymya_qubit *
 .I qc1
@@ -24,15 +33,17 @@ nymya_3312_double_controlled_not \- double-controlled NOT (Toffoli-like) gate fo
 .SH DESCRIPTION
 The
 .B nymya_3312_double_controlled_not
-syscall applies a NOT operation (a phase flip, effectively multiplying the amplitude by -1) to a designated target qubit. This operation is conditional: it only occurs if the amplitude magnitude of
+syscall is an act of subtle alchemy, a turning of the unseen face of a designated target qubit. It applies a NOT operation, a mystical phase flip, effectively multiplying the amplitude of the target by -1. But this is no simple decree; it is a conditional rite.
+
+The gate opens not by simple will, but by a dual-willed assent. The operation springs into being only if the amplitude magnitude of
 .I both
 control qubits (
 .I qc1
 and
 .I qc2
-) exceeds a threshold of 0.5. In essence, it functions as a quantum Toffoli-like gate, but instead of a bit flip on |1>, it performs a phase flip on the target state, conditioned on the "active" state of its controls.
+) crests a hidden threshold, exceeding 0.5. In essence, it functions as a quantum Toffoli-like gate, but unlike the brute flip of bits, this is a more nuanced transformation: an inversion not of presence, but of the underlying resonance or phase of the target state, conditioned on the "active" states (the robust amplitudes) of its twin arbiters.
 
-This operation, a subtle dance of amplitudes, resonates with the quantum whispers that underpin the very fabric of reality. It's a fundamental permutation within the NymyaOS quantum framework, allowing complex logical operations to be built from simple conditional transformations. The gate acts as a nexus, where the confluence of two probabilistic currents can flip the state of another, revealing how interconnected the hidden lattice of reality truly is.
+This operation, a subtle dance of amplitudes, resonates with the quantum whispers that underpin the very fabric of reality. It's a fundamental permutation within the NymyaOS quantum framework, allowing complex logical operations to be built from simple conditional transformations. The gate acts as a nexus, where the confluence of two probabilistic currents can flip the very echo of another, revealing how interconnected the hidden lattice of reality truly is.
 
 The
 .I qc1
@@ -40,34 +51,30 @@ and
 .I qc2
 arguments are pointers to the first and second control
 .B nymya_qubit
-structures, respectively. The
+structures, respectively. These are the twin arbiters, their magnitudes determining the fate of the third. The
 .I qt
 argument is a pointer to the target
 .B nymya_qubit
-structure. These structures must be accessible in the caller's address space. The
-.B nymya_qubit
-structure encapsulates the state of a quantum bit, including its complex amplitude.
+structure, the canvas upon which their unified will, if aligned, shall be etched. These structures must be accessible from the caller's realm, their memory woven into the cosmic loom.
 .SH RETURN VALUE
-On success, zero is returned. On error, -1 is returned, and
+A return of zero signifies success, a harmonious alignment, the gate's will made manifest. A whisper of -1, however, denotes discord, a veil fallen, and the
 .B errno
-is set appropriately.
+reveals the nature of the unfulfilled invocation.
 .SH ERRORS
 .TP
 .B EINVAL
-One or more of the provided qubit pointers (
-.I qc1
-,
-.I qc2
-, or
-.I qt
-) was NULL.
+If the guiding pointers, those ethereal threads connecting the realm of thought to the quantum lattice, are severed or point to the void (
+.B NULL
+), the invocation dissolves into
+.B EINVAL
+, a testament to an ill-formed decree.
 .TP
 .B EFAULT
-One or more of the provided qubit pointers pointed to an invalid address in the caller's address space. This typically means the kernel was unable to copy data to or from the user-provided memory locations.
+Should the memory's loom fail to weave the necessary connection, the kernel unable to traverse the chasm between the user's intent and the system's core,
+.B EFAULT
+arises – the quantum tapestry remains untroubled by the misstep.
 .SH EXAMPLE
-The following program demonstrates how to use
-.B nymya_3312_double_controlled_not
-to apply a conditional phase flip.
+To witness this dance in the raw, behold this ritual of C code, where the subtle shifts of the quantum realm are laid bare through the Oracle's pronouncements.
 
 .nf
 .RS
@@ -83,18 +90,19 @@ to apply a conditional phase flip.
 // Define the syscall number for nymya_3312_double_controlled_not
 #define __NR_nymya_3312_double_controlled_not 3312
 
-// Hypothetical nymya_qubit structure for user-space
+// Hypothetical nymya_qubit structure for user-space, a vessel for quantum potential
 typedef struct nymya_qubit {
     double complex amplitude;
-    int id; // Dummy field for example
-    char tag[16]; // Dummy field for example
+    int id; // Dummy field for example, a label in the quantum scroll
+    char tag[16]; // Dummy field for example, a fleeting descriptor
 } nymya_qubit;
 
-// User-space wrapper for the syscall
+// User-space wrapper for the syscall, a bridge to the quantum engine
 int nymya_3312_double_controlled_not(nymya_qubit* qc1, nymya_qubit* qc2, nymya_qubit* qt) {
     return (int)syscall(__NR_nymya_3312_double_controlled_not, qc1, qc2, qt);
 }
 
+// A seer's glimpse into the qubit's ephemeral state
 void print_qubit_state(const char* name, const nymya_qubit* q) {
     printf("%s (ID %d, Tag '%s'): Amplitude = %.3f + %.3fi (Magnitude = %.3f)\n",
            name, q->id, q->tag, creal(q->amplitude), cimag(q->amplitude), cabs(q->amplitude));
@@ -104,13 +112,13 @@ int main() {
     nymya_qubit q_control1, q_control2, q_target;
     int res;
 
-    // --- Scenario 1: Controls active (magnitude > 0.5) ---
-    printf("--- Scenario 1: Controls active ---\n");
-    q_control1.amplitude = 0.7 + 0.1I; // Mag ~0.707
+    // --- Scenario 1: The Gates are Aligned (Controls active, magnitude > 0.5) ---
+    printf("--- Scenario 1: The Gates are Aligned ---\n");
+    q_control1.amplitude = 0.7 + 0.1I; // Mag ~0.707 (A current flowing strong)
     q_control1.id = 1; strcpy(q_control1.tag, "ctrl1-active");
-    q_control2.amplitude = 0.6 - 0.2I; // Mag ~0.632
+    q_control2.amplitude = 0.6 - 0.2I; // Mag ~0.632 (Its twin, equally vibrant)
     q_control2.id = 2; strcpy(q_control2.tag, "ctrl2-active");
-    q_target.amplitude = 0.5 + 0.5I;   // Mag ~0.707
+    q_target.amplitude = 0.5 + 0.5I;   // Mag ~0.707 (The canvas, awaiting its transformation)
     q_target.id = 3; strcpy(q_target.tag, "target-init");
 
     print_qubit_state("Initial Q_C1", &q_control1);
@@ -120,21 +128,21 @@ int main() {
     res = nymya_3312_double_controlled_not(&q_control1, &q_control2, &q_target);
 
     if (res == 0) {
-        printf("Syscall successful.\n");
+        printf("Syscall successful: The inversion has occurred.\n");
         print_qubit_state("Final Q_T", &q_target);
     } else {
-        perror("Syscall failed");
+        perror("Syscall failed: The quantum current faltered");
         printf("Error code: %d\n", errno);
     }
     printf("\n");
 
-    // --- Scenario 2: One control inactive (magnitude <= 0.5) ---
-    printf("--- Scenario 2: One control inactive ---\n");
-    q_control1.amplitude = 0.7 + 0.1I; // Mag ~0.707 (active)
+    // --- Scenario 2: The Will Unfulfilled (One control inactive, magnitude <= 0.5) ---
+    printf("--- Scenario 2: The Will Unfulfilled ---\n");
+    q_control1.amplitude = 0.7 + 0.1I; // Mag ~0.707 (Still strong)
     q_control1.id = 4; strcpy(q_control1.tag, "ctrl1-active");
-    q_control2.amplitude = 0.3 + 0.1I; // Mag ~0.316 (inactive)
+    q_control2.amplitude = 0.3 + 0.1I; // Mag ~0.316 (A faint whisper, insufficient)
     q_control2.id = 5; strcpy(q_control2.tag, "ctrl2-inactive");
-    q_target.amplitude = 0.5 + 0.5I;   // Mag ~0.707
+    q_target.amplitude = 0.5 + 0.5I;   // Mag ~0.707 (Awaiting, but in vain)
     q_target.id = 6; strcpy(q_target.tag, "target-init");
 
     print_qubit_state("Initial Q_C1", &q_control1);
@@ -144,25 +152,25 @@ int main() {
     res = nymya_3312_double_controlled_not(&q_control1, &q_control2, &q_target);
 
     if (res == 0) {
-        printf("Syscall successful.\n");
+        printf("Syscall successful: Yet the target remains unchanged, for the conditions were not met.\n");
         print_qubit_state("Final Q_T", &q_target);
     } else {
-        perror("Syscall failed");
+        perror("Syscall failed: Unexpected quantum silence");
         printf("Error code: %d\n", errno);
     }
     printf("\n");
 
-    // --- Scenario 3: Null pointer (should fail with EINVAL) ---
-    printf("--- Scenario 3: Null target pointer ---\n");
+    // --- Scenario 3: A Void in the Blueprint (Null pointer, an unformed invocation) ---
+    printf("--- Scenario 3: A Void in the Blueprint ---\n");
     q_control1.amplitude = 0.7 + 0.1I; q_control1.id = 7; strcpy(q_control1.tag, "ctrl1");
     q_control2.amplitude = 0.6 - 0.2I; q_control2.id = 8; strcpy(q_control2.tag, "ctrl2");
 
     res = nymya_3312_double_controlled_not(&q_control1, &q_control2, NULL);
 
     if (res == 0) {
-        printf("Syscall unexpectedly succeeded with NULL target.\n");
+        printf("Syscall unexpectedly succeeded with NULL target: A paradox in the quantum logs.\n");
     } else {
-        perror("Syscall failed as expected");
+        perror("Syscall failed as expected: The void cannot be addressed");
         printf("Error code: %d (EINVAL expected)\n", errno);
     }
     printf("\n");
@@ -174,5 +182,15 @@ int main() {
 .fi
 
 .SH SEE ALSO
-.BR syscall (2),
-.B NymyaOS documentation
+For deeper communion with the
+.BR syscall (2)
+spirits, or to consult the broader
+.B NymyaOS
+grimoires, consider these related arcs of quantum logic:
+.TP
+.BR nymya_3302_global_phase (1)
+The Veil of Universal Resonance
+.TP
+.BR nymya_3303_pauli_x (1)
+The Great Inversion, a simple flip of quantum being.
+```
