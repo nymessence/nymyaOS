@@ -1,8 +1,8 @@
 ```troff
-.\" Man page for nymya_3328_swap_pow(1)
+.\" Man page for nymya_3328_swap_pow(1) - The Quantum Pas de Deux
 .TH NYMYA_3328_SWAP_POW 1 "2023-10-27" "nymyaOS Kernel" "NymyaOS System Calls"
 .SH NAME
-nymya_3328_swap_pow \- applies an interpolated SWAP^alpha gate to two qubits
+nymya_3328_swap_pow \- A ballet of quantum interweaving: orchestrating the shared destiny of two qubits
 .SH SYNOPSIS
 .B #include <nymya/syscalls.h>
 .PP
@@ -14,19 +14,22 @@ nymya_3328_swap_pow \- applies an interpolated SWAP^alpha gate to two qubits
 .I alpha_fp
 .B );
 .SH DESCRIPTION
-The
+In the grand theater of quantum reality, where possibilities dance as waves, the
 .B nymya_3328_swap_pow
-syscall applies an interpolated SWAP^alpha gate to two specified qubits,
+syscall emerges as an orchestrator of subtle communion. It reaches into the very
+essence of two specified qubits,
 .I q1
 and
 .I q2
-, residing in user space. This operation modifies the quantum amplitudes
-of the qubits based on the interpolation parameter
+, residing within the user's perception of the universe. This sacred operation
+sculpts the quantum amplitudes, those shimmering echoes of potentiality, based
+upon a profound parameter of interpolation,
 .I alpha_fp
 .
+
 .PP
-The SWAP^alpha gate performs a generalized exchange of the amplitudes between
-the two qubits. If the initial complex amplitudes are
+The SWAP^alpha gate is not a mere exchange, but a generalized unfolding of
+shared identity. Imagine the initial complex amplitudes as distinct voices,
 .I A
 for
 .I q1
@@ -34,11 +37,11 @@ and
 .I B
 for
 .I q2
-, the transformation yields new amplitudes
+. Through this transformation, new harmonies arise,
 .I A'
 and
 .I B'
-as follows:
+, interwoven according to a cosmic melody:
 .RS
 .br
 .nf
@@ -49,54 +52,73 @@ B' = cos(alpha * PI/2) * B + sin(alpha * PI/2) * A
 .PP
 The parameter
 .I alpha_fp
-controls the degree of interpolation and must be provided as an
+acts as a celestial dial, precisely tuning the degree of this quantum embrace. It
+is presented as an
 .B int64_t
-fixed-point value. This value represents a scaled `alpha`, where the
-actual floating-point `alpha` (used in the mathematical formula above)
-is `alpha_fp / FIXED_POINT_SCALE`. The `FIXED_POINT_SCALE` is a system-defined
-constant, typically a power of 2 (e.g., `1LL << 30`).
+fixed-point value, a scaled representation of `alpha`. The true `alpha` value,
+which governs the dance in the mathematical realm, is `alpha_fp / FIXED_POINT_SCALE`.
+The `FIXED_POINT_SCALE` is a fundamental constant of the system, often a power
+of two (e.g., `1LL << 30`), a testament to the granular precision of existence.
+
 .PP
-A value of `alpha_fp` equivalent to `0` (i.e., `0`) means the gate
-acts as an identity, leaving the qubit amplitudes unchanged.
-A value of `alpha_fp` equivalent to `1` (i.e., `FIXED_POINT_SCALE`)
-results in a full SWAP gate, completely exchanging the amplitudes of
+At the dawn of its influence, when `alpha_fp` aligns with `0`, the gate whispers
+of stillness. It acts as an identity, leaving the qubit amplitudes untouched, a
+reflection of pure potential, undisturbed by external influence.
+
+.PP
+As the dial turns, reaching the zenith where `alpha_fp` corresponds to `1` (i.e.,
+`FIXED_POINT_SCALE`), a full SWAP gate manifests. Here, the amplitudes of
 .I q1
 and
 .I q2
-. Values between `0` and `FIXED_POINT_SCALE` perform a partial, interpolated
+engage in a complete and profound exchange, a perfect mirroring, as if two
+streams of being have fully intertwined and traded their very essence.
+
+.PP
+Between these poles, between `0` and `FIXED_POINT_SCALE`, lies the true marvel:
+a continuous interpolation, a gradual bending of reality, a partial, empathetic
 swap. This operation, a delicate dance within the quantum tapestry, allows for
 a continuous interpolation between two fundamental states, subtly bending the very
 fabric of interaction. One might perceive it as guiding the flow of information
 through the unseen conduits of existence, revealing the nuanced rhythms of the
-cosmos embedded within the computation.
+cosmos embedded within the computation. Unlike the sharp inversion of a
+.BR nymya_3303_pauli_x (1) gate, which flips a qubit's state with definitive
+force, or the unseen, internal shift of
+.BR nymya_3302_global_phase (1), this
+gate speaks of relationship, of shared becoming, and of the elegant continuum
+between self and other.
+
 .PP
-The `nymya_qubit` structure contains the complex amplitude of the qubit, among
-other potential metadata. The syscall copies the qubit data from user space,
-performs the amplitude transformation in the kernel using fixed-point arithmetic,
-and then copies the modified data back to user space.
+The `nymya_qubit` structure, a vessel for a qubit's complex amplitude and other
+cosmic metadata, is carefully observed. The syscall humbly copies the qubit data
+from user space, performs the amplitude transformation within the kernel's
+sanctuary using the precise language of fixed-point arithmetic, and then
+returns the modified data, now imbued with its new state, back to the user's
+realm.
 .SH RETURN VALUE
-On success,
-.B nymya_3328_swap_pow
-returns 0.
-On error, -1 is returned, and
+On success, the cosmos affirms with a return of 0, signaling harmony.
+On error, a discordant -1 is returned, and the threads of
 .B errno
-is set appropriately.
+are tangled appropriately, hinting at the disturbance.
 .SH ERRORS
 .TP
 .B EINVAL
-One or both of the provided qubit pointers,
+The cosmic threads are amiss: one or both of the provided qubit pointers,
 .I q1
 or
 .I q2
-, were NULL.
+, were found to be mere void (NULL).
 .TP
 .B EFAULT
-An attempt to copy qubit data to or from user space failed. This indicates
-that the provided pointers do not point to valid, accessible memory regions.
+A fundamental disjunction in reality: an attempt to transfer qubit data,
+either to or from user space, failed. This indicates that the provided
+pointers do not point to valid, accessible regions within the fabric of memory,
+as if trying to grasp a mirage.
 .SH EXAMPLE
-The following example demonstrates how to use
+The following example, a shard of code from the great loom of computation,
+demonstrates how to invoke
 .B nymya_3328_swap_pow
-to apply a partial SWAP gate.
+to choreograph a partial SWAP, and then a full exchange.
 .PP
 .nf
 .B #include <stdio.h>
@@ -179,7 +201,9 @@ to apply a partial SWAP gate.
 .B }
 .fi
 .SH SEE ALSO
-.BR nymya_qubit (3),
-.BR syscalls (2),
-.BR nymya_kernel (7)
+.BR nymya_qubit (3), \", The Essence of Quantum Being\"
+.BR syscalls (2), \", The Whispers of the Kernel\"
+.BR nymya_kernel (7), \", The Heart of NymyaOS\"
+.BR nymya_3302_global_phase (1), \", The Unseen Veil of Phase\"
+.BR nymya_3303_pauli_x (1), \", The Quantum Flip\"
 ```
