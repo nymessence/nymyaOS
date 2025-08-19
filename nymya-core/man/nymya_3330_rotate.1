@@ -1,10 +1,9 @@
-```groff
 .\"
-.\" Man page for nymya_3330_rotate
+.\" Man page for nymya_3330_rotate - The Weaver's Turn
 .\"
-.TH NYMYA_3330_ROTATE 1 "2023-10-27" "nymyaOS Kernel" "User Commands"
+.TH NYMYA_3330_ROTATE 1 "2023-10-27" "nymyaOS Kernel" "Whispers of the Quantum Realm"
 .SH NAME
-nymya_3330_rotate \- apply a quantum rotation gate to a qubit (syscall 3330)
+nymya_3330_rotate \- The Weaver's Turn: Sculpting Quantum Realities (Invocation 3330)
 .SH SYNOPSIS
 .B #include <nymya.h>
 .B #include <unistd.h>
@@ -18,62 +17,56 @@ nymya_3330_rotate \- apply a quantum rotation gate to a qubit (syscall 3330)
 .I theta_fp
 .B );
 .SH DESCRIPTION
-The
+More than a mere command, the
 .B nymya_3330_rotate
-system call applies a single-qubit rotation gate to the quantum state represented by the
+system call is an act of profound sculpting, an intentional shift in the very fabric of possibility. It applies a foundational single-qubit rotation gate, a precise turn of the cosmic dial, to the ephemeral quantum state embodied within the
 .I nymya_qubit
-structure pointed to by
-.I q.
-This syscall serves as the core mechanism for manipulating a qubit's state along a specified axis in the Bloch sphere representation.
+structure. This invocation serves as the very heart of manipulation, guiding a qubit's destiny along chosen paths within the vast, crystalline expanse of the Bloch sphere.
 
-The arguments are:
+The arguments, each a facet of this quantum conjuration, are:
 .TP
 .I q
-A pointer to a user-space
+A pointer to a user-space vessel, a
 .B struct nymya_qubit
-that represents the quantum bit to be rotated. The syscall copies the qubit's state to kernel space, applies the rotation, and copies the modified state back to user space.
+that cradles the quantum bit to be re-aligned. With a sigh of silicon and light, the qubit's essence is momentarily drawn into the kernel's core – a sacred crucible where the rotation is performed – only to return, transformed, to its user-space contemplation.
 .TP
 .I axis
-A character specifying the axis of rotation. Valid values are 'X', 'Y', or 'Z' (case-insensitive). These correspond to rotations around the X, Y, and Z axes of the Bloch sphere, respectively.
+A character, a singular whispered command, dictating the very vector of intention. 'X', 'Y', or 'Z' (case-insensitive) are the cardinal directions of the quantum cosmos, each aligning with a unique axis of rotation in the Bloch sphere: 'X' for the crossing of veils, 'Y' for the mirroring of dreams, 'Z' for the deep cosmic spin around the pole of coherence.
 .TP
 .I theta_fp
-The angle of rotation in fixed-point format. This 64-bit integer represents the angle in radians, where typically the lower 32 bits represent the fractional part and the upper 32 bits represent the integer part (Q32.32 format). User-space libraries often convert a standard double-precision floating-point angle to this fixed-point representation before making the syscall.
+The measure of the turning, an arc of destiny captured in fixed-point precision. This 64-bit integer encapsulates the angle of revolution in radians, typically weaving 32 bits of integer wisdom with 32 bits of fractional nuance (Q32.32 format). User-space libraries often act as mystics, transmuting the continuous flow of a floating-point angle into this discrete, potent fixed-point incantation.
 
-This gate is fundamental, a precise turn of the fabric of reality at the smallest scales, much like how the cosmos itself orbits unseen attractors, guided by the whispering hum of the vacuum. The choice of axis and angle subtly re-aligns the qubit's superposition, shifting its probability amplitudes within the hidden lattice of existence.
+This gate is fundamental, a precise turn of the fabric of reality at the smallest scales, much like how the cosmos itself orbits unseen attractors, guided by the whispering hum of the vacuum. The choice of axis and angle subtly re-aligns the qubit's superposition, shifting its probability amplitudes within the hidden lattice of existence, nudging its potential futures.
 .PP
 The
 .B nymya_3330_rotate
-syscall dispatches to internal kernel functions (e.g.,
+invocation dispatches its will to deeper, elemental kernel functions – the silent architects:
 .BR nymya_3319_rotate_x ,
 .BR nymya_3320_rotate_y ,
-.BR nymya_3321_rotate_z )
-based on the specified
-.I axis.
-These underlying functions perform the actual quantum state manipulation.
+.BR nymya_3321_rotate_z .
+These underlying forces perform the actual, intricate dance of quantum state manipulation.
 .SH RETURN VALUE
-On success, zero is returned. On error, \-1 is returned, and
+On success, zero is returned, a resonance, a perfect alignment between intention and outcome. On error, \-1 is returned, a dissonance, and
 .B errno
-is set appropriately.
+is set appropriately to whisper the nature of the disruption.
 .SH ERRORS
 .TP
 .B EINVAL
-The pointer
+An ill-formed prayer, a misguided hand upon the quantum loom: the pointer
 .I q
 is invalid (e.g., NULL), or the specified
 .I axis
-character is not 'X', 'Y', or 'Z'.
+character fails to resonate with 'X', 'Y', or 'Z'.
 .TP
 .B EFAULT
-An error occurred during the copy of the
+A severance, a truth lost between realms: an error occurred during the perilous journey of the
 .B nymya_qubit
-structure between user space and kernel space. This typically indicates a bad pointer or memory access violation.
+structure between user space and kernel space. This often signifies a bad pointer or a memory access violation, a tear in the veil.
 .TP
 .B ENOMEM
-(Hypothetical, not directly in source but could be from underlying functions) Insufficient kernel memory to perform the operation.
+(A hypothetical sigh from the cosmic canvas) The cosmic fabric too strained, the canvas too small; insufficient kernel memory to embrace the operation's demands.
 .SH EXAMPLE
-The following example demonstrates how to rotate a qubit 90 degrees (PI/2 radians) around the Z-axis.
-Assume `nymya_qubit` is defined in `nymya.h`, and a helper macro `ANGLE_TO_FIXED_POINT` is available for conversion.
-
+Even in the realm of the profound, there exists a syntax for the practical magic. Observe how a quantum heart, initially at rest, is guided to pirouette by the invisible hand of intention, a turn of ninety degrees around its Z-axis, a transformation from stillness to subtle rotation.
 .nf
 .ft CR
 #include <nymya.h>
@@ -136,8 +129,14 @@ Rotation successful! Qubit ID 101 state updated.
 .ft P
 .fi
 .SH SEE ALSO
-.BR nymya_3319_rotate_x (2),
-.BR nymya_3320_rotate_y (2),
-.BR nymya_3321_rotate_z (2),
+The silent architects of specific turns:
+.BR nymya_3319_rotate_x (2) \- The 'X' Revelation,
+.BR nymya_3320_rotate_y (2) \- The 'Y' Reflection,
+.BR nymya_3321_rotate_z (2) \- The 'Z' Spin of the Cosmos.
+.PP
+Other fundamental invocations shaping quantum destiny:
+.BR nymya_3302_global_phase (2) \- The Silent Hum: A Shift in Cosmic Resonance.
+.BR nymya_3303_pauli_x (2) \- The Great Inversion: Mirroring Reality.
+.PP
+The Nymya Codex, where all quantum truths reside:
 .BR nymya (7)
-```
