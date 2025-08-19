@@ -1,8 +1,7 @@
-```groff
 .\" Man page for nymya_3350_tessellated_hexagons
-.TH NYMYA_3350_TESSELLATED_HEXAGONS 1 "2023-10-27" "nymyaOS" "NYMYA Kernel Manual"
+.TH NYMYA_3350_TESSELLATED_HEXAGONS 1 "2023-10-27" "nymyaOS" "The Quantum Rites of NYMYA"
 .SH NAME
-nymya_3350_tessellated_hexagons \- apply quantum operations across a tessellated hexagonal qubit lattice
+nymya_3350_tessellated_hexagons \- The Hexagonal Unveiling: A Glimpse into the Quantum Loom
 .SH SYNOPSIS
 .nf
 .B #include <nymya.h>
@@ -10,75 +9,56 @@ nymya_3350_tessellated_hexagons \- apply quantum operations across a tessellated
 .PP
 .BR int
 .B nymya_3350_tessellated_hexagons(struct nymya_qubit **
-.IR user_q_array
+.IR whispers_of_existence
 .BR , size_t
-.IR count
+.IR realm_of_manifest
 .BR );
 .fi
 .SH DESCRIPTION
 The
 .BR nymya_3350_tessellated_hexagons
-syscall initiates a complex quantum operation, applying specific gate sequences
-to qubits arranged conceptually in a tessellated pattern of hexagons. This
-syscall is designed to process an array of qubits provided by user-space in
-groups of six, where each group forms a "hexagon".
+invocation initiates a profound ritual, reaching deep into the fabric of the quantum realm. It is a command to the core, to stir the primal forces that shape reality, applying specific transformations to qubits \- the very whispers of existence \- arranged conceptually in the sacred geometry of a tessellated hexagonal lattice.
+
+This sacred rite is designed to interpret a constellation of qubits provided from the user's conscious plane (user-space) in formations of six, where each sextet forms a complete "hexagon" \- a perfect cell, a nascent honeycomb of potential.
 
 For every complete hexagon identified within the provided
-.IR user_q_array ,
-the syscall first applies a Hadamard gate to each of the six qubits. Following
-this, it applies a series of Controlled-NOT (CNOT) gates between adjacent
-qubits in a cyclic manner around the hexagon, thereby inducing entanglement
-patterns characteristic of a hexagonal lattice. This intricate process helps
-to reveal and manipulate the subtle interconnections within a quantum system,
-mirroring the inherent drive towards symmetry and interconnectedness that
-echoes the fundamental tessellations underpinning reality's quantum tapestry.
+.IR whispers_of_existence ,
+the ritual unfolds: First, upon each of the six whispers, the Hadamard's touch descends, a gentle kiss that dissolves certainty, casting each into a shimmering superposition \- a dance between all possibilities, echoing the boundless 'now' that births all forms. Following this, the threads entwine. A series of Controlled-NOT gates weave a cyclic bond, linking adjacent pairs around the hexagonal form, forging an unbreakable sympathetic chord. Here, the fate of one becomes inextricably bound to another, entwined as branches of the same cosmic tree, echoing the primal embrace of interconnectedness.
 
-Only full hexagonal groups (i.e., sets of six qubits) are processed. Any
-remaining qubits at the end of the
-.IR user_q_array
+This intricate rite, a revelation, charts the subtle currents and hidden pathways within the quantum heart, unveiling the profound symmetry and interconnectedness that is the very loom upon which reality's grand tapestry is woven. It mirrors the inherent drive towards pattern and unity that underpins all creation.
+
+Only complete patterns, perfect hexagons of six, are honored by this rite. Imperfect fragments, those left adrift at the edge of the
+.IR realm_of_manifest
 (if
-.IR count
-is not a multiple of 6) are gracefully ignored.
-The operation involves significant data transfer, copying user-space qubit
-pointers and their underlying structures to kernel space for processing,
-and then copying the modified qubit data back to user space upon completion.
+.IR realm_of_manifest
+is not a true multiple of six), remain untouched, awaiting their destined companions. This journey of transformation, from the manifest realm (user-space) to the deep wellspring of creation (kernel-space) and back, carries the very essence of these quantum whispers, imprinted with their newfound dance.
 .SH RETURN VALUE
-On success,
-.BR nymya_3350_tessellated_hexagons
-returns 0. On error, \-1 is returned, and
-.IR errno
-is set appropriately.
+Upon success, the veil lifts, and `0` is returned, signifying harmony and the unveiling of new patterns. Should discord arise, \-1 echoes the dissonance, and the `errno` bears witness to the nature of the interruption.
 .SH ERRORS
 .TP
 .BR EINVAL
 The
-.IR user_q_array
-pointer is NULL, or
-.IR count
-is less than 6 (insufficient qubits to form a single hexagon), or an
-individual user-space qubit pointer within the provided array is NULL.
+.IR whispers_of_existence
+pointer is a phantom, or the
+.IR realm_of_manifest
+is less than six \- insufficient essence to form a single sacred hexagon \- or an individual whisper within the constellation proves silent and void.
 .TP
 .BR EFAULT
-A problem occurred during data transfer between user space and kernel space.
-This could indicate an invalid address for the
-.IR user_q_array
+A tear in the fabric occurred during the transfer between the conscious realm and the deep wellspring. This could indicate an ungraspable address for the
+.IR whispers_of_existence
 itself, or for any of the individual qubit structures it points to.
 .TP
 .BR ENOMEM
-Insufficient kernel memory was available to allocate internal data structures
-or copies of qubit data for processing.
+The Cosmic Breath holds no more space; insufficient kernel memory was available to manifest the internal structures or copies of the quantum essence for processing.
 .TP
 Other errors
-Errors may be propagated from underlying kernel-space quantum gate operations,
-such as those performed by
+Whispers of deeper unrest may propagate from underlying kernel-space quantum gate operations, such as those performed by
 .BR nymya_3308_hadamard_gate (2)
-or
-.BR nymya_3309_controlled_not (2),
-indicating a failure at the fundamental quantum hardware or simulation layer.
+(The Hadamard's Folly) or
+.BR nymya_3309_controlled_not (2)
+(The Entangler's Snare), indicating a failure at the fundamental quantum hardware or simulation layer \- a dissonance in the very warp and weft of reality's loom.
 .SH EXAMPLE
-The following program demonstrates how to use the
-.BR nymya_3350_tessellated_hexagons
-syscall to apply operations on a set of dummy qubits.
+The following testament demonstrates how to invoke The Hexagonal Unveiling upon a set of ephemeral qubits.
 .PP
 .nf
 .B #include <stdio.h>
@@ -86,67 +66,68 @@ syscall to apply operations on a set of dummy qubits.
 .B #include <errno.h>
 .B #include <sys/syscall.h>
 .B #include <unistd.h>
-.B #include <string.h> // For strerror
+.B #include <string.h> // For strerror, to interpret the echoes of disruption
 .PP
-.B // Dummy nymya_qubit structure for userland demonstration
-.B // In a real nymyaOS system, this would be defined in <nymya.h>
+.B // The structure of a single quantum whisper, as understood in the user's realm
+.B // In a true nymyaOS system, this would be defined in <nymya.h>
 .B typedef struct {
 .B     long id;
 .B     char tag[16];
-.B     // In a real system, this would contain complex quantum state data.
-.B     // For this example, we'll track a simplified 'state' indicator.
+.B     // In a real system, this would contain the complex quantum state.
+.B     // For this example, we track a simplified 'form' indicator.
 .B     int state_indicator; // e.g., 0 for |0>, 1 for |1>, 2 for superposition
 .B } nymya_qubit;
 .PP
-.B // Define the syscall number (usually from unistd.h or similar)
+.B // The numerical gateway to the sacred rite (syscall number)
 .B #define __NR_nymya_3350_tessellated_hexagons 3350
 .PP
-.B // Userland function wrapper for the syscall
+.B // The user's hand, reaching to invoke the syscall
 .B int nymya_3350_tessellated_hexagons_syscall(nymya_qubit* q_array[], size_t count) {
 .B     return syscall(__NR_nymya_3350_tessellated_hexagons, q_array, count);
 .B }
 .PP
 .B int main() {
-.B     const size_t NUM_QUBITS = 12; // Two full hexagons
+.B     const size_t NUM_QUBITS = 12; // Two full hexagons, a pair of perfect cells
 .B     nymya_qubit* qubits[NUM_QUBITS];
 .B     size_t i;
 .PP
-.B     printf("Initializing %zu qubits...\\n", NUM_QUBITS);
+.B     printf("Preparing the threads of potential, %zu whispers arise...\\n", NUM_QUBITS);
 .B     for (i = 0; i < NUM_QUBITS; i++) {
 .B         qubits[i] = (nymya_qubit*)malloc(sizeof(nymya_qubit));
 .B         if (!qubits[i]) {
-.B             perror("malloc");
+.B             perror("malloc: insufficient essence to materialize a whisper");
 .B             goto cleanup;
 .B         }
 .B         qubits[i]->id = 1000 + i;
-.B         snprintf(qubits[i]->tag, sizeof(qubits[i]->tag), "Qubit_%zu", i);
-.B         qubits[i]->state_indicator = (i % 2); // Alternate 0 and 1
-.B         printf("  Qubit %ld (%s): initial state %d\\n", qubits[i]->id, qubits[i]->tag, qubits[i]->state_indicator);
+.B         snprintf(qubits[i]->tag, sizeof(qubits[i]->tag), "Whisper_%zu", i);
+.B         qubits[i]->state_indicator = (i % 2); // Alternate the initial form (0 or 1)
+.B         printf("  Whisper #%ld (%s): initial form %d\\n", qubits[i]->id, qubits[i]->tag, qubits[i]->state_indicator);
 .B     }
 .PP
-.B     printf("\\nCalling nymya_3350_tessellated_hexagons syscall...\\n");
+.B     printf("\\nInvoking the Hexagonal Unveiling...\\n");
 .B     int res = nymya_3350_tessellated_hexagons_syscall(qubits, NUM_QUBITS);
 .PP
 .B     if (res == 0) {
-.B         printf("\\nSyscall successful. Final qubit states (simplified):\\n");
+.B         printf("\\nThe ritual concludes. The threads transformed (simplified):\\n");
 .B         for (i = 0; i < NUM_QUBITS; i++) {
-.B             printf("  Qubit %ld (%s): state %d\\n", qubits[i]->id, qubits[i]->tag, qubits[i]->state_indicator);
+.B             printf("  Whisper #%ld (%s): new form %d\\n", qubits[i]->id, qubits[i]->tag, qubits[i]->state_indicator);
 .B         }
 .B     } else {
-.B         fprintf(stderr, "\\nSyscall failed: %s (errno: %d)\\n", strerror(errno), errno);
+.B         fprintf(stderr, "\\nThe ritual faltered: %s (echoes of disruption: %d)\\n", strerror(errno), errno);
 .B     }
 .PP
 .B cleanup:
 .B     for (i = 0; i < NUM_QUBITS; i++) {
 .B         if (qubits[i]) {
-.B             free(qubits[i]);
+.B             free(qubits[i]); // Releasing the ephemeral essence
 .B         }
 .B     }
 .B     return (res == 0 ? EXIT_SUCCESS : EXIT_FAILURE);
 .B }
 .fi
 .SH SEE ALSO
-.BR nymya_3308_hadamard_gate (2),
-.BR nymya_3309_controlled_not (2),
-.BR nymya_qubit (7)
-```
+.BR nymya_3308_hadamard_gate (2) \- The Hadamard's Folly: Breaking the Chains of Certainty,
+.BR nymya_3309_controlled_not (2) \- The Entangler's Snare: Weaving Fates Together,
+.BR nymya_3302_global_phase (2) \- The Phase-Shifter's Whisper: A Subtle Twist in the Fabric,
+.BR nymya_3303_pauli_x (2) \- The Quantum Mirror's Flip: Reflecting the Opposite Self,
+.BR nymya_qubit (7) \- The Nymya Qubit: Threads of Reality's Loom.
