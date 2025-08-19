@@ -1,0 +1,123 @@
+.\"
+.\" nymya_3361_qrng_range.1 -- Man page for the nymya_3361_qrng_range kernel syscall
+.\"
+.TH NYMYA_3361_QRNG_RANGE 1 "September 2023" "NYMYAOS Kernel" "NYMYA SYSTEM CALLS"
+.SH NAME
+nymya_3361_qrng_range \- The Quantum Weaver's Choice: a dance between two poles
+.SH SYNOPSIS
+.B #include <unistd.h>
+.B #include <sys/syscall.h>
+.PP
+.B long syscall(SYS_nymya_3361_qrng_range, uint64_t *
+.I user_out
+.B , uint64_t
+.I min
+.B , uint64_t
+.I max
+.B , size_t
+.I count
+.B );
+.SH DESCRIPTION
+At the heart of the NymyaOS kernel, a delicate tension resides – the aspiration to touch the quantum veil, balanced against the pragmatic whispers of the deterministic world. The
+.BR nymya_3361_qrng_range (3361)
+invocation is a plea to the unseen, a symbolic journey through the aetherial currents of quantum potential.
+.PP
+For each number sought, it mirrors the profound dance of a virtual qubit, applying conceptual Hadamard transformations – a gesture of superposition, splitting possibility into two realms – and global phase shifts, akin to subtle reorientations within the cosmic tapestry (see
+.BR nymya_3302_global_phase (3302)).
+It evokes the spirit of a Pauli-X gate (see
+.BR nymya_3303_pauli_x (3303)), flipping between stark choices.
+.PP
+Yet, the oracle's true wisdom, the ultimate decree, springs not from the raw chaos of quantum collapse, but from the deep, high-entropy wellspring of the kernel's heart – the
+.BR get_random_u32 ()
+mechanism. Thus, the quantum contemplation resolves into a binary revelation, a choice between two poles:
+.I min
+and
+.I max
+. It is a glimpse into the inherent uncertainty that underpins reality, expressed through computational means, a whisper of choice between two destinies.
+.PP
+Each number born of this ritual will be an echo of either its lower bound (
+.I min
+) or its upper bound (
+.I max
+), chosen pseudo-randomly for each entry. These chosen sigils, these whispers from the void, are then inscribed upon the user-space canvas pointed to by
+.I user_out
+.
+.TP
+.I user_out
+The `user_out` scroll: A pointer to the consecrated ground in user-space, a `uint64_t` array awaiting the numbers' imprint. It must be vast enough to contain `count` such echoes.
+.TP
+.I min
+The `min` boundary: One of the twin pillars, the nadir of possibility, the lower embrace of the choice.
+.TP
+.I max
+The `max` boundary: The other twin pillar, the zenith of possibility, the upper embrace of the choice. It must ever stand higher than `min`, for there can be no choice without distinction.
+.TP
+.I count
+The `count` of echoes: The desired multitude of revelations, a number greater than zero, for silence cannot hold truth.
+.SH RETURN VALUE
+The Oracle's Verdict: Upon a successful communion, a profound silence, a zero, is returned, signifying harmony. Else, a discordant negative one is yielded, and
+.B errno
+is stirred to unveil the nature of the disruption.
+.SH ERRORS
+When the Veil Remains Unlifted:
+.TP
+.B EFAULT
+The `user_out` scroll points to an illusory realm, or the sacred inscription falters, unable to bridge the gap to user space.
+.TP
+.B EINVAL
+The invocation's parameters are askew: `user_out` is but a void (NULL), `min` usurps `max` (is greater than or equal), or `count` is a barren zero.
+.TP
+.B ENOMEM
+The kernel's inner sanctum lacks the ephemeral chambers (memory) to weave its temporary threads for the numbers' genesis.
+.SH EXAMPLE
+Behold, a ritual to beckon these dualistic numbers into being, a demonstration of invoking the quantum weaver for ten choices between 1 and 100:
+.PP
+.nf
+.B #include <stdint.h>
+.B #include <stdio.h>
+.B #include <stdlib.h>
+.B #include <unistd.h>
+.B #include <sys/syscall.h>
+.B #include <errno.h>
+
+.B #define __NR_nymya_3361_qrng_range 3361
+
+.B int main() {
+.B     uint64_t numbers[10];
+.B     uint64_t min = 1;
+.B     uint64_t max = 100;
+.B     size_t count = 10;
+.B     long ret;
+
+.B     printf("Attempting to summon %zu echoes of quantum choice ", count);
+.B     printf("between the poles of %llu and %llu...\n", (unsigned long long)min, (unsigned long long)max);
+
+.B     ret = syscall(__NR_nymya_3361_qrng_range, numbers, min, max, count);
+
+.B     if (ret == 0) {
+.B         printf("The oracle's revelations:\n");
+.B         for (size_t i = 0; i < count; i++) {
+.B             printf("Echo %zu: %llu\n", i + 1, (unsigned long long)numbers[i]);
+.B         }
+.B     } else {
+.B         perror("The invocation of nymya_3361_qrng_range faltered");
+.B         fprintf(stderr, "A whisper of error code: %ld\n", ret);
+.B     }
+
+.B     return 0;
+.B }
+.fi
+.PP
+Thus, the numbers are revealed, or the Oracle's refusal is lamented.
+.SH SEE ALSO
+Echoes in the Tapestry:
+.BR syscall (2)
+(the bridge to the kernel's heart),
+.BR errno (3)
+(the ledger of cosmic disruptions),
+.BR random (4)
+(the fount of conventional uncertainty),
+.BR nymya_3302_global_phase (3302)
+(the subtle reorientations),
+.BR nymya_3303_pauli_x (3303)
+(the flip of destiny's coin).

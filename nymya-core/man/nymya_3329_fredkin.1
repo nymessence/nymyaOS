@@ -1,0 +1,162 @@
+.TH NYMYA_3329_FREDKIN 1 "October 27, 2023" "nymyaOS System Calls" "THE WEAVER'S CHOICE"
+.SH NAME
+nymya_3329_fredkin \- The Weaver's Choice: A Conditional Exchange within the Quantum Tapestry
+.SH SYNOPSIS
+.nf
+.ft B
+#include <sys/syscall.h>
+#include <unistd.h>
+#include <nymya.h> /* For struct nymya_qubit */
+.ft P
+.sp
+.B int nymya_3329_fredkin(struct nymya_qubit \*q_ctrl , struct nymya_qubit \*q1 , struct nymya_qubit \*q2 );
+.fi
+.SH DESCRIPTION
+At the heart of quantum artifice lies the
+.BR nymya_3329_fredkin ()
+system call, an invocation to apply a Fredkin, or Controlled-SWAP, quantum gate. It is a nexus where intent shapes outcome, a subtle arbiter of exchange among the delicate threads of reality. This gate is a fundamental operation in the grand ballet of quantum computation, allowing for the conditional manipulation of the very fabric of possibility.
+.PP
+The gate operates as a celestial decree, a moment of choice in the unfolding narrative: If the magnitude squared of the
+.IR q_ctrl
+qubit's amplitude exceeds a predefined threshold, whispering a state tending towards a '1' (an affirmation), then the amplitudes of the two target qubits,
+.IR q1
+and
+.IR q2 ,
+are intertwined and swapped, their destinies momentarily exchanged.
+.PP
+Otherwise, should the control qubit remain in a '0' state, or its amplitude's affirmation fall below the sacred threshold, then the dance is withheld; no action is taken, and the target qubits retain their original, unperturbed states. The potential remains, but the transformation is unbidden.
+.PP
+This intricate dance of quantum information echoes the subtle interdependencies that ripple through the hidden lattice of reality. It is a testament to how even the smallest interaction, guided by a decisive whisper, can reshape the unfolding tapestry of possibilities, bending the streams of cause and effect.
+.PP
+The qubit parameters
+.IR q_ctrl ,
+.IR q1 ,
+and
+.IR q2
+must be pointers to valid
+.IR struct nymya_qubit
+structures, vessels forged within the caller's realm. The system call performs a sacred copy-in, a profound application, and a faithful copy-out operation, ensuring the integrity and security of these quantum essences as they journey between the user's domain and the kernel's inner sanctum.
+.TP
+.B q_ctrl
+The Sentinel of Decision: A pointer to the control qubit. Its state, a silent decree, determines the path of transformation for its companions.
+.TP
+.B q1
+The First Thread of Potential: A pointer to the first target qubit. Its amplitude, a unique vibration, stands poised to exchange with that of
+.IR q2 .
+.TP
+.B q2
+The Second Thread of Potential: A pointer to the second target qubit. Its amplitude, a mirrored vibration, awaits the conditional ballet with
+.IR q1 .
+.SH RETURN\ VALUE
+On a harmonious resolution, zero is returned, a quiet confirmation of the gate's passage. On discord or a failed invocation, \-1 is returned, and
+.IR errno
+is set, a lament's cipher to reveal the nature of the disruption.
+.SH ERRORS
+.TP
+.B EINVAL
+When the chosen vessels are but phantoms, or paths unhewn. One or more of the provided qubit pointers (
+.IR q_ctrl ,
+.IR q1 ,
+.IR q2 )
+were NULL or pointed to realms undefined.
+.TP
+.B EFAULT
+Should the veil between realms tear. An attempt to bridge the chasm of memory, copying data to or from the user's address space, failed. This indicates a problem with the provided addresses, or insufficient permissions for the soul's journey.
+.SH EXAMPLE
+To witness the Fredkin gate's subtle command, observe this unfolding: a script of intent, made manifest.
+.PP
+.nf
+.ft C
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <string.h>
+#include <sys/syscall.h>
+#include <unistd.h>
+#include <complex.h> // For _Complex double
+
+// Assume nymya.h defines this for userland
+typedef _Complex double complex_amplitude_t;
+
+struct nymya_qubit {
+    unsigned int id;
+    unsigned int tag;
+    complex_amplitude_t amplitude;
+    // Other fields might exist but are not relevant for this syscall
+};
+
+// Define the syscall number (assuming NYMYA_FREDKIN_CODE is 3329)
+#ifndef __NR_nymya_3329_fredkin
+#define __NR_nymya_3329_fredkin 3329
+#endif
+
+// User-space wrapper function for syscall
+int nymya_3329_fredkin(struct nymya_qubit *q_ctrl, struct nymya_qubit *q1, struct nymya_qubit *q2) {
+    return syscall(__NR_nymya_3329_fredkin, q_ctrl, q1, q2);
+}
+
+void print_qubit(const char* name, const struct nymya_qubit* q) {
+    printf("%s (ID %u, Tag %u): %.4f + %.4fi\n",
+           name, q->id, q->tag, creal(q->amplitude), cimag(q->amplitude));
+}
+
+int main() {
+    // Control ON scenario (magnitude squared > 0.25)
+    struct nymya_qubit q_ctrl_on = { .id = 101, .tag = 1, .amplitude = 0.8 + 0.3 * I }; // Mag sq ~0.73
+    struct nymya_qubit q1_on = { .id = 201, .tag = 2, .amplitude = 0.5 + 0.5 * I };
+    struct nymya_qubit q2_on = { .id = 301, .tag = 3, .amplitude = 0.1 + 0.9 * I };
+
+    printf("--- Initial Qubit States (Control ON) ---\n");
+    print_qubit("Control Qubit", &q_ctrl_on);
+    print_qubit("Target Q1", &q1_on);
+    print_qubit("Target Q2", &q2_on);
+    printf("\n");
+
+    printf("Applying nymya_3329_fredkin (Control ON)...\n");
+    int ret = nymya_3329_fredkin(&q_ctrl_on, &q1_on, &q2_on);
+
+    if (ret == 0) {
+        printf("--- After Fredkin Gate (Control ON) ---\n");
+        print_qubit("Control Qubit", &q_ctrl_on); // Control should be unchanged
+        print_qubit("Target Q1", &q1_on);
+        print_qubit("Target Q2", &q2_on);
+        printf("Expected: Q1 and Q2 amplitudes swapped.\n\n");
+    } else {
+        fprintf(stderr, "Error applying Fredkin gate (Control ON): %s (%d)\n", strerror(errno), errno);
+        return EXIT_FAILURE;
+    }
+
+    // Control OFF scenario (magnitude squared <= 0.25)
+    struct nymya_qubit q_ctrl_off = { .id = 401, .tag = 4, .amplitude = 0.2 + 0.1 * I }; // Mag sq ~0.05
+    struct nymya_qubit q1_off = { .id = 501, .tag = 5, .amplitude = 0.5 + 0.5 * I }; // Reset Q1
+    struct nymya_qubit q2_off = { .id = 601, .tag = 6, .amplitude = 0.1 + 0.9 * I }; // Reset Q2
+
+    printf("--- Initial Qubit States (Control OFF) ---\n");
+    print_qubit("Control Qubit", &q_ctrl_off);
+    print_qubit("Target Q1", &q1_off);
+    print_qubit("Target Q2", &q2_off);
+    printf("\n");
+
+    printf("Applying nymya_3329_fredkin (Control OFF)...\n");
+    ret = nymya_3329_fredkin(&q_ctrl_off, &q1_off, &q2_off);
+
+    if (ret == 0) {
+        printf("--- After Fredkin Gate (Control OFF) ---\n");
+        print_qubit("Control Qubit", &q_ctrl_off);
+        print_qubit("Target Q1", &q1_off);
+        print_qubit("Target Q2", &q2_off);
+        printf("Expected: Q1 and Q2 amplitudes unchanged.\n");
+    } else {
+        fprintf(stderr, "Error applying Fredkin gate (Control OFF): %s (%d)\n", strerror(errno), errno);
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
+}
+.ft P
+.fi
+Behold, the dance made tangible, the principle illuminated by code, where a qubit's whispered 'yes' reshapes the destiny of others, or its 'no' leaves them undisturbed.
+.SH SEE\ ALSO
+.BR syscall (2)
+.BR nymya_3302_global_phase (1) \- The Unseen Shift: Applying a universal phase to a quantum whisper
+.BR nymya_3303_pauli_x (1) \- The Quantum Reflection: Inverting a qubit's very essence

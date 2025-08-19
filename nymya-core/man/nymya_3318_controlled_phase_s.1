@@ -1,0 +1,157 @@
+.TH NYMYA_3318_CONTROLLED_PHASE_S 1 "2023-10-27" "NymyaOS Kernel Oracles" "THE CONDUCTOR'S QUADRANT SHIFT"
+.SH NAME
+nymya_3318_controlled_phase_s \- The Conductor's Quadrant Shift, A Conditional Weaving of Cosmic Threads
+
+.SH SYNOPSIS
+.B #include <nymya.h>
+.br
+.B #include <stdint.h>
+.br
+.B #include <errno.h>
+.br
+.B #include <sys/syscall.h>
+.br
+.B #include <unistd.h>
+.br
+.P
+.B int nymya_3318_controlled_phase_s(struct nymya_qubit *
+.I qc
+.B , struct nymya_qubit *
+.I qt
+.B );
+.P
+This profound invocation is typically channeled through a higher-order wrapper, a priest-function guiding the spirit. Yet, the boldest may directly intone its raw form via the
+.BR syscall (2)
+chant, invoking the sacred number
+.BR NYMYA_CPHASE_S_CODE
+(known to the ancients as 3318).
+
+.SH DESCRIPTION
+This sacred invocation,
+.B nymya_3318_controlled_phase_s
+, orchestrates a subtle re-tuning of the target qubit's very being. Like a cosmic tuning fork, it bestows a quarter-turn, a $\pi/2$ radian shift upon its hidden phase – the S gate, the whisper of a new direction, a revelation of its latent self.
+
+Yet, this transformation is not absolute, but conditional, a dance dictated by the 'control' qubit. Only if the resonance of the control qubit,
+.IR qc ,
+transcends a certain threshold – a magnitude exceeding 0.5, like a voice rising above the ambient hum, a spirit asserting its presence – does the target,
+.IR qt ,
+receive this sacred instruction. Should the control's presence be too faint, its amplitude's echo less than or equal to this half-mark, the target remains untouched, its intrinsic melody unaltered, its destined path unswayed.
+
+This delicate interplay embodies the profound interconnectedness of all things, where the very essence of one entity can ripple through the fabric of another, prompting a silent, yet profound, metamorphosis. It is the cosmic loom in action, a subtle re-configuration of probabilities, a dance of cause and consequence at the quantum veil's edge. Such mechanisms are the very heartbeats of the universe's grand design, reflecting the intricate bonds that bind existence.
+
+In the fleeting realm of conscious thought, the 'user-space,' these cosmic entities (`nymya_qubit` structures) are perceived through the fluid lens of complex numbers, akin to dreams expressed in intricate patterns. But when this invocation descends into the kernel's core – the bedrock of reality – the essences are transmuted. Here, within the unyielding crucible of Q32.32 fixed-point arithmetic, the truth is rendered absolute, stripped of the ethereal ambiguities of floating-point, ensuring the universe's mechanics remain deterministic and true to their immutable laws.
+
+Each such interaction, each subtle shift, is etched into the annals of existence, a symbolic event logged for the discerning eye. These are the chronicles of quantum evolution, the sacred texts revealing the unfolding saga of the system's dance.
+
+.SH RETURN VALUE
+Upon the successful weaving of destinies, a zero, signifying completion and harmony, is returned. Should the threads tangle, or the cosmic loom falter, a -1 is yielded, and
+.I errno
+shall bear the mark of the discord.
+
+.SH ERRORS
+.TP
+.B EINVAL
+The Void's Touch. A disconnection, a pointer into the vast emptiness, where no qubit essence resides to guide or be guided. This speaks of a path not taken, a missing link in the cosmic chain.
+.TP
+.B EFAULT
+The Veil's Resistance. A tear in the fabric of shared reality, an attempt to grasp what is beyond reach, or a disturbance in the very integrity of the calling spirit's domain. The universe recoils from such intrusions.
+
+.SH EXAMPLE
+The following testament demonstrates how one might invoke the
+.B nymya_3318_controlled_phase_s
+oracle to witness a conditional shift in quantum destiny. Know that `nymya_qubit` and its brethren would typically be unveiled in `nymya.h`.
+
+.nf
+.ft CR
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/syscall.h>
+#include <errno.h>
+#include <complex.h>
+#include <math.h>
+
+// Assuming nymya_qubit is defined similarly in nymya.h
+// This is a simplified mock for the example.
+typedef struct {
+    unsigned int id;
+    char tag[16];
+    double complex amplitude; // User-space representation, a dream of complex numbers
+    // Other qubit state data would be here, the hidden truths
+} nymya_qubit;
+
+// Define the syscall number (from nymya.h or similar header)
+#define NYMYA_CPHASE_S_CODE 3318
+
+int main() {
+    nymya_qubit control_q, target_q;
+
+    // --- Scenario 1: Control qubit magnitude > 0.5 (should apply S gate) ---
+    // The Oracle speaks with conviction, its voice clear and strong.
+    control_q.id = 101;
+    snprintf(control_q.tag, sizeof(control_q.tag), "ControlQ1");
+    control_q.amplitude = 0.8 + 0.6 * I; // Magnitude = 1.0 > 0.5 - A resonant presence
+
+    target_q.id = 102;
+    snprintf(target_q.tag, sizeof(target_q.tag), "TargetQ1");
+    target_q.amplitude = 1.0; // Initial state |0>, untouched, awaiting guidance
+
+    printf("Scenario 1: The Oracle's voice is strong (> 0.5). A quadrant shift is foretold.\n");
+    printf("Initial Target Q1 amplitude: %.3f + %.3fi\n", creal(target_q.amplitude), cimag(target_q.amplitude));
+
+    long res1 = syscall(NYMYA_CPHASE_S_CODE, &control_q, &target_q);
+
+    if (res1 == 0) {
+        printf("The cosmic dance completes. Syscall successful.\n");
+        printf("Final Target Q1 amplitude: %.3f + %.3fi\n", creal(target_q.amplitude), cimag(target_q.amplitude));
+        // Expected: 0.0 + 1.0i (i.e., |0> * i), a subtle re-orientation
+    } else {
+        perror("The cosmic dance faltered");
+        return EXIT_FAILURE;
+    }
+    printf("\n");
+
+    // --- Scenario 2: Control qubit magnitude <= 0.5 (should NOT apply S gate) ---
+    // The Oracle whispers, its voice too faint to command the shift.
+    control_q.id = 201;
+    snprintf(control_q.tag, sizeof(control_q.tag), "ControlQ2");
+    control_q.amplitude = 0.3 + 0.1 * I; // Magnitude approx 0.316 <= 0.5 - A gentle presence
+
+    target_q.id = 202;
+    snprintf(target_q.tag, sizeof(target_q.tag), "TargetQ2");
+    target_q.amplitude = 0.0 + 1.0 * I; // Initial state |1>, unwavering
+
+    printf("Scenario 2: The Oracle's voice is faint (<= 0.5). The target's path remains unbroken.\n");
+    printf("Initial Target Q2 amplitude: %.3f + %.3fi\n", creal(target_q.amplitude), cimag(target_q.amplitude));
+
+    long res2 = syscall(NYMYA_CPHASE_S_CODE, &control_q, &target_q);
+
+    if (res2 == 0) {
+        printf("The cosmic dance holds. Syscall successful.\n");
+        printf("Final Target Q2 amplitude: %.3f + %.3fi\n", creal(target_q.amplitude), cimag(target_q.amplitude));
+        // Expected: 0.0 + 1.0i (i.e., unchanged), its destiny unaltered
+    } else {
+        perror("The cosmic dance faltered");
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
+}
+.ft P
+.nf
+.ft CR
+Example Compile & Run:
+.sp
+$ gcc -std=c11 -Wall -Wextra -lm -o cphase_s_test cphase_s_test.c
+$ ./cphase_s_test
+.ft P
+.fi
+
+.SH SEE ALSO
+.BR syscall (2) (The Breath of Creation),
+.BR errno (3) (The Lamentations of Discord),
+.BR complex (7) (The Mathematics of Dreams and Illusions),
+.BR nymya_init_qubit (2) (The First Spark of Being),
+.BR nymya_measure_qubit (2) (The Gaze of Unveiling),
+.BR nymya_3302_global_phase (2) (The Universal Hum),
+.BR nymya_3303_pauli_x (2) (The Cosmic Flip)

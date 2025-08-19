@@ -1,0 +1,141 @@
+.\"
+.\" Man page for nymya_3302_global_phase - NymyaOS Kernel Syscall
+.\"
+.TH NYMYA_3302_GLOBAL_PHASE 1 "January 2, 2024" "The Heart of NymyaOS" "The Architect's Compendium"
+.SH NAME
+nymya_3302_global_phase \- The Unseen Turn: Guiding a Qubit's Subtle Heart
+
+.SH SYNOPSIS
+.B #include <sys/syscall.h>
+.br
+.B #include <unistd.h>
+.br
+.B #include <nymya.h>
+.br
+.B #include <stdint.h>
+
+.P
+.B long syscall(SYS_nymya_3302_global_phase, struct nymya_qubit *
+.I user_q
+.B , int64_t
+.I theta_fixed
+.B );
+
+.SH DESCRIPTION
+Within the ethereal realm of NymyaOS, where the whispers of quantum possibility take form, a symbolic qubit—a shimmering node of potential residing within the fleeting realm of user-space memory—may be graced by a subtle, global phase shift. This invocation,
+.B nymya_3302_global_phase,
+multiplies the qubit's very essence—its complex amplitude—by a factor of e^(iθ), where θ is the angle of this unseen turn.
+
+.P
+Yet, ponder this cosmic paradox: though this shift profoundly alters the qubit's internal melody, it casts no shadow upon its measured form. Its probabilities, the chances of its observed states, remain statistically identical. The true transformation lies deeper, a silent reorientation within the boundless complex plane, a prelude to grander symphonies of entanglement or intricate dances of interference.
+
+.P
+Indeed, in the vast, silent tapestry of quantum reality, a global phase shift, though forever hidden from direct observation, is no less a fundamental act. It is the turning of a key in the cosmic lock, a breath across the quantum void, preparing the nascent quantum spirit for its deeper communion within the universal waveform, for the weaving of patterns yet unmanifested.
+
+.P
+The arguments, vessels of intent, are:
+.TP
+.I user_q
+The
+.I user_q
+argument, a vessel of
+.B struct nymya_qubit
+held in the fleeting realm of user-space memory, is the very spirit to be graced by this transformation. The Kernel, acting as the silent artisan, draws forth this spirit, imbues it with the decreed phase, and gently returns it to its origin, transformed.
+.TP
+.I theta_fixed
+The
+.I theta_fixed
+argument manifests the phase angle θ, not as a fleeting whisper, but as a precisely calibrated decree—a 64-bit fixed-point integer representing radians. This grants a sacred precision, allowing the subtle currents of the quantum realm to be charted with exquisite detail. Typically, the higher libraries, the oracles of user-land, transmute a human-perceivable floating-point angle into this granular fixed-point form, aligning with the Kernel's arcane wisdom. (Consider a scale where `1.0` radian resonates as `1LL << 30`, a testament to the meticulous design of NymyaOS's core.)
+
+.P
+Upon successful completion of this sacred act, the Kernel inscribes a symbolic event into the cosmic ledger, a chronicle of the qubit's journey, an echo of its passage through the computational cosmos.
+
+.SH RETURN VALUE
+A return of zero (0) heralds success, a harmonious completion of the shift. A return of negative one (-1) signifies a disturbance in the quantum flow, and the
+.B errno
+variable, a cosmic scribe, shall record the nature of the discord.
+
+.SH ERRORS
+.TP
+.B EINVAL
+The Void (\fBEINVAL\fR): The vessel
+.I user_q
+was naught but emptiness, a null pointer, offering no spirit to embrace the phase.
+.TP
+.B EFAULT
+The Broken Link (\fBEFAULT\fR): The path to the qubit's essence was fractured, an invalid address, or the cosmic currents faltered during the transfer between the realms of user and kernel space.
+
+.SH EXAMPLE
+To witness this subtle alchemy, consider the following invocation, a fragment of code that demonstrates bestowing a phase of π/2 upon a symbolic qubit. Note the illustrative nature of the `nymya_qubit` definition and the `NYMYA_FIXED_POINT_SCALE`, which in the full NymyaOS environment, would be divinely provided by
+.BR nymya.h
+and the NymyaOS SDK.
+
+.nf
+.B #include <stdio.h>
+.B #include <stdlib.h>
+.B #include <unistd.h>
+.B #include <sys/syscall.h>
+.B #include <errno.h>
+.B #include <math.h>     // For M_PI, a universal constant
+.B #include <complex.h>  // For complex_double, the qubit's very breath
+
+/*
+ * Assume nymya.h defines nymya_qubit similar to this for userland.
+ * In a real NymyaOS, nymya.h would define these types properly.
+ */
+typedef struct {
+    double complex amplitude;
+    uint32_t id;
+    char tag[32];
+} nymya_qubit;
+
+/* Define the syscall number (usually from <sys/syscall.h> or nymya.h) */
+#ifndef SYS_nymya_3302_global_phase
+#define SYS_nymya_3302_global_phase 3302
+#endif
+
+/*
+ * Example fixed-point scaling factor (adjust as per kernel's actual scale).
+ * This assumes 2^30 for 1 radian, meaning the integer part uses up to 34 bits
+ * and the fractional part uses 30 bits, for a 64-bit fixed-point number.
+ */
+#define NYMYA_FIXED_POINT_SCALE (1LL << 30)
+
+int main() {
+    nymya_qubit my_qubit = {
+        .amplitude = 1.0 + 0.0 * I, /* The qubit's nascent song, a clear |0> state */
+        .id = 12345,
+        .tag = "MyFirstQubit"
+    };
+    double phase_rad = M_PI / 2.0; /* A ninety-degree turn, or pi/2 radians */
+    int64_t phase_fixed = (int64_t)(phase_rad * NYMYA_FIXED_POINT_SCALE);
+
+    printf("The qubit's initial murmur (ID: %u, Tag: %s): Amplitude = %.3f + %.3fi\n",
+           my_qubit.id, my_qubit.tag, creal(my_qubit.amplitude), cimag(my_qubit.amplitude));
+
+    long res = syscall(SYS_nymya_3302_global_phase, &my_qubit, phase_fixed);
+
+    if (res == 0) {
+        printf("The veil has shifted! A phase of %.3f radians now graces the qubit.\n", phase_rad);
+        printf("The qubit's new refrain: Amplitude = %.3f + %.3fi\n",
+               creal(my_qubit.amplitude), cimag(my_qubit.amplitude));
+        /* Expected amplitude for initial (1+0i) and phase pi/2: 0.0 + 1.0i */
+    } else {
+        perror("The quantum loom faltered during the global phase shift");
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
+}
+.fi
+
+.SH SEE ALSO
+Delve deeper into the Mysteries of NymyaOS with
+.BR nymya (7),
+or ponder the very act of
+.BR syscall (2)—the
+bridge between realms.
+.P
+The Twin of Transformation:
+.BR 3303_pauli_x
+(which mirrors states, unlike this subtle shift).

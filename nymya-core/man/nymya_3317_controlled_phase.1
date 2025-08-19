@@ -1,0 +1,146 @@
+.TH NYMYA_3317_CONTROLLED_PHASE 1 "NymyaOS" "The Chronicles of NymyaOS: Quantum Incantations"
+.SH NAME
+nymya_3317_controlled_phase \- The Weaver's Conditional Touch: Orchestrating a Phase of Influence upon a NymyaOS Qubit
+.SH SYNOPSIS
+.nf
+.B #include <nymya/qubit.h>
+.B #include <sys/syscall.h>
+.PP
+.B int nymya_3317_controlled_phase(struct nymya_qubit *qc , struct nymya_qubit *qt , int64_t theta_fixed );
+.fi
+.SH DESCRIPTION
+This parchment unveils the arcane function,
+.B nymya_3317_controlled_phase
+, a system call designed to imbue a quantum controlled phase upon a receptive target qubit. It demands three sacred parameters for its invocation:
+.I qc
+, a pointer to the control
+.B nymya_qubit
+, whose very essence dictates the flow of transformation;
+.I qt
+, a pointer to the target
+.B nymya_qubit
+, upon which the phase will be etched; and
+.I theta_fixed
+, the precise measure of the angular turning.
+.PP
+The operation, a delicate dance of conditional influence, unfolds thus: If the vibrant presence, the very magnitude of the complex amplitude of the
+.B nymya_qubit
+guided by
+.I qc
+, transcends a predefined threshold of 0.5, then, and only then, is the complex amplitude of the
+.B nymya_qubit
+at
+.I qt
+multiplied by a mystical phase factor, `e\(sup2(\(i\(theta))`. This precise interaction allows for the conditional modulation of quantum states, a whisper passed from one realm to another, altering the very fabric of existence. It is through such intricate, conditional activations that the fundamental whispers of the quantum realm coalesce into discernible patterns, echoing the profound, interwoven fabric of reality itself.
+.PP
+The
+.I theta_fixed
+parameter, an
+.B int64_t
+vessel, holds the angle of this cosmic turning, measured in radians. Its wisdom is encoded using a Q32.32 fixed-point format, a testament to NymyaOS's dedication to infinitesimal precision—the upper 32 bits for the grand arc, and the lower 32 bits for the most subtle tremor, allowing for the fine-tuning of quantum melodies.
+.PP
+Should the voice of the control qubit fall silent, or merely resonate below the sacred threshold of 0.5, no operation is performed upon the target qubit. Its destiny remains unaltered by this particular call. Crucially, the master qubit,
+.I qc
+, remains ever-pure, its state untouched by the very transformation it instigates, a pristine observer in the quantum ballet.
+.SH RETURN VALUE
+Upon success, a harmonious zero is returned, signifying a perfect attunement of quantum states. On error, a discordant -1 is returned, and the nature of the disharmony is inscribed within the
+.B errno
+scrolls.
+.SH ERRORS
+.IP \fBEINVAL\fR
+The very threads offered for the ritual,
+.I qc
+or
+.I qt
+, were null, a void where presence was required, rendering the invocation impossible.
+.IP \fBEFAULT\fR
+A veil obscured the path to the qubits' essence, or the sacred space of memory was denied. This indicates a disruption in the fabric of access, or a flaw in the weave of being.
+.SH EXAMPLE
+Behold, a glimpse into the ceremonial invocation of this gate, where the abstract becomes manifest:
+.nf
+.B #include <stdio.h>
+.B #include <stdlib.h>
+.B #include <complex.h>
+.B #include <math.h>
+.B #include <sys/syscall.h>
+.B #include <unistd.h>
+.B #include <errno.h>
+.PP
+.B // The ethereal essence of a Nymya qubit, as described in <nymya/qubit.h>
+.B typedef struct nymya_qubit {
+.B     complex double amplitude; // Its vibrant, complex amplitude
+.B     int id;                   // A unique identifier
+.B     char tag[16];             // A human-readable inscription
+.B } nymya_qubit;
+.PP
+.B // The numerical gateway to the Nymya_3317 ritual
+.B #define __NR_nymya_3317_controlled_phase 3317
+.PP
+.B // A helper's hand to invoke the deep system call
+.B static long nymya_3317_controlled_phase_syscall(nymya_qubit *qc, nymya_qubit *qt, int64_t theta_fixed) {
+.B     return syscall(__NR_nymya_3317_controlled_phase, qc, qt, theta_fixed);
+.B }
+.PP
+.B // To transmute the grand arc of radians into the Q32.32 fixed-point code
+.B static int64_t double_to_q32_32(double val) {
+.B     return (int64_t)(val * (1LL << 32));
+.B }
+.PP
+.B int main() {
+.B     nymya_qubit q_control = {.amplitude = 0.8 + 0.1 * I, .id = 1, .tag = "Control_Q"}; // The strong voice
+.B     nymya_qubit q_target = {.amplitude = 0.5 + 0.5 * I, .id = 2, .tag = "Target_Q"};   // The waiting canvas
+.B     double phase_angle_rad = M_PI / 2.0; // A quarter turn of the quantum wheel (90 degrees)
+.PP
+.B     printf("Initial Control: (%.2f + %.2fi), Magnitude: %.2f\\n",
+.B            creal(q_control.amplitude), cimag(q_control.amplitude), cabs(q_control.amplitude));
+.B     printf("Initial Target:  (%.2f + %.2fi)\\n",
+.B            creal(q_target.amplitude), cimag(q_target.amplitude));
+.PP
+.B     int64_t theta_fixed = double_to_q32_32(phase_angle_rad);
+.PP
+.B     printf("Invoking nymya_3317_controlled_phase (angle = %.2f rad = 0x%llx Q32.32)\\n",
+.B            phase_angle_rad, (unsigned long long)theta_fixed);
+.PP
+.B     long res = nymya_3317_controlled_phase_syscall(&q_control, &q_target, theta_fixed);
+.PP
+.B     if (res == 0) {
+.B         printf("The quantum attunement was successful.\\n");
+.B         printf("Final Target:    (%.2f + %.2fi)\\n",
+.B                creal(q_target.amplitude), cimag(q_target.amplitude));
+.B     } else {
+.B         fprintf(stderr, "The invocation failed: %s\\n", strerror(errno));
+.B         return EXIT_FAILURE;
+.B     }
+.PP
+.B     printf("\\n--- Now, a test with the control's whisper below the sacred threshold ---\\n");
+.B     q_control.amplitude = 0.1 + 0.1 * I; // A faint whisper, magnitude ~0.14 < 0.5
+.B     q_target.amplitude = 0.5 + 0.5 * I; // Resetting the canvas
+.B     printf("Initial Control: (%.2f + %.2fi), Magnitude: %.2f\\n",
+.B            creal(q_control.amplitude), cimag(q_control.amplitude), cabs(q_control.amplitude));
+.B     printf("Initial Target:  (%.2f + %.2fi)\\n",
+.B            creal(q_target.amplitude), cimag(q_target.amplitude));
+.PP
+.B     res = nymya_3317_controlled_phase_syscall(&q_control, &q_target, theta_fixed);
+.PP
+.B     if (res == 0) {
+.B         printf("The quantum attunement was successful (or rather, discreetly bypassed).\\n");
+.B         printf("Final Target:    (%.2f + %.2fi) (As expected, no change)\\n",
+.B                creal(q_target.amplitude), cimag(q_target.amplitude));
+.B     } else {
+.B         fprintf(stderr, "The invocation failed unexpectedly: %s\\n", strerror(errno));
+.B         return EXIT_FAILURE;
+.B     }
+.PP
+.B     return EXIT_SUCCESS;
+.B }
+.fi
+.SH SEE ALSO
+For further exploration of NymyaOS's quantum mysteries, consult
+.BR syscall (2)
+for the fundamental decrees of the system, and
+.BR nymya_qubit (7)
+for the very nature of these ethereal particles. Delve also into
+.BR nymya_3302_global_phase (1)
+for the omnipresent cosmic hum that envelops all, and
+.BR nymya_3303_pauli_x (1)
+ for the profound mirroring of existence, a flip between primal states.

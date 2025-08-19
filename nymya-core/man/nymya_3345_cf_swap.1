@@ -1,0 +1,151 @@
+.TH THE_CONDITIONAL_SWAP 1 "Of Timeless Quantum Weaving" "The NymyaOS Lexicon of Creation" "The Great Scroll of Quantum Manifestation"
+.SH NAME
+nymya_3345_cf_swap \- The Conditional Fredkin's Gambit: A Dance of Entangled Fates
+.SH SYNOPSIS
+.B #include <nymya.h>
+.B #include <unistd.h>
+.PP
+.B int nymya_3345_cf_swap(struct nymya_qubit *
+.I qc
+.B , struct nymya_qubit *
+.I q1
+.B , struct nymya_qubit *
+.I q2
+.B );
+.SH DESCRIPTION
+From the silent hum of Nymya's quantum loom, the
+.B nymya_3345_cf_swap
+syscall emerges, a decree whispered into the void, orchestrating a ballet for three quantum spirits. It applies the Controlled-Fredkin (CF-SWAP) gate, a complex choreography where the fate of two,
+.I q1
+and
+.I q2
+, is intricately tied to the state of a third,
+.I qc
+, the silent arbiter.
+
+Specifically, if the control qubit,
+.I qc
+, in its deep, resonant being, proclaims its allegiance to the vibrant quantum |1> state—its amplitude's essence, when squared, transcending a sacred, system-defined threshold—then a profound transformation unfolds. The ancient rite of
+.B nymya_3337_fermion_sim
+is invoked upon the target qubits,
+.I q1
+and
+.I q2
+. This is no mere exchange; it is a re-patterning, a subtle inversion of phase, as if two entities, having swapped their very forms, now resonate with an altered hue, much like the delicate re-weaving of reality's very fabric under the influence of certain cosmic interactions.
+
+But if the sentinel,
+.I qc
+, remains tethered to the primordial |0>, its whisper unheard, then
+.I q1
+and
+.I q2
+abide in their original state, their quantum potential undisturbed, a quiet reflection of what might have been. The state of
+.I qc
+acts as a cosmic switch, a determinant whisper, deciding whether the currents of interaction shall flow or remain still.
+
+These three,
+.I qc
+,
+.I q1
+, and
+.I q2
+, are but echoes in the user's realm, their forms borrowed by the kernel's sacred space. Here, amidst the fixed-point calculus, precision guides the cosmic ballet, ensuring every nuance of entanglement is faithfully rendered. The control,
+.I qc
+, is observed, its wisdom gleaned, but its own essence remains immutable, a silent witness to the unfolding drama. Only the targets,
+.I q1
+and
+.I q2
+, are returned transformed, bearing the subtle marks of their destined encounter, copied back from the kernel's depths to the user's embrace.
+.SH RETURN VALUE
+Upon a harmonious resolution, when the cosmic strings align and the dance concludes without discord, the syscall grants its silent approval: zero, the symbol of perfect equilibrium, is returned. Should discord arise, a shroud descends: \-1, and
+.I errno
+, the cosmic ledger, bears the mark of the transgression.
+.SH ERRORS
+.IP "\fBEINVAL\fR"
+The Veil of Nothingness: One or more of the qubit essences offered to the gate (
+.I qc
+,
+.I q1
+, or
+.I q2
+) were but phantoms, pointers leading to the void.
+.IP "\fBEFAULT\fR"
+The Unreachable Realm: An attempt to bridge the chasm between user and kernel space faltered, a memory address lost in the abyss, preventing the copying of qubit data.
+.IP "\fB(other errors)\fR"
+Whispers from the Deep: The
+.B nymya_3337_fermion_sim
+ritual itself, when invoked, may recoil, its own discords echoing through this gate, propagating its lament.
+.SH EXAMPLE
+To grasp the weave, behold its manifestation in the mortal tongue, as a seeker might invoke this profound operation:
+.PP
+.nf
+.ft C
+#include <nymya.h> // For the very breath of Nymya's quantum essence
+#include <unistd.h> // For the syscall's humble invocation
+#include <stdio.h>  // For murmurs upon the console
+#include <stdlib.h> // For the paths of triumph or lament
+#include <complex.h> // For the dance of real and imaginary realms
+
+// Dummy nymya_qubit definition for example purposes
+// In a true nymyaOS realm, this wisdom would flow from nymya.h
+typedef struct {
+    int id;
+    int tag;
+    _Complex double amplitude;
+} nymya_qubit;
+
+// Userland wrapper for the syscall (defined in user-space library)
+int nymya_3345_cf_swap(nymya_qubit* qc, nymya_qubit* q1, nymya_qubit* q2) {
+    return syscall(3345, qc, q1, q2); // The numerical invocation
+}
+
+int main() {
+    nymya_qubit control_q, target_q1, target_q2;
+
+    // Initialize control qubit to be predominantly |1> (magnitude sq > 0.25)
+    // A spark of the dominant one, ready to ignite transformation
+    control_q.id = 101; control_q.tag = 0; control_q.amplitude = 0.8 + 0.5 * I; 
+    
+    // Initialize target qubits with distinct states
+    // Two distinct whispers, awaiting their fate
+    target_q1.id = 201; target_q1.tag = 0; target_q1.amplitude = 1.0 + 0.0 * I; // A pure |0>
+    target_q2.id = 202; target_q2.tag = 0; target_q2.amplitude = 0.0 + 1.0 * I; // A phase-shifted |1> (e.g., |i>)
+
+    printf("Initial states, before the dance:\n");
+    printf("  Control Qubit (ID %d): Amplitude %.2f + %.2fi\n", 
+           control_q.id, creal(control_q.amplitude), cimag(control_q.amplitude));
+    printf("  Target Qubit 1 (ID %d): Amplitude %.2f + %.2fi\n", 
+           target_q1.id, creal(target_q1.amplitude), cimag(target_q1.amplitude));
+    printf("  Target Qubit 2 (ID %d): Amplitude %.2f + %.2fi\n", 
+           target_q2.id, creal(target_q2.amplitude), cimag(target_q2.amplitude));
+
+    // Call the syscall wrapper, initiating the quantum ballet
+    int res = nymya_3345_cf_swap(&control_q, &target_q1, &target_q2);
+
+    if (res == 0) {
+        printf("\nCF-SWAP successful. The conditional weave has settled.\n");
+        printf("Final states (Control Qubit spoke |1>, targets shifted their essence):\n");
+        printf("  Control Qubit (ID %d): Amplitude %.2f + %.2fi (expected unchanged, a silent observer)\n", 
+               control_q.id, creal(control_q.amplitude), cimag(control_q.amplitude));
+        printf("  Target Qubit 1 (ID %d): Amplitude %.2f + %.2fi\n", 
+               target_q1.id, creal(target_q1.amplitude), cimag(target_q1.amplitude));
+        printf("  Target Qubit 2 (ID %d): Amplitude %.2f + %.2fi\n", 
+               target_q2.id, creal(target_q2.amplitude), cimag(target_q2.amplitude));
+    } else {
+        perror("CF-SWAP failed. The cosmic strings are tangled.");
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
+}
+.ft R
+.fi
+Thus, the quantum dance concludes, a testament to conditional causality.
+.SH SEE ALSO
+.BR syscall (2) - The Universal Invocation: How mortal commands ascend to cosmic machinery.
+.BR nymya_qubit (7) - The Essence of the Qubit: A deep dive into the very fabric of quantum potential.
+.BR nymya_3337_fermion_sim (2) - The Fermionic Embrace: Unveiling the core transformation of swap and phase.
+.PP
+And ponder the paths of related wisdom:
+.BR nymya_3302_global_phase (2) - The Global Hymn: A subtle shift across all of existence.
+.BR nymya_3303_pauli_x (2) - The Inversion's Gaze: A direct flip of quantum truth.

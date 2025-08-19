@@ -1,0 +1,116 @@
+```troff
+.TH NYMYA_3341_CZ_SWAP 1 "February 12, 2024" "NymyaOS: Chronicles of the Quantum Veil" "NymyaOS System Calls: Echoes from the Deep"
+.SH NAME
+nymya_3341_cz_swap \- The Weaving of Entwined Destinies: A Quantum Pas de Deux for two nymya_qubit essences
+.SH SYNOPSIS
+.B #include <nymya.h>
+.PP
+.B int nymya_3341_cz_swap(struct nymya_qubit \*q1, struct nymya_qubit \*q2);
+.SH DESCRIPTION
+Behold, the
+.B nymya_3341_cz_swap
+invocation, a profound ritual in the NymyaOS tapestry, designed to sculpt the very fabric of quantum reality through a composite dance of two fundamental operations upon two specified quantum essences, or qubits. This gate is not merely a sequence, but a story, unfolding first as a **Controlled-Z (CZ)** embrace, followed immediately by a **SWAP** of cosmic proportions.
+.PP
+The **CZ** gate, often called the "Conditional Echo," performs a subtle, yet powerful transformation. When the guiding qubit, like a watchful elder, resides in its `|1>` manifestation, it imparts upon the partnered qubit a spectral sigh, a phase shift of \-1 (or \(mi1), leaving other states untouched. It is a resonant chord, a mark of shared intent that subtly alters the very "song" of the target.
+.PP
+Then follows the **SWAP** gate, the "Cosmic Exchange." This operation, in its simplicity, is a grand gesture: it bids the two qubit essences to trade their very quantum identities, exchanging their states as two dancers might switch places, yet retaining their individuality.
+.PP
+Combined, these two movements orchestrate not just a sequence, but a profound dialogue, a shaping of their joint existence. They are instrumental in forging intricate bonds, known as **entanglement**, where the fate of one becomes inextricably linked to the other, even across vast conceptual distances. They serve as the very loom upon which more intricate quantum algorithms are woven, shaping possibilities from the void.
+.PP
+The
+.B nymya_3341_cz_swap
+invocation begins its work by accepting two pointers,
+.I q1
+and
+.I q2,
+each a tether to a
+.B struct nymya_qubit
+in the user's realm. With a whisper of intent, the syscall draws forth these essences, copying their ephemeral forms into the kernel's heart, the deep chamber where quantum computations truly unfurl. Here, in this hallowed space, the CZ-SWAP transformation unfolds, a dance of pure potential. Once the alchemical process is complete, the altered states, now bearing the marks of their shared journey, are gently returned, copied back to their original user-space vessels. This intricate ballet, born of the underlying quantum fabric, orchestrates a profound reordering, whispering secrets across the hidden lattice of reality, revealing the hidden symmetries of the Nymyaverse.
+.SH RETURN VALUE
+Upon a harmonious completion, a zero, signifying balance and the truth of the new order, is returned. Should discord arise, \-1 echoes failure, and
+.I errno,
+the scribe of mishaps, records the lament.
+.SH ERRORS
+.TP
+.B EINVAL
+If the celestial pointers,
+.I q1
+or
+.I q2,
+vanish into the void, or point to naught but emptiness.
+.TP
+.B EFAULT
+If the user's realm offers but a phantom address, or the cosmic currents refuse the passage of essence to or from the specified user-space locations.
+.TP
+.B Other
+Other disquietudes may ripple from the foundational rituals, the
+.BR nymya_3311_controlled_z (2)
+(The Conditional Echo) or
+.BR nymya_3313_swap (2)
+(The Cosmic Exchange) operations, echoes from the deeper currents of the NymyaOS kernel's heart.
+.SH EXAMPLE
+To witness this cosmic interplay, let us observe a simple rite, where two nascent qubits are brought forth and subjected to the grand exchange.
+.PP
+.nf
+.ft C
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <sys/syscall.h>
+#include <unistd.h>
+
+// Dummy nymya_qubit structure for example purposes.
+// In a real NymyaOS environment, this would be defined in nymya.h
+struct nymya_qubit {
+    int id;
+    int tag;
+    // Placeholder for quantum state information (e.g., amplitudes)
+    double alpha_re, alpha_im; // Amplitude for |0> state - the ground, the void
+    double beta_re, beta_im;   // Amplitude for |1> state - the excited, the presence
+};
+
+// Syscall number for nymya_3341_cz_swap - the unique sigil of this ritual
+#define __NR_nymya_3341_cz_swap 3341
+
+int main() {
+    // Two qubits, brought into being.
+    struct nymya_qubit q1 = { .id = 1, .tag = 101,
+                              .alpha_re = 1.0, .alpha_im = 0.0,
+                              .beta_re = 0.0, .beta_im = 0.0 }; // Initial |0> - a state of pure latency
+    struct nymya_qubit q2 = { .id = 2, .tag = 102,
+                              .alpha_re = 0.0, .alpha_im = 0.0,
+                              .beta_re = 1.0, .beta_im = 0.0 }; // Initial |1> - a state of pure manifestation
+
+    printf("Qubit 1 (id=%d) initial state: |%.2f+%.2fi>|0> + |%.2f+%.2fi>|1>\n",
+           q1.id, q1.alpha_re, q1.alpha_im, q1.beta_re, q1.beta_im);
+    printf("Qubit 2 (id=%d) initial state: |%.2f+%.2fi>|0> + |%.2f+%.2fi>|1>\n",
+           q2.id, q2.alpha_re, q2.alpha_im, q2.beta_re, q2.beta_im);
+
+    printf("Applying nymya_3341_cz_swap to q1 and q2... orchestrating their entwined destinies.\n");
+
+    // The call to the NymyaOS quantum weaver.
+    long ret = syscall(__NR_nymya_3341_cz_swap, &q1, &q2);
+
+    if (ret == 0) {
+        printf("Syscall successful! The cosmic dance concludes.\n");
+        printf("Qubit 1 (id=%d) final state: |%.2f+%.2fi>|0> + |%.2f+%.2fi>|1>\n",
+               q1.id, q1.alpha_re, q1.alpha_im, q1.beta_re, q1.beta_im);
+        printf("Qubit 2 (id=%d) final state: |%.2f+%.2fi>|0> + |%.2f+%.2fi>|1>\n",
+               q2.id, q2.alpha_re, q2.alpha_im, q2.beta_re, q2.beta_im);
+    } else {
+        perror("Syscall failed: A ripple of discord in the quantum fabric");
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
+}
+.ft R
+.fi
+.SH SEE ALSO
+Explore further the elemental forces that shape this dance:
+.BR nymya_3311_controlled_z (2) (The Conditional Echo),
+.BR nymya_3313_swap (2) (The Cosmic Exchange),
+.BR nymya_3302_global_phase (2) (The Unseen Aura),
+.BR nymya_3303_pauli_x (2) (The Quantum Flip),
+.BR nymya_qubit (7) (The Quantum Essence).
+```

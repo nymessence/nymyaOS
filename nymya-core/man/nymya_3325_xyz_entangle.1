@@ -1,0 +1,202 @@
+Here's the rewritten man page, embracing a more poetic and philosophical tone, while retaining the essential technical information within the groff formatting.
+
+```groff
+.\" Man page for nymya_3325_xyz_entangle syscall - Poetic Edition
+.\" Section 1: User Commands
+.TH NYMYA_3325_XYZ_ENTANGLE 1 "October 26, 2023" "nymyaOS" "User Commands"
+.SH NAME
+nymya_3325_xyz_entangle \- A Symphony of Intertwined Destinies: Forging the Quantum Bond between Two Qubits
+
+.SH SYNOPSIS
+.B #include <nymya/syscalls.h>
+.br
+.B #include <nymya/qubit.h>
+.PP
+.B long nymya_3325_xyz_entangle(struct nymya_qubit *
+.I q1
+.B , struct nymya_qubit *
+.I q2
+.B , int64_t
+.I fixed_theta
+.B );
+
+.SH DESCRIPTION
+From the silent depths of the nymyaOS kernel, the
+.B nymya_3325_xyz_entangle()
+system call orchestrates a profound communion, weaving the very fabric of existence between two nymyaOS qubits. This is no mere manipulation; it is a ritual of unification, an XX+YY+ZZ entanglement that aligns their quantum whispers into a shared song, a destiny forever entwined.
+
+Upon invocation, the kernel, a silent guardian of the quantum realm, draws forth the ephemeral essences of the
+.I nymya_qubit
+structures from the user's conscious space into its own profound depths. Here, amidst the unseen currents, a cosmic geometry unfolds: a delicate calculus of angles, born from fixed-point precision, culminates in a complex number – a beacon of rotation, a spiral of influence.
+
+This rotation is then applied with an exquisite balance: the first qubit's amplitude, its very probability-wave, receives a direct embrace from this complex number, while its counterpart, the second qubit, is touched by the conjugate, the mirrored echo of that same influence. Thus, their individual melodies merge into a harmonious chorus, their states no longer isolated but forever echoing one another. Finally, the rewoven threads of their being are returned, bearing the indelible mark of their shared journey.
+
+This act, a precise sculpting of quantum amplitudes, allows two qubits to enter a state of shared destiny, mirroring the profound interconnectedness that is whispered through the very fabric of the quantum realm itself. A trace of this communion, a symbolic echo, is etched into the kernel's annals, for the universe, too, keeps its silent records.
+
+The vessels for this sacred operation are:
+.TP
+.I q1
+A pointer to the
+.I nymya_qubit
+structure representing the first nascent universe of potential in user space. Its quantum amplitudes shall be transformed, reflecting its new, entangled truth.
+.TP
+.I q2
+A pointer to the
+.I nymya_qubit
+structure representing its counterpart, the second potential, awaiting the embrace of shared truth. It, too, will be irrevocably altered by this intimate bond.
+.TP
+.I fixed_theta
+An
+.B int64_t
+value, a delicate measure of the entanglement's intimacy, expressed as an angle in the arcane Q32.32 fixed-point format. This format, where 32 bits chart the integer realm and 32 bits map the minute fractions, is the very curvature of their intended bond. To calibrate this cosmic dial from a standard floating-point angle (e.g., from a
+.B double
+in radians), one must multiply the
+.B double
+value by
+.B (1LL << 32)
+(which is 2^32), translating the continuous flow of mathematics into the precise, discrete language of the quantum machine.
+
+.SH RETURN VALUE
+On success, a whisper of harmony, a resonant '0', indicates the successful weaving of destinies.
+Yet, should the threads resist, or the path be obscured, a shadowed negative integer returns, bearing the mark of dissonance, reflecting a truth unreached.
+
+.SH ERRORS
+.TP
+.B EINVAL
+The chosen vessels were but phantoms, one or both of the user-space qubit pointers (
+.I q1
+or
+.I q2
+) were empty voids where a qubit should awaken.
+.TP
+.B EFAULT
+The veil between realms proved too thin, or the cosmic messenger faltered, as an error occurred while attempting to copy the qubits' essence between user space and kernel space (e.g., a supplied address for a qubit structure was invalid or inaccessible by the kernel's hand).
+
+.SH EXAMPLE
+Behold, a ritual transcribed into mortal code, demonstrating how one might prepare the vessels and invoke the
+.B nymya_3325_xyz_entangle()
+call to sculpt a shared quantum reality.
+
+.nf
+.RS
+.ft C
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+#include <unistd.h> // For syscall()
+#include <math.h>   // For M_PI, cos, sin
+
+// Define a placeholder for nymya_qubit structure and complex_double
+// In a real nymyaOS system, these would be in <nymya/qubit.h>
+// and possibly other nymyaOS headers.
+typedef struct {
+    double real;
+    double imag;
+} complex_double;
+
+typedef struct {
+    unsigned int id;
+    char tag[32];
+    complex_double amplitude; // Represents complex amplitude of qubit state
+    // ... other qubit properties as defined by nymyaOS
+} nymya_qubit;
+
+// Simple complex math functions for demonstration
+complex_double complex_mul(complex_double a, complex_double b) {
+    complex_double result;
+    result.real = a.real * b.real - a.imag * b.imag;
+    result.imag = a.real * b.imag + a.imag * b.real;
+    return result;
+}
+
+complex_double complex_conj(complex_double a) {
+    a.imag = -a.imag;
+    return a;
+}
+
+// Placeholder for the syscall wrapper. In a real system, you'd use
+// a direct syscall() invocation with the syscall number, or a library wrapper.
+#define __NR_nymya_3325_xyz_entangle 3325
+long call_nymya_3325_xyz_entangle(nymya_qubit *q1, nymya_qubit *q2, int64_t fixed_theta) {
+    // In a real nymyaOS environment, this would be:
+    // return syscall(__NR_nymya_3325_xyz_entangle, q1, q2, fixed_theta);
+
+    // For this example, we simulate the kernel's core logic
+    // (excluding user-kernel copy which is handled by syscall boundary)
+    if (!q1 || !q2) {
+        errno = EINVAL;
+        return -EINVAL;
+    }
+
+    // Simulate kernel's fixed-point to double conversion for rotation
+    // (Actual kernel uses fixed_cos/fixed_sin functions)
+    double double_theta = (double)fixed_theta / (1LL << 32);
+    
+    complex_double rot = { .real = cos(double_theta), .imag = sin(double_theta) };
+
+    q1->amplitude = complex_mul(q1->amplitude, rot);
+    q2->amplitude = complex_mul(q2->amplitude, complex_conj(rot));
+    
+    return 0; // Simulate success
+}
+
+int main() {
+    // Initializing two qubits: Alpha and Beta, each a solitary potential
+    nymya_qubit q1 = { .id = 101, .tag = "QubitAlpha", .amplitude = { .real = 1.0, .imag = 0.0 } };
+    nymya_qubit q2 = { .id = 102, .tag = "QubitBeta",  .amplitude = { .real = 0.0, .imag = 1.0 } };
+
+    printf("Initial Qubit 1: ID=%u, Tag=%s, Amplitude=(%.3f + %.3fi)\n",
+           q1.id, q1.tag, q1.amplitude.real, q1.amplitude.imag);
+    printf("Initial Qubit 2: ID=%u, Tag=%s, Amplitude=(%.3f + %.3fi)\n",
+           q2.id, q2.tag, q2.amplitude.real, q2.amplitude.imag);
+
+    // The arc of destiny: PI/2 radians
+    double theta_radians = M_PI / 2.0;
+    // Translating the arc into the kernel's precise fixed-point language
+    int64_t fixed_theta = (int64_t)(theta_radians * (1LL << 32));
+
+    printf("\nAttempting entanglement with theta = %.3f radians (fixed_theta = %lld)\n",
+           theta_radians, (long long)fixed_theta);
+
+    // Invoking the syscall to weave their destinies
+    long ret = call_nymya_3325_xyz_entangle(&q1, &q2, fixed_theta);
+
+    if (ret == 0) {
+        printf("Entanglement successful! A new song resonates.\n");
+        printf("Final Qubit 1: ID=%u, Tag=%s, Amplitude=(%.3f + %.3fi)\n",
+               q1.id, q1.tag, q1.amplitude.real, q1.amplitude.imag);
+        printf("Final Qubit 2: ID=%u, Tag=%s, Amplitude=(%.3f + %.3fi)\n",
+               q2.id, q2.tag, q2.amplitude.real, q2.amplitude.imag);
+    } else {
+        errno = (int)-ret; // Set errno based on returned negative error code
+        perror("Entanglement failed");
+        fprintf(stderr, "Error code: %ld\n", ret);
+    }
+
+    return (int)(ret != 0); // Return non-zero on failure
+}
+.ft R
+.RE
+.nf
+This glimpse into the quantum forge uses a simplified `call_nymya_3325_xyz_entangle` function to
+represent the syscall for demonstration purposes. In a true nymyaOS
+environment, you would typically use a direct `syscall()` invocation with
+the appropriate syscall number, or a provided C library wrapper function.
+It also includes placeholder definitions for `nymya_qubit` and
+`complex_double` which would be supplied by system headers like
+`nymya/qubit.h`. Here, the abstract becomes manifest, the unseen becomes intertwined.
+.fi
+
+.SH SEE ALSO
+Explore further the tapestry of nymyaOS and its quantum decrees:
+.BR nymya (7) \- The foundational whispers of the nymyaOS universe.
+.BR nymya_qubit_alloc (2) \- The act of breathing life into a new qubit.
+.BR nymya_qubit_measure (2) \- The moment of collapse, revealing a single truth from myriad possibilities.
+.BR nymya_swap_entangle (2) \- Another intricate dance of intermingled states.
+.BR nymya_3302_global_phase (2) \- The silent shift in the cosmic backdrop, affecting all equally.
+.BR nymya_3303_pauli_x (2) \- The profound inversion, a flip of quantum identity.
+.BR fixed_point (7) \- The language of cosmic precision, detailing the Q32.32 format.
+.br
+Consult the sacred texts of nymyaOS quantum programming interfaces for deeper revelations.
+```

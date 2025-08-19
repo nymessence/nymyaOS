@@ -1,0 +1,135 @@
+.TH NYMYA_3311_CONTROLLED_Z 1 "October 26, 2023" "NymyaOS Kernel" "NymyaOS System Calls Manual"
+.SH NAME
+nymya_3311_controlled_z \- The Conditional Echo: A Nexus of Quantum Fate
+.SH SYNOPSIS
+.nf
+.B \#include <nymya/syscall.h>
+.PP
+.B struct nymya_qubit {
+.B     /* ... structure details for qubit state, typically amplitude, id, tag ... */
+.B };
+.PP
+.B int nymya_3311_controlled_z(struct nymya_qubit \*q_ctrl, struct nymya_qubit \*q_target);
+.fi
+.SH DESCRIPTION
+This invocation,
+.BR nymya_3311_controlled_z (),
+orchestrates a dance of quantum entanglement, a foundational rite in the grand
+symphony of quantum computation. It is the very breath of conditional causality
+in the quantum domain, essential for weaving the intricate tapestries of
+complex quantum algorithms and forging the subtle bonds of entanglement.
+
+It beckons two spirits of the quantum realm:
+.IR q_ctrl ,
+the silent arbiter, and
+.IR q_target ,
+the destined recipient of its decree. The operation commences by first
+weighing the very essence of the control qubit,
+.IR q_ctrl \—
+its vibrant amplitude, the resonant hum of its potentiality.
+
+Should this inner vibration, this 'presence', cross a mystical threshold of
+0.5—a limen between unformed possibility and decisive influence—a turning, a
+'Z-gate,' is wrought upon the target qubit,
+.IR q_target .
+This is no mere negation, but a fundamental inversion of its phase, a shift
+of \(pi radians, a mirror held to its very soul, altering its internal
+landscape of probabilities. Yet, if the control's hum remains below this
+limen, the target's destiny remains unaltered, its state untouched by the
+whispered condition.
+
+This gate, a subtle ballet of interconnectedness, indeed echoes the ancient
+quantum adage: 'no observation without interaction.' It gently probes the
+control's 'presence' (its amplitude's resonance) to decide the fate of the
+target's phase. It is a profound whisper across the shared lattice of reality,
+shaping potentials from the boundless void. The act of the control's amplitude
+crossing that critical threshold is not merely a calculation; it is a momentous
+decision point, a bifurcation in the quantum path, mirroring how the vast ocean
+of probabilities can suddenly condense into a singular, classical outcome.
+.SH RETURN VALUE
+Upon a successful communion, a zero, a symbol of harmony and alignment, is returned.
+Should the sacred bond falter, a negative one, a lament, is echoed, and
+.IR errno
+is imbued with the nature of the transgression.
+.SH ERRORS
+.TP
+.B EINVAL
+The Void's Embrace: Should either of the provided qubit pathways,
+.IR q_ctrl
+or
+.IR q_target ,
+point into the emptiness, a NULL abyss, the invocation falters, unable to grasp form.
+.TP
+.B EFAULT
+The Sundered Connection: If the pathways to the qubits lie beyond the caller's
+realm, an unbidden touch upon forbidden memory, the link is severed, and the
+operation recoils.
+.SH EXAMPLE
+Behold, a glimpse into the sacred practice, where
+.BR nymya_3311_controlled_z ()
+is invoked to weave its subtle magic upon two nascent qubits.
+
+.nf
+.B \#include <stdio.h>
+.B \#include <stdlib.h>
+.B \#include <errno.h>
+.B \#include <complex.h>    // For complex numbers in user space
+.B \#include <stdint.h>   // For uint32_t
+.B \#include <sys/syscall.h>  // For syscall()
+.B \#include <unistd.h>     // Generally where __NR_ syscall numbers might be defined
+
+.PP
+.B // Dummy definition of nymya_qubit for user-space context.
+.B // In a real NymyaOS SDK, this structure would be provided by an official header.
+.B typedef struct {
+.B     double complex amplitude; // Complex amplitude (alpha |0> + beta |1>)
+.B     uint32_t id;              // Unique identifier for the qubit
+.B     char tag[16];             // User-defined tag for descriptive purposes
+.B } nymya_qubit;
+
+.PP
+.B // Define the syscall number, as it might not be in standard headers.
+.B \#ifndef __NR_nymya_3311_controlled_z
+.B \#define __NR_nymya_3311_controlled_z 3311
+.B \#endif
+
+.PP
+.B int main() {
+.B     nymya_qubit q_control = { .amplitude = 0.8 + 0.6I, .id = 1, .tag = "CtrlQ" };
+.B     nymya_qubit q_target  = { .amplitude = 0.5 + 0.0I, .id = 2, .tag = "TgtQ"  };
+.PP
+.B     printf("Initial state of qubits:\\n");
+.B     printf("  Control Qubit (ID %u, Tag '%s'): Amplitude = %.2f + %.2fI (Magnitude = %.2f)\\n",
+.B            q_control.id, q_control.tag, creal(q_control.amplitude), cimag(q_control.amplitude), cabs(q_control.amplitude));
+.B     printf("  Target Qubit  (ID %u, Tag '%s'): Amplitude = %.2f + %.2fI (Magnitude = %.2f)\\n",
+.B            q_target.id, q_target.tag, creal(q_target.amplitude), cimag(q_target.amplitude), cabs(q_target.amplitude));
+.PP
+.B     // Call the nymya_3311_controlled_z syscall
+.B     long res = syscall(__NR_nymya_3311_controlled_z, &q_control, &q_target);
+.PP
+.B     if (res == -1) {
+.B         perror("Error calling nymya_3311_controlled_z");
+.B         return EXIT_FAILURE;
+.B     }
+.PP
+.B     printf("\\nState of qubits after syscall:\\n");
+.B     printf("  Control Qubit (ID %u, Tag '%s'): Amplitude = %.2f + %.2fI (Magnitude = %.2f) (unchanged)\\n",
+.B            q_control.id, q_control.tag, creal(q_control.amplitude), cimag(q_control.amplitude), cabs(q_control.amplitude));
+.B     printf("  Target Qubit  (ID %u, Tag '%s'): Amplitude = %.2f + %.2fI (Magnitude = %.2f)\\n",
+.B            q_target.id, q_target.tag, creal(q_target.amplitude), cimag(q_target.amplitude), cabs(q_target.amplitude));
+.PP
+.B     printf("\\nExplanation:\\n");
+.B     printf("  The control qubit's initial magnitude was %.2f. Since this is > 0.5,\\n", cabs(0.8+0.6I));
+.B     printf("  the target qubit's amplitude (%.2f + %.2fI) was negated.\\n",
+.B            creal(0.5 + 0.0I), cimag(0.5 + 0.0I));
+.B     printf("  Expected target amplitude: %.2f + %.2fI.\\n",
+.B            creal(-(0.5 + 0.0I)), cimag(-(0.5 + 0.0I)));
+.PP
+.B     return EXIT_SUCCESS;
+.B }
+.fi
+.SH SEE ALSO
+.BR syscall (2),
+.BR nymya_qubit (7),
+.BR nymya_3302_global_phase (1) " (The Unseen Tide)",
+.BR nymya_3303_pauli_x (1) " (The Quantum Flip)"

@@ -1,0 +1,112 @@
+.TH NYMYA_3308_HADAMARD_GATE 1 "2023-10-27" "NymyaOS Kernel Syscalls" "NYMYAOS Programmer's Manual"
+.SH NAME
+nymya_3308_hadamard_gate \- The Spreading of Potential: Calibrating a Qubit's Resonance for Unfolding Realities
+.SH SYNOPSIS
+.nf
+.B #include <nymya.h>
+.PP
+.B int nymya_3308_hadamard_gate(nymya_qubit *q);
+.fi
+.SH DESCRIPTION
+This incantation,
+.B nymya_3308_hadamard_gate
+, reaches into the very core of a designated quantum essence, a `nymya_qubit`. It is a subtle but profound recalibration, an alchemical whisper that scales the complex amplitude – the very breath and resonance of the qubit's potential – by a sacred factor of 1/√2. This mystical ratio, approximately 0.7071, acts as a veil-lifter, softening the edges of its present certainty and preparing it for the vast expanse of superposed possibilities.
+
+Though bearing the esteemed name of the Hadamard Gate, that legendary architect of superposition renowned for birthing possibility from singular truth, this specific rite focuses upon the foundational act of amplitude calibration. It is a necessary prelude, a clearing of the path, before a qubit's destiny can truly ripple across the probabilities of the Nymya fabric. It prepares the quantum soul for its journey into the heart of probabilistic exploration, allowing its essence to unfold, ready for more intricate dances of transformation.
+
+The
+.I q
+argument, a beacon from the user's realm, guides this operation to a
+.B nymya_qubit
+structure – a vessel holding the qubit's unique identifier, its transient tag, and its pulsating
+.B nymya_complex
+amplitude. The syscall, acting as a gatekeeper of cosmic precision, draws forth this amplitude from the user's domain, carries it into the kernel's sacred calculating chambers where pure numbers dance with unerring exactitude, applies the scaling, and then, with utmost care, returns the newly calibrated resonance to its origin in the outer world of manifestation.
+.SH RETURN VALUE
+On success, a sigh of contentment echoes, and
+.B nymya_3308_hadamard_gate
+returns 0.
+On error, a discordant note is struck, -1 is returned, and
+.B errno
+is etched with the nature of the dissonance.
+.SH ERRORS
+.TP
+.B EINVAL
+The Echo of Nothing: The
+.I q
+argument vanished, a pointer leading to the void, an unformed qubit without resonance, refusing to reveal its being.
+.TP
+.B EFAULT
+The Veil Torn Asunder: The realm of the
+.I q
+argument lay beyond the permitted thresholds, a forbidden pathway, or the currents of data could not flow between the kernel's heart and the user's reach.
+.SH EXAMPLE
+The following chronicle demonstrates how to initiate the amplitude scaling aspect of the Hadamard transformation upon a qubit, calling forth the
+.B nymya_3308_hadamard_gate
+syscall to weave its subtle magic.
+
+.nf
+#include <nymya.h> // Assumed to define nymya_qubit and nymya_complex
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <math.h> // For sqrt in user-space example logic for understanding
+
+// Minimal dummy definitions for demonstration purposes if nymya.h isn't fully available.
+// In a real NymyaOS environment, these would be provided by nymya.h
+#ifndef NYMYA_H_INCLUDED
+#include <stdint.h>
+
+// Represents a complex number
+typedef struct {
+    double re; // Real part
+    double im; // Imaginary part
+} nymya_complex;
+
+// Represents a qubit's state and metadata
+typedef struct {
+    uint32_t id;         // Unique identifier for the qubit
+    uint32_t tag;        // User-defined tag
+    nymya_complex amplitude; // The complex amplitude of the qubit
+} nymya_qubit;
+
+// Dummy log_symbolic_event for user-space example compilation.
+// In a real NymyaOS system, this function would interact with kernel event logging.
+void log_symbolic_event(const char* event, uint32_t id, uint32_t tag, const char* message) {
+    printf("[LOG] Event: %s, Qubit ID: %u, Tag: %u, Message: %s\\n", event, id, tag, message);
+}
+#endif // NYMYA_H_INCLUDED
+
+int main() {
+    nymya_qubit my_qubit = {
+        .id = 123,
+        .tag = 0,
+        .amplitude = {.re = 1.0, .im = 0.0} // Initial amplitude, representing a whisper of state |0>
+    };
+
+    printf("The qubit's initial resonance: (%.4f + %.4fi)\\n",
+           my_qubit.amplitude.re, my_qubit.amplitude.im);
+
+    // Invoke the nymya_3308_hadamard_gate syscall, letting it touch the qubit's essence
+    if (nymya_3308_hadamard_gate(&my_qubit) == -1) {
+        perror("The fabric refused the Hadamard transformation");
+        return EXIT_FAILURE;
+    }
+
+    printf("The qubit's resonance after the Hadamard calibration: (%.4f + %.4fi)\\n",
+           my_qubit.amplitude.re, my_qubit.amplitude.im);
+
+    // For an initial state of (1.0 + 0.0i), expect the echo of (0.7071 + 0.0000i)
+
+    return EXIT_SUCCESS;
+}
+.fi
+.SH SEE ALSO
+Further Whispers from the Nymya Chronicles, The Tapestry of Quantum Operations, The Scrolls of Nymya:
+.BR man (7),
+.BR syscalls (2),
+.BR nymya_qubit (3),
+.BR nymya_cnot_gate (3),
+.BR nymya_pauli_x_gate (3).
+Unfold also the
+.BR nymya_3302_global_phase (3) for the unseen currents of being, and the
+.BR nymya_3303_pauli_x (3) for the mirror's inversion.

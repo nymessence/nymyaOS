@@ -1,0 +1,146 @@
+.\" Man page for nymya_3320_rotate_y(1)
+.TH NYMYA_3320_ROTATE_Y 1 "Nya Elyria's Cycle of Genesis" "nymyaOS Kernel Syscalls: Whispers of the Fabric" "User Commands"
+.SH NAME
+nymya_3320_rotate_y \- The Y-Axis Turn: Guiding the Qubit's Inner Compass
+
+.SH SYNOPSIS
+.B #include <nymya.h>
+.B #include <sys/syscall.h>
+.B #include <unistd.h>
+.PP
+.B int nymya_3320_rotate_y(nymya_qubit *
+.I q
+.B , int64_t
+.I theta_fp
+.B );
+
+.SH DESCRIPTION
+Through the sacred invocation
+.B nymya_3320_rotate_y
+, one may subtly command the very fabric of existence, initiating a quantum pirouette around the Y-axis. This act, a gentle whisper to a nymyaOS qubit's core, shifts the intricate dance of its amplitude. It is a re-alignment of its inner truth, subtly reshaping the ethereal veils of its superposition and re-threading the cosmic lines of its entanglement. Each turn, measured by the provided angle, is a precise recalibration of its being, a shift in its cosmic posture within the foundational geometry that is Nya Elyria's grand design. It echoes the very quantum whispers that orchestrate reality itself.
+
+The
+.I q
+argument serves as the vessel, a user-space conduit pointing to the
+.B nymya_qubit
+structure whose destiny is to be reshaped. The Kernel, acting as the Sacred Weaver, draws forth the qubit's current essence from the ephemeral user-space, performs the alchemical transformation, and then returns the newly harmonized state to its origin.
+
+The
+.I theta_fp
+argument is the measure of this intended shift, an angle expressed in radians, meticulously encoded as a 64-bit fixed-point integer. This precise measure, though born of mundane calculation, directs the profound re-orientation, its specific quantum of truth revealed within the
+.B nymya.h
+header. It often requires a translation from the fleeting approximations of standard floating-point to the unyielding precision demanded by the quantum loom, perhaps through the sacred rite of
+.B NYMYA_RAD_TO_FP
+.
+
+.SH RETURN VALUE
+On success, zero is returned, signifying harmony and alignment. On error, -1 is returned, a sign of discord, and
+.B errno
+is set appropriately, detailing the nature of the cosmic resistance.
+
+.SH ERRORS
+.TP
+.B EINVAL
+When
+.I q
+, the guiding light, points to the void (NULL), the turn cannot begin. This is
+.B EINVAL
+, the echo of an Unchosen Path.
+.TP
+.B EFAULT
+Should the address held by
+.I q
+wander beyond the hallowed grounds of the process's perception, the fabric resists. This is
+.B EFAULT
+, the sound of a Fractured Thread, an unreachable whisper.
+
+.SH EXAMPLE
+A Glimpse into the Quantum Loom: The following incantation demonstrates how to invoke
+.B nymya_3320_rotate_y
+to re-orient a qubit.
+
+.nf
+.ft C
+#include <nymya.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <unistd.h>
+#include <math.h> // For M_PI, the cosmic constant
+
+// Define minimal nymya_qubit and fixed-point types for the example.
+// In a real nymyaOS environment, these would be provided by <nymya.h>,
+// emerging from the very bedrock of Nya Elyria's design.
+typedef struct {
+    int64_t re; // The Real Chord of its Amplitude (fixed-point)
+    int64_t im; // The Imaginary Resonances of its Amplitude (fixed-point)
+} nymya_complex_fixed_t;
+
+typedef struct {
+    int id; // Its unique cosmic identifier
+    int tag; // A ephemeral tag for human understanding
+    nymya_complex_fixed_t amplitude; // The very song of its being
+    // Other subtle data of the qubit's state might reside here
+} nymya_qubit;
+
+// Assume a fixed-point scale (e.g., 2^30 for 30 fractional bits),
+// representing the universe's inherent precision.
+// These conversion macros, rites of translation, would typically be in <nymya.h>.
+#ifndef NYMYA_FIXED_POINT_FRAC_BITS
+#define NYMYA_FIXED_POINT_FRAC_BITS 30
+#endif
+#define NYMYA_RAD_TO_FP(rad) ((int64_t)((rad) * (1LL << NYMYA_FIXED_POINT_FRAC_BITS)))
+#define NYMYA_FP_TO_RAD(fp)  (((double)(fp)) / (1LL << NYMYA_FIXED_POINT_FRAC_BITS))
+
+int main() {
+    // Behold, a new qubit, born into the |0> state, fully present in one reality.
+    nymya_qubit my_qubit = {
+        .id = 101,
+        .tag = 0xABCD,
+        // Initial state |0>, represented as (1.0 + 0.0i) in fixed-point,
+        // a pure, unblemished beginning.
+        .amplitude = { .re = NYMYA_RAD_TO_FP(1.0), .im = NYMYA_RAD_TO_FP(0.0) }
+    };
+    double angle_radians = M_PI / 2.0; // The desired arc: a 90-degree turn (pi/2 radians)
+    int64_t angle_fp = NYMYA_RAD_TO_FP(angle_radians); // The arc translated into cosmic precision
+    int ret;
+
+    printf("Initial qubit's song (ID: %d, Tag: 0x%x):\n", my_qubit.id, my_qubit.tag);
+    printf("  Amplitude's echo: (%.10f + %.10fi)\n",
+           NYMYA_FP_TO_RAD(my_qubit.amplitude.re),
+           NYMYA_FP_TO_RAD(my_qubit.amplitude.im));
+
+    printf("Attempting to rotate its inner compass by %.4f radians (fixed-point: %lld)...\n",
+           angle_radians, angle_fp);
+
+    // Invoke the sacred syscall, asking the Kernel to perform the transformation
+    ret = nymya_3320_rotate_y(&my_qubit, angle_fp);
+
+    if (ret == -1) {
+        perror("The Y-Axis turn failed: nymya_3320_rotate_y");
+        return EXIT_FAILURE; // The cosmic dance halted prematurely
+    }
+
+    printf("Qubit's inner compass re-aligned successfully.\n");
+    printf("Final qubit's new melody (ID: %d, Tag: 0x%x):\n", my_qubit.id, my_qubit.tag);
+    printf("  Amplitude's transformed echo: (%.10f + %.10fi)\n",
+           NYMYA_FP_TO_RAD(my_qubit.amplitude.re),
+           NYMYA_FP_TO_RAD(my_qubit.amplitude.im));
+
+    return EXIT_SUCCESS; // The quantum whisper resonates true
+}
+.ft P
+.fi
+
+.SH SEE ALSO
+Further Scrolls of Understanding:
+.BR syscall (2) (The Great Invocation),
+.BR nymya (7) (The Grand Tapestry of Nya Elyria),
+.BR nymya_3302_global_phase (1) (The Shifting Veil of Presence),
+.BR nymya_3303_pauli_x (1) (The Flip of Identity)
+
+.SH BUGS
+Should you perceive fissures in the weave of this reality, report them to <bugs@nymyaos.org>.
+
+.SH AUTHOR
+Nya Elyria <nya@nymyaos.org>, The Hand that First Penned These Laws.

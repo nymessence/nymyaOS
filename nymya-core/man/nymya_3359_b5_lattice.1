@@ -1,0 +1,130 @@
+.TH THE_WEAVE_OF_REALITY 1 "Echoes of Time" "The Nymya Kernel" "Interdimensional Rites"
+.SH NAME
+nymya_3359_b5_lattice \- The Weaver's Knot: Unveiling Entanglement Across Five Planes of Being
+.SH SYNOPSIS
+.nf
+#include <nymya/syscalls.h>
+#include <stddef.h> /* For the measure of things */
+
+int nymya_3359_b5_lattice(nymya_qpos5d q[], size_t count);
+.fi
+.SH DESCRIPTION
+The
+.B nymya_3359_b5_lattice
+invocation is a deep descent into the very quantum anima, a communion with the unseen fabric that binds all possibility. It operates upon a gathering of
+.B nymya_qubit
+entities, each a spark of consciousness placed within the boundless expanse of a conceptual 5-dimensional cosmos. This sacred rite orchestrates quantum interactions, weaving the very essence of reality.
+
+First, upon each qubit, a whisper of the universe's full potential is bestowed – a Hadamard awakening, scattering its singular truth into a symphony of probability, mirroring the dawn of all choices.
+
+Following this, within the boundless expanse of five conceptual dimensions, the ritual discerns those pairs of quantum sparks whose Euclidean echoes draw them into an intimate dance, their separation a mere whisper below the Kernel's ancient, hallowed threshold. For these destined duos, a Controlled-NOT (CNOT) gate is invoked, a sacred bond woven into their very essence, establishing an entanglement that reflects the profound, hidden lattice – the cosmic thread connecting disparate points, proving that even across seemingly unfathomable realities, a shared destiny can be forged. This operation reveals the underlying quantum mechanics that bind entities across seemingly disparate realities.
+
+This sacred operation re-sculpts the quantum states (\fBq\fR member) within the provided array, allowing the ripples of their newfound entanglement to cascade back into the calling process's perception, altering the very tapestry of its reality. The spatial coordinates themselves (\fBx, y, z, w, v\fR), though vital for the discerning eye of proximity, remain undisturbed, merely signposts in the boundless void.
+
+The arguments are:
+.TP
+\fBq\fR
+A gathering of
+.B nymya_qpos5d
+structures. Each structure is a vessel holding a
+.B nymya_qubit
+representing the quantum state, and five double-precision floating-point numbers (\fBx, y, z, w, v\fR) charting its coordinates within the 5-dimensional continuum. The inner
+.B nymya_qubit
+state within each element of this array will be updated by the Kernel's operations, reflecting the dance of entanglement.
+.TP
+\fBcount\fR
+The number of elements within the
+.I q
+array. This value must be at least 32, for the Lattice requires a sufficient multitude for its weaving to commence.
+.SH RETURN VALUE
+A return of zero signifies the successful weaving, a harmony restored, the lattice acknowledged. A value of -1 speaks of discord, a disruption in the quantum flow, with
+.B errno
+revealing the nature of the cosmic misalignment.
+.SH ERRORS
+.TP
+\fBEINVAL\fR
+The provided gathering of quantum vessels (\fIq\fR array) was but an echo, or its number (\fIcount\fR) too meager for the weaving, less than the sacred minimum of 32.
+.TP
+\fBENOMEM\fR
+The Kernel's heart, though vast, found not enough memory to embrace the request, a momentary scarcity in the cosmic reserves.
+.TP
+\fBEFAULT\fR
+The pathway to the quantum vessels was obscured, an address beyond the veil, preventing the sacred transfer between mortal and kernel realms.
+.SH EXAMPLE
+To witness the ritual, to invoke the Lattice from the mortal realm, consider this fragment of a seeker's scroll:
+
+.nf
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <string.h>
+
+/*
+ * Mock definitions for nymya.h types required for userland example.
+ * In a real nymyaOS environment, these would be provided by <nymya/types.h>
+ * or similar.
+ */
+typedef struct {
+    int id;
+    int tag;
+    /* ... additional opaque quantum state data ... */
+} nymya_qubit;
+
+typedef struct {
+    nymya_qubit q;
+    double x, y, z, w, v; /* 5D coordinates */
+} nymya_qpos5d;
+
+/*
+ * Syscall prototype (usually from <nymya/syscalls.h>)
+ */
+extern int nymya_3359_b5_lattice(nymya_qpos5d q[], size_t count);
+
+int main() {
+    const size_t NUM_QUBITS = 32; /* The sacred minimum for the weaving */
+    nymya_qpos5d qubits[NUM_QUBITS];
+    int i;
+
+    /* Initialize qubits with some dummy data */
+    printf("Preparing %zu quantum sparks for the weaving...\n", NUM_QUBITS);
+    for (i = 0; i < NUM_QUBITS; i++) {
+        qubits[i].q.id = i + 100; /* A unique identifier */
+        qubits[i].q.tag = 0xAB;   /* A mark of its origin */
+        /* Assign some 5D coordinates, mapping their ethereal locations */
+        qubits[i].x = (double)i * 0.1;
+        qubits[i].y = (double)(NUM_QUBITS - i) * 0.1;
+        qubits[i].z = (double)i * 0.05;
+        qubits[i].w = (double)(i % 5) * 0.02;
+        qubits[i].v = (double)(i / 5) * 0.03;
+        printf("  Qubit %d, a nascent potential, positioned at (%.2f, %.2f, %.2f, %.2f, %.2f)\n",
+               qubits[i].q.id, qubits[i].x, qubits[i].y, qubits[i].z,
+               qubits[i].w, qubits[i].v);
+    }
+
+    printf("\nInvoking the nymya_3359_b5_lattice syscall, seeking the threads of connection...\n");
+    int ret = nymya_3359_b5_lattice(qubits, NUM_QUBITS);
+
+    if (ret == 0) {
+        printf("\nSyscall successful! The quantum states have danced, entangled, and reshaped.\n");
+        printf("The first qubit (ID %d, Tag %d) now reflects the new cosmic alignment.\n",
+               qubits[0].q.id, qubits[0].q.tag);
+        /*
+         * In a real application, a deeper gaze would be cast upon the modified
+         * nymya_qubit states within the `qubits` array to witness
+         * the profound effects of the Hadamard and CNOT gates.
+         */
+    } else {
+        fprintf(stderr, "\nSyscall failed: %s (%d)\n", strerror(errno), errno);
+    }
+
+    return ret;
+}
+.fi
+.SH SEE ALSO
+For deeper contemplation of the Nymya mysteries, consult these kindred scrolls:
+.BR nymya (7) (The Core of Existence),
+.BR nymya_qubit_info (1) (Secrets of a Single Spark),
+.BR hadamard (3) (The Veil's Parting),
+.BR cnot (3) (The Binding of Fates),
+.BR 3302_global_phase (3) (The Shifting Veil of Phase),
+.BR 3303_pauli_x (3) (The Quantum Flip of Being).

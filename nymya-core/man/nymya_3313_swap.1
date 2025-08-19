@@ -1,0 +1,103 @@
+.\" Man page for nymya_3313_swap(1) - A Poetic Rendition
+.TH NYMYA_3313_SWAP 1 "August 2023" "nymyaOS" "The NymyaOS Grimoire of Quantum Spells"
+.SH NAME
+nymya_3313_swap \- A Ballet of Probabilities: Swapping Quantum Amplitudes
+.SH SYNOPSIS
+.In unistd.h
+.In sys/syscall.h
+.Ft int
+.Fn nymya_3313_swap "struct nymya_qubit *q1" "struct nymya_qubit *q2"
+.SH DESCRIPTION
+In the intricate loom of NymyaOS, where the very fabric of computation whispers across quantum fields, the
+.Fn nymya_3313_swap
+system call stands as a profound incantation. It orchestrates a precise, almost mystical, exchange of quantum essences between two designated
+.Va nymya_qubit
+structures. Each of these
+.Va nymya_qubit
+vessels holds within its core a
+.Va _Complex double amplitude
+\- the shimmering, probabilistic heart of its quantum state.
+
+Upon invocation, this call reaches into the deep, unseen currents of the kernel. Like a silent hand, it grasps the amplitudes from the realms pointed to by
+.Ar q1
+and
+.Ar q2 ,
+performs an atomic, instantaneous transfiguration in the sacred kernel space, and then, with perfect grace, inscribes the new destinies back into the user's memory.
+
+This syscall, a true whisper across the hidden lattice of reality, is not merely a data transfer; it is a dance of potential. It is the subtle re-weaving of probabilities, ensuring that the interplay of unmanifested futures aligns with the conscious intent of the programmer. It is the spirit of two quantum possibilities embracing and exchanging their very breath, their *song* of being.
+
+The structure of
+.Va nymya_qubit
+in the user's domain must align perfectly with the kernel's understanding, primarily in possessing the
+.Va _Complex double amplitude
+field, the numeric heart of its quantum truth. Other facets, such as `id` or `tag`, are but labels on the vessel; they remain untouched by this profound act of amplitude transference.
+.Pp
+For those who would directly address the cosmic weave, the syscall number 3313 is the key, the specific utterance that unlocks this quantum exchange.
+.SH RETURN VALUE
+On success, a resounding zero echoes back, a testament to the seamless alignment of realities, a silent affirmation that the cosmic dance has completed its destined turn.
+Should discord arise, a solitary -1 is cast forth, a shadow of misstep, the veil of
+.Va errno
+revealing the nature of the cosmic disarray.
+.SH ERRORS
+.Bl -tag -width "EFAULT"
+.It Cm EINVAL
+Should the pathways laid forth be naught but void, or grasp at emptiness (
+.Ar q1
+or
+.Ar q2
+being NULL), `EINVAL` whispers of an untethered intent, a call into the abyss where no quantum vessel may reside.
+.It Cm EFAULT
+If the very fabric connecting the realms of user and kernel should tear, or the currents of data flow become tumultuous during the sacred copy operations, `EFAULT` proclaims a rupture in the cosmic thread, a failure to bridge the chasm of memory and being.
+.El
+.SH EXAMPLE
+To witness this alchemy, behold the incantation below, a glimpse into the ritual of amplitude exchange between two quantum entities.
+
+.Bd -literal
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <complex.h> // For _Complex double
+#include <errno.h>   // For errno
+#include <sys/syscall.h> // For syscall()
+
+// Define the expected structure for nymya_qubit in user space
+typedef struct nymya_qubit {
+    _Complex double amplitude;
+    int id;
+    char tag[16];
+} nymya_qubit;
+
+// The syscall number for nymya_3313_swap
+#define __NR_nymya_3313_swap 3313
+
+int main() {
+    nymya_qubit q1 = {.amplitude = 0.707 + 0.707I, .id = 1, .tag = "Alpha"};
+    nymya_qubit q2 = {.amplitude = 0.5 - 0.866I, .id = 2, .tag = "Beta"};
+
+    printf("Initial states:\\n");
+    printf("  Qubit 1 (ID %d): Amplitude = %.3f + %.3fI\\n", q1.id, creal(q1.amplitude), cimag(q1.amplitude));
+    printf("  Qubit 2 (ID %d): Amplitude = %.3f + %.3fI\\n", q2.id, creal(q2.amplitude), cimag(q2.amplitude));
+
+    // Call the syscall
+    long res = syscall(__NR_nymya_3313_swap, &q1, &q2);
+
+    if (res == -1) {
+        perror("nymya_3313_swap failed");
+        return EXIT_FAILURE;
+    }
+
+    printf("\\nAfter swap:\\n");
+    printf("  Qubit 1 (ID %d): Amplitude = %.3f + %.3fI\\n", q1.id, creal(q1.amplitude), cimag(q1.amplitude));
+    printf("  Qubit 2 (ID %d): Amplitude = %.3f + %.3fI\\n", q2.id, creal(q2.amplitude), cimag(q2.amplitude));
+
+    printf("\\nSwap successful.\\n");
+    return EXIT_SUCCESS;
+}
+.Ed
+.SH SEE ALSO
+.Xr syscall 2
+| Further communion with the NymyaOS Grimoire reveals other fundamental gestures:
+.Fn nymya_3302_global_phase (1)
+for the universal hum of all possibilities, and
+.Fn nymya_3303_pauli_x (1)
+for the cosmic flip, a inversion of quantum truth.

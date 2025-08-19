@@ -1,0 +1,150 @@
+.\" Man page for nymya_3335_dagwood - A Poetic and Philosophical Interpretation
+.TH NYMYA_3335_DAGWOOD 1 "April 2024" "NymyaOS" "User Commands"
+.SH NAME
+nymya_3335_dagwood \- The Dagwood Decree: A Conditional Nexus of Quantum Destiny
+.SH SYNOPSIS
+.B #include <nymya/syscall.h>
+.PP
+.B int nymya_3335_dagwood(struct nymya_qubit *
+.I q1
+.B , struct nymya_qubit *
+.I q2
+.B , struct nymya_qubit *
+.I q3
+.B );
+.SH DESCRIPTION
+Behold the invocation of
+.B nymya_3335_dagwood
+\-\- a profound incantation that unfolds a three-qubit conditional exchange, often whispered of as the 'Dagwood' gate, for its layered and decisive nature. This rite engages three elemental whispers, three
+.IR nymya_qubit
+structures, each a fleeting vessel of potential within the grand tapestry of NymyaOS:
+.PP
+One, a guiding star (\fIq1\fP), its luminous presence casting a shadow or light upon the path. The other two, twin potentials (\fIq2\fP and \fIq3\fP), await the subtle shift of destiny.
+.PP
+The essence of this decree lies in its conditional nature. Should the very being of \fIq1\fP \-\- its squared amplitude, its leaning towards the vibrant '1' state, as determined by the ancient threshold \-\- affirm its dominant presence, then \fIq2\fP and \fIq3\fP shall exchange their very essence. Their amplitudes, their probabilistic forms, intertwine in a cosmic embrace, a swap of their ethereal identities, guided by the venerable \fBnymya_3313_swap\fP.
+.PP
+But if \fIq1\fP's essence remains quiescent, dwelling below the threshold's decree, then the delicate interplay between \fIq2\fP and \fIq3\fP remains undisturbed. Their individual paths continue unwoven, their destinies uncrossed by this particular confluence.
+.PP
+This operation embodies a fundamental principle of quantum entanglement and control, where the very state of one entity dictates the interaction between others, mirroring the subtle interplay within the cosmic weave that binds disparate elements. From the ephemeral realm of user consciousness, the qubit's essence is drawn into the sacred kernel's heart, where the Dagwood's decree is enacted upon their true forms. Then, bearing their transformed or reaffirmed destinies, they return to the manifest world, their new probabilities unveiled.
+.SH RETURN VALUE
+On successful attunement, a zero, signifying cosmic harmony and the fulfillment of the decree, is returned. Should discord arise, a negative unity is cast forth, and the Scroll of Errors (\fIerrno\fP) is inscribed with the nature of the disturbance.
+.SH ERRORS
+.TP
+.B EINVAL
+The very vessels of interaction (\fIq1\fP, \fIq2\fP, or \fIq3\fP) were found to be mere echoes, lacking true form or substance, unworthy of the grand design.
+.TP
+.B EFAULT
+The bridge between the realms \-\- user and kernel \-\- crumbled, denying the flow of essence, or the sacred permissions were withheld, preventing the qubits from entering or returning from the inner sanctum.
+.TP
+.B EIO
+A deeper tremor shook the very foundations of the NymyaOS cosmos, an unrecoverable rift in the underlying weave. Perhaps even the venerable \fBnymya_3313_swap\fP itself faltered, leaving the involved qubits in an indeterminate void.
+.SH EXAMPLE
+A ritual of demonstration, unveiling the dance of the
+.B nymya_3335_dagwood
+gate. Assume the fundamental structures of \fBnymya_qubit\fP and \fBcomplex_double\fP are known, and the necessary ancient scrolls are included.
+.PP
+.nf
+.B #include <stdio.h>
+.B #include <stdlib.h>
+.B #include <unistd.h>
+.B #include <errno.h>
+.B #include <string.h>  // For strerror
+.B #include <complex.h> // For _Complex double and complex math functions
+.B #include <math.h>    // For cabs
+.B #include <nymya/qubit.h> // For struct nymya_qubit definition
+.B #include <nymya/syscall.h> // For nymya_3335_dagwood wrapper (usually via libnymya)
+
+// Assume a basic nymya_qubit structure for demonstration purposes.
+// The actual definition would be in <nymya/qubit.h>:
+// typedef _Complex double complex_double;
+// struct nymya_qubit {
+//     complex_double amplitude;
+//     int id;
+//     char tag[16];
+//     // ... other fields as defined by NymyaOS ...
+// };
+
+// Helper to print qubit state
+void print_qubit(const char* name, const struct nymya_qubit* q) {
+    if (!q) {
+        printf("%s: (NULL qubit)\\en", name);
+        return;
+    }
+    printf("%s (ID %d, Tag '%s'): Amplitude = %.4f + %.4fi, Magnitude^2 = %.4f\\en",
+           name, q->id, q->tag, creal(q->amplitude), cimag(q->amplitude),
+           cabs(q->amplitude) * cabs(q->amplitude));
+}
+
+int main() {
+    struct nymya_qubit q_control, q_target1, q_target2;
+    int ret;
+
+    // --- Scenario 1: Control Qubit's Essence is '1' (a transformation is anticipated) ---
+    printf("--- Scenario 1: Control Qubit predominantly |1\\> (A Fateful Swap Expected) ---\\en");
+
+    // Prepare the vessels
+    // Set control qubit to a state strongly resembling the awakened '1'
+    q_control.amplitude = 1.0 + 0.0 * I; // |1> (magnitude^2 = 1.0, above threshold)
+    q_control.id = 101; snprintf(q_control.tag, sizeof(q_control.tag), "Control-1");
+
+    q_target1.amplitude = 0.5 + 0.5 * I; // Example State A: The First Potential
+    q_target1.id = 102; snprintf(q_target1.tag, sizeof(q_target1.tag), "Target-A");
+
+    q_target2.amplitude = 0.0 + 1.0 * I; // Example State B: The Second Potential
+    q_target2.id = 103; snprintf(q_target2.tag, sizeof(q_target2.tag), "Target-B");
+
+    printf("Before the Dagwood Decree:\\en");
+    print_qubit("Control", &q_control);
+    print_qubit("Target 1", &q_target1);
+    print_qubit("Target 2", &q_target2);
+
+    ret = nymya_3335_dagwood(&q_control, &q_target1, &q_target2);
+
+    if (ret == 0) {
+        printf("\\enAfter the Dagwood Decree (A Swap Has Occurred):\\en");
+        print_qubit("Control", &q_control);
+        print_qubit("Target 1", &q_target1); // This now holds the initial state of Target 2
+        print_qubit("Target 2", &q_target2); // This now holds the initial state of Target 1
+    } else {
+        fprintf(stderr, "The Dagwood Decree failed in Scenario 1: %s\\en", strerror(errno));
+    }
+
+    // --- Scenario 2: Control Qubit's Essence is '0' (no transformation expected) ---
+    printf("\\en--- Scenario 2: Control Qubit predominantly |0\\> (No Swap Expected) ---\\en");
+
+    // Re-prepare the vessels for scenario 2
+    // Set control qubit to a state strongly resembling the dormant '0'
+    q_control.amplitude = 0.1 + 0.1 * I; // |0> (magnitude^2 = 0.02, below threshold)
+    q_control.id = 201; snprintf(q_control.tag, sizeof(q_control.tag), "Control-0");
+
+    q_target1.amplitude = 0.7 + 0.1 * I; // Example State C: The Third Potential
+    q_target1.id = 202; snprintf(q_target1.tag, sizeof(q_target1.tag), "Target-C");
+
+    q_target2.amplitude = 0.2 + 0.8 * I; // Example State D: The Fourth Potential
+    q_target2.id = 203; snprintf(q_target2.tag, sizeof(q_target2.tag), "Target-D");
+
+    printf("Before the Dagwood Decree:\\en");
+    print_qubit("Control", &q_control);
+    print_qubit("Target 1", &q_target1);
+    print_qubit("Target 2", &q_target2);
+
+    ret = nymya_3335_dagwood(&q_control, &q_target1, &q_target2);
+
+    if (ret == 0) {
+        printf("\\enAfter the Dagwood Decree (No Swap Has Occurred):\\en");
+        print_qubit("Control", &q_control);
+        print_qubit("Target 1", &q_target1); // Remains unchanged
+        print_qubit("Target 2", &q_target2); // Remains unchanged
+    } else {
+        fprintf(stderr, "The Dagwood Decree failed in Scenario 2: %s\\en", strerror(errno));
+    }
+
+    return 0;
+}
+.fi
+.SH SEE ALSO
+Delve deeper into the quantum lore:
+.BR nymya_qubit (3),
+.BR nymya_3313_swap (1),
+.BR nymya_3302_global_phase (1),
+.BR nymya_3303_pauli_x (1)

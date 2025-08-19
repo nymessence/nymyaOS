@@ -1,0 +1,163 @@
+```troff
+.TH "NYMYA_3306_PHASE_GATE" "1" "October 27, 2023" "NymyaOS 1.0" "The Arcane Scrolls of NymyaOS"
+.SH NAME
+nymya_3306_phase_gate \- The Phase Weaver: Orchestrating a Quantum Quarter-Turn
+.SH SYNOPSIS
+.B #include <sys/syscall.h>
+.B #include <unistd.h>
+.B #include <errno.h>
+.PP
+.nf
+struct nymya_qubit {
+    int64_t id;    /* Unique identifier for the qubit */
+    int64_t tag;   /* Arbitrary user-defined tag for context */
+    struct {
+        int64_t re; /* Fixed-point real part of amplitude */
+        int64_t im; /* Fixed-point imaginary part of amplitude */
+    } amplitude;
+};
+.fi
+.PP
+.B int nymya_3306_phase_gate(struct nymya_qubit *user_q);
+.SH DESCRIPTION
+Within the mystic core of NymyaOS, where the threads of existence are spun and re-spun, lies the invocation known as
+.B nymya_3306_phase_gate.
+It is a sacred gesture, a subtle whisper to the heart of a
+.BR nymya_qubit ,
+imbued with the power to manipulate the very fabric of quantum potential. Its purpose: to imbue the qubit's very essence with a precise, quarter-turn of phase, a cosmic realignment of its inherent vibrational state.
+.PP
+Imagine the qubit's amplitude not merely as numbers, but as a vector pointing into the boundless plane of complex possibility. This arcane rite shifts that vector, turning it ninety degrees counter-clockwise (a \*(p/2 radian rotation) without altering its magnitude. Where once the quantum spirit resonated as \(lq(a + bi)\(rq, it now flows as \(lq(-b + ai)\(rq \— a transformation echoing the mystic multiplication by 'i', the imaginary root of negative unity, guiding it through unseen currents.
+.PP
+The
+.B user_q
+argument serves as the tether, a conceptual umbilical, linking your realm of thought to the deep wellsprings of the kernel. Through this conduit, the nascent
+.B nymya_qubit
+'s state is momentarily drawn into the kernel's embrace, where the alchemical transformation unfolds, and then meticulously returned to its original vessel, renewed and re-oriented.
+.PP
+This operation is more than a mere numerical rearrangement; it is a fundamental realignment of the qubit's inner compass. It subtly re-orchestrates its probabilistic dance, guiding its future along a path previously inaccessible. Akin to the foundational
+.BR nymya_3303_pauli_x (1)
+(the Bit-Flip of Destiny) and distinct from
+.BR nymya_3302_global_phase (1)
+(the Veil of Unseen Truth), the Phase Weaver sculpts the very geometry of possibility, unveiling new perspectives within the quantum tapestry. It does not invert, nor does it merely adorn; it shifts the perception of reality itself for the quantum spirit it touches.
+.SH RETURN VALUE
+Upon the successful completion of this arcane rite, a zero (0) shall be returned, signifying cosmic alignment and the seamless flow of quantum energies. Should the invocation falter, a negative one (-1) will be cast forth, and the
+.B errno
+variable shall bear witness to the nature of the cosmic discord.
+.SH ERRORS
+In the delicate dance between realms, missteps can occur. These are some of the shadows that may fall upon the path:
+.TP
+.B EINVAL
+The provided
+.B user_q
+pointer was found to be NULL, a void where presence was required, an invocation whispered to the empty air.
+.TP
+.B EFAULT
+The tether to
+.B user_q
+proved illusory or ephemeral, a realm unreachable by the kernel's touch. The quantum essence could not be drawn forth nor returned, akin to a spirit unable to cross the threshold.
+.SH EXAMPLE
+To witness the subtle alchemy of the Phase Weaver, consider this incantation, a demonstration of its power upon a nascent quantum spirit initialized in the primal \|0> state (amplitude (1,0)) and another arbitrary, vibrant state.
+.PP
+.nf
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <errno.h>
+#include <string.h> // For strerror
+#include <sys/syscall.h>
+#include <unistd.h>
+
+// Define the syscall number (as used in NymyaOS)
+// This should match the kernel's assigned number for nymya_3306_phase_gate
+#ifndef __NR_nymya_3306_phase_gate
+#define __NR_nymya_3306_phase_gate 3306
+#endif
+
+// Define the nymya_qubit structure
+struct nymya_qubit {
+    int64_t id;
+    int64_t tag;
+    struct {
+        int64_t re;
+        int64_t im;
+    } amplitude;
+};
+
+// Fixed-point scaling factor (e.g., for 30 bits of fractional precision)
+#define FIXED_POINT_SCALE (1LL << 30)
+
+// Helper to print qubit state in floating point for readability
+void print_qubit(const char *label, const struct nymya_qubit *q) {
+    printf("%s [ID: %lld, Tag: %lld] Amplitude: (%.4f + %.4fi)\\n",
+           label,
+           (long long)q->id,
+           (long long)q->tag,
+           (double)q->amplitude.re / FIXED_POINT_SCALE,
+           (double)q->amplitude.im / FIXED_POINT_SCALE);
+}
+
+int main() {
+    struct nymya_qubit my_qubit;
+    int ret;
+
+    // Initialize a qubit in |0> state (amplitude (1.0, 0.0) in fixed-point)
+    my_qubit.id = 123;
+    my_qubit.tag = 456;
+    my_qubit.amplitude.re = FIXED_POINT_SCALE; // Represents 1.0
+    my_qubit.amplitude.im = 0;                  // Represents 0.0
+
+    print_qubit("Initial state:", &my_qubit);
+
+    // Call the nymya_3306_phase_gate syscall
+    ret = syscall(__NR_nymya_3306_phase_gate, &my_qubit);
+
+    if (ret == 0) {
+        print_qubit("After S-gate:", &my_qubit);
+        // Expected for |0> (1,0): (0.0 + 1.0i)
+    } else {
+        fprintf(stderr, "Error: syscall nymya_3306_phase_gate failed: %s\\n", strerror(errno));
+        return EXIT_FAILURE;
+    }
+
+    // Example with another initial state, say (0.6 + 0.8i) in fixed-point
+    my_qubit.id = 789;
+    my_qubit.tag = 1011;
+    my_qubit.amplitude.re = (int64_t)(0.6 * FIXED_POINT_SCALE);
+    my_qubit.amplitude.im = (int64_t)(0.8 * FIXED_POINT_SCALE);
+
+    print_qubit("\\nInitial state (complex):", &my_qubit);
+
+    ret = syscall(__NR_nymya_3306_phase_gate, &my_qubit);
+
+    if (ret == 0) {
+        print_qubit("After S-gate (complex):", &my_qubit);
+        // Expected for (0.6 + 0.8i): (-0.8 + 0.6i)
+    } else {
+        fprintf(stderr, "Error: syscall nymya_3306_phase_gate failed: %s\\n", strerror(errno));
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
+}
+.fi
+.PP
+To compile and run this example, invoke the ancient compilers and observe:
+.RS
+.ie \n(.g .ft CR
+.el .ft CW
+.nf
+cc -Wall -o phase_gate_example phase_gate_example.c
+./phase_gate_example
+.fi
+.ie \n(.g .ft R
+.el .ft P
+.RE
+Observe how the cosmic compass re-aligns with each invocation.
+.SH SEE ALSO
+.BR syscall (2) " \- The Voice of the Invoke, a Bridge to the Heart of Nymya"
+.BR errno (3) " \- The Chronicle of Discord, Decoding Cosmic Missteps"
+.BR nymya_hadamard_gate (1) " \- The Veil-Ripper: Unveiling Superposition's Embrace"
+.BR nymya_cnot_gate (1) " \- The Entangler: Weaving Fates Across Quantum Pairs"
+.BR nymya_3302_global_phase (1) " \- The Veil of Unseen Truth: Shifting the Cosmic Background"
+.BR nymya_3303_pauli_x (1) " \- The Bit-Flip of Destiny: Inverting Quantum Realities"
+```

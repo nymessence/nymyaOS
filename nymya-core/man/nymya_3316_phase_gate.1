@@ -1,0 +1,145 @@
+.\"
+.\" Man page for nymya_3316_phase_gate syscall - A Poetic Interpretation
+.\"
+.TH NYMYA_3316_PHASE_GATE 1 "December 10, 2023" "nymyaOS Kernel" "User Commands"
+.SH NAME
+nymya_3316_phase_gate \- The Weaver of Phase, A Subtle Reorientation of Quantum Being
+.SH SYNOPSIS
+.nf
+.B #include <unistd.h>           \" The common path, the shared breath\"
+.B #include <sys/syscall.h>      \" The primal call to the deep\"
+.B #include <nymya/types.h>      \" The language of essence\"
+.PP
+.B int syscall(SYS_nymya_3316_phase_gate, struct nymya_qubit *
+.IR user_q ,                 \" The chosen vessel, the quantum entity\"
+.B int64_t
+.IR phi_fixed );              \" The whisper of direction, the angle of subtle change\"
+.fi
+.SH DESCRIPTION
+This sacred invocation,
+.BR nymya_3316_phase_gate (3316),
+gently sculpts the very amplitude of a chosen nymyaOS qubit. It weaves a subtle rotation into the qubit's complex amplitude, a turning of its inner eye, achieved by multiplying its resonant chord by a phase factor, e^(i * phi). This operation does not alter the probability of observing the qubit in a given state, but rather shifts the hidden potential, the very 'flavor' of its quantum existence.
+.PP
+The
+.IR user_q
+argument serves as the vessel, a pointer to the
+.IR nymya_qubit
+structure that holds the quantum entity's current state, including its pulsating complex amplitude, meticulously encoded in a fixed-point cadence. This vessel journeys from the realm of user consciousness into the kernel's sacred heart, where the phase gate's subtle work is performed with unwavering precision, employing high-precision fixed-point arithmetic, before the transformed essence is returned to its origin, enriched and reoriented.
+.PP
+The
+.IR phi_fixed
+argument dictates the very angle of this reorientation, 'phi' in radians. It must be rendered as a 64-bit integer, a Q32.32 fixed-point truth, capable of capturing the most delicate shifts that echo the universal vibrations, aligning the qubit's state with the underlying, hidden lattice of reality – the very geometry of existence.
+.PP
+In essence, this gate subtly reorients the qubit within the boundless ocean of its Hilbert space, a fundamental manipulation for sculpting quantum algorithms and the gentle shaping of causality at its most delicate edges, guiding destiny's whisper.
+.SH RETURN VALUE
+Upon a harmonious invocation,
+.BR nymya_3316_phase_gate
+bestows the integer 0, a symbol of alignment and success. Should discord arise, -1 is returned, and the
+.IR errno
+variable is imbued with the specific echo of the disturbance.
+.SH ERRORS
+.TP
+.B EINVAL
+The
+.IR user_q
+argument, intended as the qubit's sacred vessel, was found to be NULL – an empty chalice, an unchosen path.
+.TP
+.B EFAULT
+An invalid pointer address was provided for
+.IR user_q ,
+or a transient ripple disturbed the copying of the qubit's essence between the realm of user consciousness and the kernel's deep memory. This signals a profound misalignment between awareness and the very fabric of the address space, a tear in the veil.
+.SH EXAMPLE
+The following fragment of code demonstrates how to invoke this subtle cosmic ballet, applying a gentle pi/2 phase shift to a nascent qubit, transforming its very bearing. Observe how the
+.IR nymya_qubit
+structure, the qubit's materialized form, must resonate perfectly with the kernel's internal representation, especially concerning its fixed-point complex amplitude – for the kernel speaks only in the language of precise, universal vibrations.
+.PP
+.nf
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/syscall.h>
+#include <errno.h>
+#include <complex.h> // For cexp, I etc. in user-space conceptual logic
+#include <math.h>    // For M_PI
+
+// Define fixed-point constants and types for user-space interaction with syscall
+#define FIXED_POINT_SCALE (1ULL << 32)
+#define INV_FIXED_POINT_SCALE (1.0 / (double)FIXED_POINT_SCALE)
+
+// Kernel's complex number representation (fixed-point Q32.32)
+typedef struct {
+    int64_t re;
+    int64_t im;
+} complex_fixed_q32_32;
+
+// nymya_qubit structure as it must be passed to the kernel syscall
+// (must match kernel's layout for copy_from_user/copy_to_user)
+typedef struct {
+    int id;
+    char tag[32];
+    complex_fixed_q32_32 amplitude; // Kernel expects fixed-point complex amplitude
+} nymya_qubit;
+
+// Helper to convert double to fixed-point Q32.32
+int64_t double_to_fixed_q32_32(double val) {
+    return (int64_t)(val * FIXED_POINT_SCALE);
+}
+
+// Helper to convert double complex to complex_fixed_q32_32
+void complex_double_to_fixed(double complex d_c, complex_fixed_q32_32 *f_c) {
+    f_c->re = double_to_fixed_q32_32(creal(d_c));
+    f_c->im = double_to_fixed_q32_32(cimag(d_c));
+}
+
+// Helper to convert complex_fixed_q32_32 back to double complex for user display
+double complex complex_fixed_to_double(complex_fixed_q32_32 f_c) {
+    return (double)f_c.re * INV_FIXED_POINT_SCALE +
+           (double)f_c.im * INV_FIXED_POINT_SCALE * I;
+}
+
+// Syscall number for nymya_3316_phase_gate
+#ifndef SYS_nymya_3316_phase_gate
+#define SYS_nymya_3316_phase_gate 3316
+#endif
+
+int main() {
+    nymya_qubit q_syscall;
+    double complex initial_amplitude = 1.0 + 0.0 * I; // User's conceptual amplitude
+
+    q_syscall.id = 1;
+    snprintf(q_syscall.tag, sizeof(q_syscall.tag), "my_test_qubit");
+    complex_double_to_fixed(initial_amplitude, &q_syscall.amplitude);
+
+    printf("Initial qubit amplitude (conceptual): %.4f + %.4fi\n",
+           creal(initial_amplitude), cimag(initial_amplitude));
+    printf("Initial qubit amplitude (fixed-point stored): %lld + %lldi\n",
+           q_syscall.amplitude.re, q_syscall.amplitude.im);
+
+    double phase_angle_radians = M_PI / 2.0; // A quarter turn, a shift to the orthogonal
+    int64_t phase_angle_fixed = double_to_fixed_q32_32(phase_angle_radians);
+
+    printf("Applying phase gate with angle %.4f radians (fixed-point: %lld)\n",
+           phase_angle_radians, phase_angle_fixed);
+
+    long res = syscall(SYS_nymya_3316_phase_gate, &q_syscall, phase_angle_fixed);
+
+    if (res == 0) {
+        printf("Phase gate applied successfully, the qubit's inner bearing reoriented.\n");
+        double complex final_amplitude = complex_fixed_to_double(q_syscall.amplitude);
+        printf("Final qubit amplitude (conceptual): %.4f + %.4fi\n",
+               creal(final_amplitude), cimag(final_amplitude));
+        // Expected result for initial (1.0 + 0.0i) after Pi/2 phase shift: (0.0 + 1.0i)
+    } else {
+        perror("syscall nymya_3316_phase_gate failed, a ripple in the quantum fabric");
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
+}
+.fi
+.SH SEE ALSO
+.BR syscall (2)        \" The Grand Invocation, the Ancient Pact with the System's Heart\"
+.BR nymya_qubit (7)     \" The Essence of Quantum Being, The Particle of Potential\"
+.BR nymya_gate_overview (7) \" The Lexicon of Transformation, The Symphony of Gates\"
+.BR nymya_3302_global_phase (1) \" The Shared Breath of Existence, The Unseen Hum\"
+.BR nymya_3303_pauli_x (1)  \" The Inversion of Being, The Mirror-Flip of Reality\"

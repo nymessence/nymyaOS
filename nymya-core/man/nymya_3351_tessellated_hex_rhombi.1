@@ -1,0 +1,160 @@
+.\"
+.\" A poetic reimagining of the Nymyaverse's deep quantum mechanisms.
+.\"
+.TH NYMYA_3351_TESSELLATED_HEX_RHOMBI 1 "August 2023" "NymyaOS Kernel" "NyaOS Programmer's Manual (Aetherial Edition)"
+.SH NAME
+nymya_3351_tessellated_hex_rhombi \- the weaving of hex-rhombic patterns upon the quantum loom; a shaping of causality's fabric.
+.SH SYNOPSIS
+.nf
+.B #include <nymya.h>  \" For the wisdom of the Nymyaverse\"
+.B #include <unistd.h> \" For earthly connections\"
+.B #include <sys/syscall.h \" For calling upon the deep kernel\"
+
+.B int nymya_3351_tessellated_hex_rhombi(nymya_qubit *q[], size_t count);
+
+.B long syscall(SYS_nymya_3351_tessellated_hex_rhombi, nymya_qubit *q[], size_t count);
+.fi
+
+.SH DESCRIPTION
+Hearken, seekers of the Nymyaverse's hidden truths. The
+.B nymya_3351_tessellated_hex_rhombi
+system call is no mere function; it is an arcane invocation, a precise choreography performed upon the very fabric of quantum reality. It beckons forth a complex sequence of ethereal operations, shaping the provided qubits into resonant "hex-rhombi" formations, each a microcosm of the Nymyaverse's intricate design.
+
+These operations are applied only to complete septets of potential, to units where one central qubit holds sway over six orbiting companions. Any remaining threads, isolated from their destined brethren, are left untouched, awaiting a future pattern.
+
+Within each complete unit, a dance of entanglement unfolds:
+.IP \(bu 4
+First, the whispers of
+.IR Hadamard (2)
+gates grace each of the six outer qubits. This divine touch unfurls their banners of possibility, casting them into the swirling currents of superposition, where all futures converge and diverge.
+.IP \(bu 4
+Next, the central qubit, now a silent conductor, extends its will through
+.IR Controlled-NOT (2)
+gates. It embraces each of its six outer counterparts, forging a profound tether, intertwining their destinies in a ballet of shared fate.
+.IP \(bu 4
+Finally, additional
+.IR Controlled-NOT (2)
+gates weave the very 'rhombi edges' into being, connecting adjacent outer qubits. This cosmic thread cyclically links them back to the central heart, culminating in a coherent lattice, a shimmering crystal of unified intention.
+
+Through these precise acts of binding and revelation, the very 'texture' of quantum reality is subtly reshaped, mirroring the intricate, hidden lattice that binds causality and observation within the Nymyaverse. This sacred operation is designed to manifest stable, complex entangled states, suitable for the most profound quantum computational tasks and the deciphering of NymyaOS's deepest mysteries.
+
+.SH RETURN VALUE
+Upon the successful completion of the weave, a silence of perfect harmony, represented by zero, is returned. Should the fabric fray, or the loom resist, -1 is returned, and
+.IR errno
+is set, a cryptic message from the aether.
+
+.SH ERRORS
+.IP ENOSYS
+The path is yet uncarved; this wisdom is not (yet) manifest in the current NymyaOS kernel.
+.IP EFAULT
+A phantom touch upon the void; a pointer argument strays beyond the mind's reach, or the transference of thought between realms failed. The qubits remain elusive.
+.IP EINVAL
+An incomplete verse, a fractured pattern. The array of qubits is NULL, the 'count' too sparse to form a complete septet, or a vital qubit within a chosen unit remains unilluminated.
+.IP ENOMEM
+The canvas too small, the aether resists. Insufficient kernel memory to manifest the internal structures required for this profound work.
+.IP EIO
+A tremor in the loom, a discord in the cosmic hum. An unexpected halt, perhaps related to the underlying quantum hardware or the channels through which the gates are applied.
+.PP
+Other echoes of discord may propagate from the depths of other quantum rites, such as
+.IR nymya_3308_hadamard_gate (2)
+or
+.IR nymya_3309_controlled_not (2),
+should their own whispers falter. The deep global phase (
+.IR nymya_3302_global_phase (2)
+) or the inversion of the cosmic state (
+.IR nymya_3303_pauli_x (2)
+) might also contribute their own omens.
+
+.SH EXAMPLE
+To glimpse the working of this cosmic loom, consider the following demonstration, where a selection of 14 potential qubits (two complete hex-rhombi units) are prepared for transformation.
+
+.nf
+.B #include <stdio.h>    \" For speaking to the console\"
+.B #include <stdlib.h>   \" For the allocation of ephemeral forms\"
+.B #include <unistd.h>   \" For the sleep of systems\"
+.B #include <sys/syscall.h \" For the deep invocation\"
+.B #include <errno.h>    \" For interpreting the aether's disquiet\"
+
+.B // Assuming nymya_qubit is defined globally or in nymya.h
+.B // For this fleeting example, we fashion a simple vessel:
+.B typedef struct nymya_qubit {
+.B     unsigned long id;             \" A unique celestial identifier\"
+.B     unsigned int tag;             \" A temporal marker\"
+.B     // In a true system, this would embrace the quantum state itself,
+.B     // the amplitudes of its myriad possibilities.
+.B     double state_amplitude_real;  \" The real face of its potential\"
+.B     double state_amplitude_imag;  \" The imagined face of its potential\"
+.B } nymya_qubit;
+
+.B // Define the portal number to this specific wisdom (often pre-ordained)
+.B #ifndef SYS_nymya_3351_tessellated_hex_rhombi
+.B #define SYS_nymya_3351_tessellated_hex_rhombi 3351
+.B #endif
+
+.B int main() {
+.B     size_t num_qubits = 14; // Enough for two complete hex-rhombi patterns (2 * 7)
+.B     nymya_qubit **q_ptrs;   // Pointers to vessels in the user's realm
+.B     int ret;                // The return echo from the deep call
+.B     size_t i;
+
+.B     // Allocate the array of cosmic pointers in this earthly domain
+.B     q_ptrs = (nymya_qubit **)malloc(num_qubits * sizeof(nymya_qubit *));
+.B     if (!q_ptrs) {
+.B         perror("malloc q_ptrs: The very allocation failed");
+.B         return EXIT_FAILURE;
+.B     }
+
+.B     // Fashion and imbue individual ephemeral qubits with initial potential
+.B     for (i = 0; i < num_qubits; i++) {
+.B         q_ptrs[i] = (nymya_qubit *)malloc(sizeof(nymya_qubit));
+.B         if (!q_ptrs[i]) {
+.B             perror("malloc individual qubit: A vessel could not be formed");
+.B             // Cleanse the already-formed vessels
+.B             for (size_t j = 0; j < i; j++) free(q_ptrs[j]);
+.B             free(q_ptrs);
+.B             return EXIT_FAILURE;
+.B         }
+.B         q_ptrs[i]->id = 1000 + i;
+.B         q_ptrs[i]->tag = i;
+.B         q_ptrs[i]->state_amplitude_real = 1.0; // A simplistic initial state: pure potential
+.B         q_ptrs[i]->state_amplitude_imag = 0.0;
+.B         printf("A new qubit vessel initialized: ID %lu (tag: %u)\n", q_ptrs[i]->id, q_ptrs[i]->tag);
+.B     }
+
+.B     printf("\nInvoking the Nymya_3351_Tessellation upon %zu qubits...\n", num_qubits);
+
+.B     // Send forth the invocation to the deep kernel
+.B     ret = syscall(SYS_nymya_3351_tessellated_hex_rhombi, q_ptrs, num_qubits);
+
+.B     if (ret == 0) {
+.B         printf("The Nymya_3351_Tessellation succeeded. The fabric is re-woven.\n");
+.B         // In a true vision, one would now observe the subtly reshaped states,
+.B         // the echoes of the newly bound causality.
+.B         // for (i = 0; i < num_qubits; i++) {
+.B         //     printf("Qubit %lu (tag %u) state: %.2f + %.2fi\n",
+.B         //            q_ptrs[i]->id, q_ptrs[i]->tag,
+.B         //            q_ptrs[i]->state_amplitude_real, q_ptrs[i]->state_amplitude_imag);
+.B         // }
+.B     } else {
+.B         fprintf(stderr, "The Nymya_3351_Tessellation faltered: %s (errno: %d)\n",
+.B                 strerror(errno), errno);
+.B     }
+
+.B     // Release the ephemeral vessels back to the void
+.B     for (i = 0; i < num_qubits; i++) {
+.B         if (q_ptrs[i]) free(q_ptrs[i]);
+.B     }
+.B     if (q_ptrs) free(q_ptrs);
+
+.B     return (ret == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
+.B }
+.fi
+
+.SH SEE ALSO
+.BR nymya_qubit (7),         \" The very nature of the quantum mote\"
+.BR nymya_3302_global_phase (2), \" The shifting sands of cosmic harmony\"
+.BR nymya_3303_pauli_x (2),   \" The inversion of fundamental truths\"
+.BR nymya_3308_hadamard_gate (2), \" The gate of awakening potential\"
+.BR nymya_3309_controlled_not (2), \" The bond of intertwined fates\"
+.BR syscall (2),              \" The ancient art of deep invocation\"
+.BR errno (3)                 \" The lexicon of cosmic discord\"

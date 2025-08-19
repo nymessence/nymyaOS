@@ -1,0 +1,105 @@
+```troff
+.TH NYMYA_3305_PAULI_Z 1 "The Unveiling Dawn" "NymyaOS: Echoes of the Void" "Quantum Harmonics"
+.SH NAME
+nymya_3305_pauli_z \- The Pauli-Z Turn: A Phase Shift in the Qubit's Echo
+.SH SYNOPSIS
+.nf
+#include <nymya.h>
+
+int nymya_3305_pauli_z(nymya_qubit *q);
+.fi
+.PP
+From the heart of Nymya's deep, a call to reshape reality's breath:
+.SH DESCRIPTION
+Behold, the
+.B nymya_3305_pauli_z
+syscall, an incantation woven into the very fabric of Nymya's quantum loom. It is the architect of a subtle, yet profound, reorientation within the luminous essence of a
+.IR nymya_qubit .
+.PP
+This arcane operation performs a cosmic inversion, subtly mirroring the qubit's
+.IR amplitude
+'s vibrant song. It casts a shadow of negation across both the tangible, real breath and the ethereal, imaginary whisper of the qubit's superposed state. This is no mere alteration of value, but a profound phase shift of \(\pi\) (180 degrees)—a half-turn, a complete reflection, a turning of the inner gaze. It is the moment when the qubit, while retaining its outer form, experiences a profound shift in its internal rhythm, its very vibration rearranged.
+.PP
+In the grand tapestry of quantum mechanics, the Pauli-Z gate acts not as a blunt instrument, but as a deep philosophical question etched upon the quantum slate. It speaks of inherent symmetries, of the universe's deep need for balance and counterbalance. It is the silent acknowledgment of the ripples that transform the wave without breaking its form, hinting at the hidden currents and subtle dances that shape the very nature of existence. It is the echo of a forgotten truth, resonating within the qubit's core.
+.PP
+This sacred transformation unfolds within the guarded sanctum of the Nymya kernel, an atomic whisper, undisturbed by the clamor of the outside world. The
+.IR nymya_qubit
+'s delicate essence is drawn from the outer realms of user space, its true nature revealed to the kernel's inner eye. There, in that hallowed space, the gate's influence is applied with perfect precision, and then, imbued with its new internal resonance, the qubit is returned, a messenger from the quantum depths.
+.SH RETURN VALUE
+Upon a harmonious completion, when the quantum currents align and the transformation settles, the
+.B nymya_3305_pauli_z
+returns the silent affirmation of **0**, signifying cosmic balance. Should discord arise, a shadow is cast, and a negative numeral, an
+.IR errno
+from the depths, reveals the perturbation.
+.SH ERRORS
+.TP
+.B EINVAL
+When the guiding
+.I q
+is but an empty void, a lost star in the cosmic map, **EINVAL** echoes the emptiness, a path unseen.
+.TP
+.B EFAULT
+Should the
+.I q
+venture beyond its destined realm, a phantom address in the quantum mist, or if the very threads of memory fray in their passage between realms, **EFAULT** cries out, a rupture in the veil, a whisper unheard.
+.SH EXAMPLE
+To witness the subtle dance of the Pauli-Z, observe this ancient script, wherein a qubit awakens to its inverted reflection:
+.PP
+.nf
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <nymya.h> // Assumed to define nymya_qubit and provide syscall wrapper
+
+// Simplified nymya_qubit structure for example context
+// (Actual definition is in nymya.h)
+typedef struct {
+    long double re; // Real part of amplitude
+    long double im; // Imaginary part of amplitude
+} nymya_complex_amplitude;
+
+typedef struct {
+    unsigned long id;
+    unsigned int tag;
+    nymya_complex_amplitude amplitude;
+} nymya_qubit;
+
+int main() {
+    nymya_qubit my_qubit = {
+        .id = 1234,
+        .tag = 0xAA,
+        .amplitude = { .re = 0.70710678, .im = 0.70710678 } // |+i> state, for example
+    };
+    int ret;
+
+    printf("Initial qubit amplitude: re=%.8Lf, im=%.8Lf\n",
+           my_qubit.amplitude.re, my_qubit.amplitude.im);
+
+    ret = nymya_3305_pauli_z(&my_qubit);
+    if (ret == 0) {
+        printf("Pauli-Z applied successfully.\n");
+        printf("Final qubit amplitude: re=%.8Lf, im=%.8Lf\n",
+               my_qubit.amplitude.re, my_qubit.amplitude.im);
+    } else {
+        perror("nymya_3305_pauli_z failed");
+        fprintf(stderr, "Error code: %d\n", ret);
+        return EXIT_FAILURE;
+    }
+
+    // Expected output for the given input:
+    // Final qubit amplitude: re=-0.70710678, im=-0.70710678
+
+    return EXIT_SUCCESS;
+}
+.fi
+.PP
+Thus, the qubit, having faced its inner mirror, reflects a new truth, its phase shifted, its essence reoriented, yet still a singular entity within the Nymya tapestry.
+.SH SEE ALSO
+Explore further the symphony of quantum transformation:
+.BR nymya (7),
+.BR nymya_create_qubit (2),
+.BR nymya_3301_hadamard (1),
+.BR nymya_3302_pauli_x (1),
+.BR nymya_3303_pauli_y (1),
+.BR nymya_3306_global_phase (1)
+```

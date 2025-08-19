@@ -1,0 +1,126 @@
+.\" Man page for nymya_3307_sqrt_x_gate - A Quantum Overture
+.TH NYMYA_3307_SQRT_X_GATE 1 "2023-10-27" "NymyaOS" "NymyaOS Kernel Calls"
+.SH NAME
+nymya_3307_sqrt_x_gate \- The Pivot of Possibility: A Square Root X (√X) quantum transformation for the qubit's essence
+.SH SYNOPSIS
+.B #include <unistd.h>
+.br
+.B #include <sys/syscall.h>
+.br
+.B #include <stdint.h>
+.PP
+.B int nymya_3307_sqrt_x_gate(struct nymya_qubit *q);
+.SH DESCRIPTION
+Beyond the veil of classical certainty, where reality unfurls in shades of probability, lies the domain of the quantum. The
+.B nymya_3307_sqrt_x_gate
+syscall is not merely an operation, but a cosmic pivot, a deliberate whisper applied to the nascent truth held within a
+.IR nymya_qubit .
+It is a fundamental movement in the grand ballet of quantum computation, a gentle turning that reshapes the qubit's state vector upon the luminous surface of its computational sphere.
+
+.PP
+With the precision of an ancient clockwork, this gate delves into the qubit's intrinsic vibration (its complex amplitude \fI(re + i*im)\fP). There, it applies a subtle, yet profound, transformation: a multiplication by the arcane scalar \fI(1/√2)(1 + i)\fP. This alchemy is performed with the immutable laws of fixed-point arithmetic, ensuring the delicate balance of the quantum realm is maintained with unwavering accuracy.
+
+.PP
+Often envisioned as a "half-rotation" upon the fabled Bloch sphere, the √X gate guides the qubit from one realm of superposition into another, unveiling possibilities along the hidden lattice of reality. It does not collapse the qubit's potential, but rather refines it, preparing its ethereal form for deeper entanglement with other quantum echoes, or for the ultimate revelation of measurement, where its probabilistic nature must resolve into a single, observed truth. It is an essential chord in the symphony of quantum discovery, shifting the qubit's echo with the elegance of a cosmic whisper.
+
+.PP
+The
+.IR nymya_qubit
+structure, a vessel for this quantum essence, is expected to house its complex amplitude in a fixed-point format, scaled by the cosmic constant of \fI2^32\fP. The seeker who invokes this gate bears the sacred trust of ensuring the pointer
+.IR q
+leads to a valid, writable sanctuary within user-space memory, a place where the qubit's transformation may truly unfold.
+.SH RETURN VALUE
+Upon a true alignment and successful cosmic resonance, zero is returned, signifying harmony. Should the quantum pathway falter, -1 is returned, and the fabric of
+.IR errno
+is rent to reveal the nature of the discord.
+.SH ERRORS
+.TP
+.B EINVAL
+When the whisper finds no ear, when the guiding hand \fIq\fP points to a void where presence should be.
+.TP
+.B EFAULT
+When the path to the qubit's heart is veiled by shadow, when the address specified by \fIq\fP lies beyond the accessible domains, or the memory it points to is not writable. This signifies a fracture in the fabric of user-space memory access, impeding the gate's subtle work.
+.SH EXAMPLE
+To witness the gate's touch upon the nascent |0> state, observe this rite of invocation:
+.PP
+.nf
+.RS
+#define _GNU_SOURCE
+#include <unistd.h>
+#include <sys/syscall.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <math.h> // For M_SQRT1_2, for verification purposes
+
+// Define syscall number for nymya_3307_sqrt_x_gate
+#ifndef __NR_nymya_3307_sqrt_x_gate
+#define __NR_nymya_3307_sqrt_x_gate 3307
+#endif
+
+// Define fixed-point scale factor (matching kernel's 2^32)
+#define FIXED_POINT_SCALE (1LL << 32)
+
+// NymyaOS qubit structure (simplified for user-space example)
+struct nymya_complex_amplitude {
+    int64_t re;
+    int64_t im;
+};
+
+struct nymya_qubit {
+    uint32_t id;
+    uint32_t tag;
+    struct nymya_complex_amplitude amplitude;
+};
+
+int main() {
+    struct nymya_qubit my_qubit;
+    int ret;
+
+    // Initialize qubit to |0> state, which corresponds to an amplitude
+    // of (1.0 + 0.0i). In fixed-point, this is (FIXED_POINT_SCALE + 0i).
+    my_qubit.id = 1;
+    my_qubit.tag = 0; // A tag for grouping or identification
+    my_qubit.amplitude.re = FIXED_POINT_SCALE;
+    my_qubit.amplitude.im = 0;
+
+    printf("Initial qubit state:\n");
+    printf("  Fixed-point (re, im): (%lld, %lld)\n",
+           my_qubit.amplitude.re, my_qubit.amplitude.im);
+    printf("  Floating-point (re, im): (%.4f, %.4f)\n\n",
+           (double)my_qubit.amplitude.re / FIXED_POINT_SCALE,
+           (double)my_qubit.amplitude.im / FIXED_POINT_SCALE);
+
+    // Invoke the syscall
+    ret = syscall(__NR_nymya_3307_sqrt_x_gate, &my_qubit);
+
+    if (ret == 0) {
+        printf("Syscall nymya_3307_sqrt_x_gate successful!\n");
+        printf("Final qubit state:\n");
+        printf("  Fixed-point (re, im): (%lld, %lld)\n",
+               my_qubit.amplitude.re, my_qubit.amplitude.im);
+        printf("  Floating-point (re, im): (%.4f, %.4f)\n",
+               (double)my_qubit.amplitude.re / FIXED_POINT_SCALE,
+               (double)my_qubit.amplitude.im / FIXED_POINT_SCALE);
+
+        // For an initial |0> state (1+0i), applying (1/√2)(1+i)
+        // results in an amplitude of (1/√2 + i/√2).
+        printf("\nExpected floating-point (approx) for |0> after √X: (%.4f, %.4f)\n",
+               M_SQRT1_2, M_SQRT1_2);
+    } else {
+        perror("Syscall nymya_3307_sqrt_x_gate failed");
+        fprintf(stderr, "Error code: %d\n", errno);
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
+}
+.RE
+.fi
+Observe how the quantum whisper reshapes its very essence, guiding it to a new state of superposition, closer to the heart of quantum possibility.
+.SH SEE ALSO
+.BR nymya_qubit (7),
+.BR syscalls (2),
+.BR nymya_3302_global_phase (1) \- the subtle shift of the cosmic phase,
+.BR nymya_3303_pauli_x (1) \- the complete inversion of identity.
