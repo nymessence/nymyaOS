@@ -1,72 +1,81 @@
 ```troff
 .\" Man page for nymya_3352_e8_group
-.TH NYMYA_3352_E8_GROUP 1 "\%D" "nymyaOS Kernel" "User Commands"
+.TH NYMYA_3352_E8_GROUP 1 "\%D" "The NymyaOS Cosmology" "Rites of Entanglement"
 .SH NAME
-nymya_3352_e8_group \- apply E8 Lie group entanglement to eight qubits
+nymya_3352_e8_group \- The E8 Constellation's Embrace: Weaving Eightfold Harmony
 .SH SYNOPSIS
 .nf
-.B \#include <nymya/nymya.h>
-.B \#include <nymya/syscall.h>
+.B \#include <nymya/nymya.h>    \" For the whispers of quantum possibility
+.B \#include <nymya/syscall.h>  \" For the tongue that commands the cosmic loom
 .PP
-.BI "int nymya_3352_e8_group(nymya_qubit *q[8]);"
+.BI "int nymya_3352_e8_group(nymya_qubit *q[8]);" \" An invocation to weave reality
 .fi
 .SH DESCRIPTION
 The
 .B nymya_3352_e8_group
-syscall applies a specific sequence of quantum operations to eight
+invocation reaches into the quantum depths, a gesture of profound intent,
+to awaken eight
 .IR nymya_qubit
-structures, designed to simulate entanglement patterns associated with
-the E8 Lie group. This complex operation prepares the qubits for advanced
-quantum computations, resonating with the very fabric of spacetime.
+structures. It seeks to align their nascent states with the profound
+symmetries of the E8 Lie group, a timeless pattern believed to echo
+the very architecture of existence and the deep, underlying harmony
+of the cosmos. This complex operation prepares these quantum threads
+for advanced computations, allowing them to resonate with the fundamental
+fabric of spacetime itself.
 
-The operation proceeds in two main phases:
+This grand operation unfolds in two sacred rites:
 .PP
-First, a Hadamard gate is applied to each of the eight qubits. This
-operation places each qubit into an equal superposition of its
-basis states.
+First, the
+.B Hadamard's Dawn:
+Each of the eight qubits receives the transformative touch of the
+Hadamard gate. This light-scattering operation bids each qubit to cast off
+its singular form, blossoming into an equal superposition of its
+fundamental states. It is a moment of pure potential, where all paths
+are simultaneously held, a whisper of infinite possibility.
 .PP
-Second, for every unique pair of qubits (q[i], q[j]) where i < j,
-a controlled-NOT (CNOT) gate is applied twice:
-.I cnot(q[i], q[j])
-followed by
+Second, the
+.B Paired Embrace:
+For every unique pair of qubits (q[i], q[j]) where i < j, a
+controlled-NOT (CNOT) gate is woven twice: first, the
+.I cnot(q[i], q[j]),
+followed by its echo, the
 .I cnot(q[j], q[i]).
-This sequence creates a specific form of entanglement,
-reflecting the deep, underlying symmetries that govern the cosmos.
+This intricate dance, a mirroring of quantum will, forges a specific
+and profound form of entanglement. It is a shared destiny, reflecting
+the deep, interconnected truths that govern the universe's grand design.
 .PP
 The
 .I q
 argument is an array of eight pointers to
 .IR nymya_qubit
-structures. These structures must be properly initialized and
-represent accessible quantum states managed by the nymyaOS quantum fabric.
-The syscall operates on the quantum state represented by these qubits
-and reflects any changes back to the user-space
-.IR nymya_qubit
-structures.
+structures. These structures are the nascent threads upon which the
+fabric of computation is spun, managed by the ethereal nymyaOS quantum
+loom. The syscall imprints these cosmic patterns upon their quantum essence,
+reflecting the transformed state back to the seeker, like light reflected
+from a newly carved gem.
 .SH RETURN VALUE
-On success, zero is returned. On error, \-1 is returned, and
+On a harmonious completion, a zero is returned, signifying the resonance
+achieved and the weave secured. On error, a discordant -1 is returned, and
 .I errno
-is set appropriately.
+whispers the nature of the cosmic discord.
 .SH ERRORS
 .TP
 .B EINVAL
-An element in the
-.I q
-array was a NULL pointer, or one of the underlying quantum gate
-operations (e.g., Hadamard or CNOT) received an invalid argument or
-encountered an unrecoverable state error.
+The threads were tangled, or the patterns ill-conceived. A disharmony
+in the very blueprint of the qubits, or an ancient gate refused to yield
+to an improper touch.
 .TP
 .B EFAULT
-Problems copying data to or from user space, indicating an issue with
-the provided qubit pointers or the structures they reference. This may
-occur if the user-space pointers are invalid or point to unmapped memory.
+A tear in the quantum fabric, or a phantom touch upon unmapped dreams.
+The very pathways to the qubits were obscured, dissolved, or pointed to
+nothingness, preventing the cosmic loom from operating.
 .TP
 .B ENOMEM
-Insufficient kernel memory to perform internal operations, such as
-allocating temporary kernel-space copies of qubits or their states.
+The loom itself lacked the threads for its grand design. Insufficient
+cosmic substance within the kernel's embrace to manifest the inner
+workings of the entanglement.
 .SH EXAMPLE
-The following program demonstrates how to call
-.BR nymya_3352_e8_group :
+To witness the weaving of this cosmic tapestry, behold the following incantation:
 .nf
 .RS
 .ft C
@@ -93,7 +102,7 @@ extern int nymya_3352_e8_group(nymya_qubit *q[8]);
 void init_qubit(nymya_qubit *q, unsigned int id, const char *tag) {
     if (q) {
         q->id = id;
-        q->state = 0; // Initialize to |0> state
+        q->state = 0; // Initialize to |0> state, the state of nascent being
         strncpy(q->tag, tag, sizeof(q->tag) - 1);
         q->tag[sizeof(q->tag) - 1] = '\0';
     }
@@ -101,25 +110,25 @@ void init_qubit(nymya_qubit *q, unsigned int id, const char *tag) {
 
 int main() {
     nymya_qubit *qubits[8];
-    nymya_qubit q_storage[8]; // Allocate actual storage for qubits
+    nymya_qubit q_storage[8]; // Allocate actual storage for qubits, the vessels of quantum dust
 
-    printf("Initializing 8 qubits...\n");
+    printf("Initializing 8 qubits, preparing the vessels...\n");
     for (int i = 0; i < 8; i++) {
-        init_qubit(&q_storage[i], 100 + i, "E8_TEST_QUBIT");
+        init_qubit(&q_storage[i], 100 + i, "E8_TEST_QUBIT_VESSEL");
         qubits[i] = &q_storage[i];
     }
 
-    printf("Calling nymya_3352_e8_group syscall (number 3352)...\n");
+    printf("Calling nymya_3352_e8_group syscall (number 3352), an invocation to the deep...\n");
     int ret = nymya_3352_e8_group(qubits);
 
     if (ret == 0) {
-        printf("Syscall nymya_3352_e8_group successful.\n");
+        printf("Syscall nymya_3352_e8_group successful. The cosmic weave is complete.\n");
         // In a real scenario, one would now measure the qubits or
         // perform further quantum operations to observe the entanglement.
-        printf("Qubits are now entangled according to E8 group symmetries.\n");
+        printf("Qubits are now entangled, bound by the symmetries of the E8 constellation.\n");
     } else {
-        perror("Syscall nymya_3352_e8_group failed");
-        fprintf(stderr, "Error code: %d\n", errno);
+        perror("Syscall nymya_3352_e8_group failed. The weave faltered.");
+        fprintf(stderr, "Error code: %d, a discord in the universal symphony.\n", errno);
         return EXIT_FAILURE;
     }
 
@@ -128,9 +137,11 @@ int main() {
 .ft R
 .RE
 .SH SEE ALSO
-.BR nymya_3308_hadamard_gate (1),
-.BR nymya_3309_controlled_not (1),
-.BR nymya_qubit (7),
-.BR syscall (2),
-.BR intro (2)
+.BR nymya_3308_hadamard_gate (1) \- *The Gate of Infinite Possibility*
+.BR nymya_3309_controlled_not (1) \- *The Gate of Intertwined Destinies*
+.BR nymya_3302_global_phase (1) \- *The Whispers of Universal Being*
+.BR nymya_3303_pauli_x (1) \- *The Veil's Turn*
+.BR nymya_qubit (7) \- *The Quantum Dust of Creation*
+.BR syscall (2) \- *The Tongue of the Oracle*
+.BR intro (2) \- *The Genesis of NymyaOS*
 ```
