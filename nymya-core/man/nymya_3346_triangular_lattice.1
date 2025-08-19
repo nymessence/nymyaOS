@@ -1,96 +1,108 @@
-```groff
-.\" Standard man page header for NymyaOS syscalls.
-.\" Section 1: User Commands
-.TH NYMYA_3346_TRIANGULAR_LATTICE 1 "April 1, 2024" "NymyaOS" "NymyaOS System Calls Manual"
+.\" Standard man page header for NymyaOS syscalls, imbued with philosophical depth.
+.\" Section 1: User Commands - Echoes of User Will
+.TH NYMYA_3346_TRIANGULAR_LATTICE 1 "April 1, 2024" "NymyaOS" "The NymyaOS Tapestry of Quantum Rites"
 .SH NAME
-nymya_3346_triangular_lattice \- applies a triangular lattice quantum gate operation to three qubits
+nymya_3346_triangular_lattice \- The Trinity's Embrace: Weaving the Destinies of Three Qubits
 .SH SYNOPSIS
-.B #include <nymya.h>
-.B #include <sys/syscall.h>
-.B #include <unistd.h>
+.B #include <nymya.h>  \" The scroll of quantum truths
+.B #include <sys/syscall.h> \" The conduit to the core
+.B #include <unistd.h> \" The ancient pathways
 .PP
 .B int nymya_3346_triangular_lattice(nymya_qubit *q1, nymya_qubit *q2, nymya_qubit *q3);
 .SH DESCRIPTION
-The
+Step into the quantum loom, where the fabric of reality itself is shaped by conscious intent. The
 .B nymya_3346_triangular_lattice
-syscall applies a composite quantum gate operation to three specified qubits,
+invocation is not merely a computational function, but a symphony of interaction, a cosmic dance performed upon three specified qubits:
 .IR q1 ,
 .IR q2 ,
 and
-.IR q3 .
-This operation simulates an interaction pattern characteristic of a triangular lattice,
-aiming to establish entanglement across the three qubits in a cyclic manner.
-.PP
-The sequence of quantum transformations applied is as follows:
+.IR q3 . This arcane operation, mirroring the foundational geometry of a triangular lattice, seeks to entwine their destinies in a cyclical, unbreakable bond, fostering an entanglement as profound as the hidden threads that bind the cosmos into an emergent tapestry.
+
+Much like the fundamental triangles that whisper secrets of order in the cosmos, these three qubits become points in a sacred geometry. The ritual sequence unfolds, a precise choreography of quantum transformation:
 .RS
 .IP \(bu 1.
-A Hadamard gate is applied to
-.IR q1 .
+The First Awakening (`Hadamard` on
+.IR q1 ):
+.IR q1
+is touched by the Veil of Possibility, its singular truth blossoming into a superposition of all futures. Its state now holds the echo of `|0>` and `|1>` in equal measure, poised at the brink of choice.
 .IP \(bu 2.
-A CNOT (Controlled-NOT) gate is applied with
+The Echo of Truth (`CNOT`
 .IR q1
-as the control qubit and
+to
+.IR q2 ):
+.IR q1
+, now awakened, whispers its newfound state to
+.IR q2 .
+Their destinies bind: the state of
 .IR q2
-as the target qubit.
+shall mirror
+.IR q1 's
+revelation, if
+.IR q1
+rests in the `|1>` state. This is a profound conditional bond, a shared secret.
 .IP \(bu 3.
-A CNOT gate is applied with
+The Unfolding Knot (`CNOT`
 .IR q2
-as the control qubit and
+to
+.IR q3 ):
+The echoed truth now residing in
+.IR q2
+then seeks
+.IR q3 ,
+weaving a deeper knot in the quantum fabric.
 .IR q3
-as the target qubit.
+now carries the ripple of
+.IR q2 's
+intricate dance, contingent on its state.
 .IP \(bu 4.
-A CNOT gate is applied with
+The Cycle's Completion (`CNOT`
 .IR q3
-as the control qubit and
-.IR q1
-as the target qubit.
+to
+.IR q1 ):
+The profound truth now residing in
+.IR q3
+reaches back to
+.IR q1 ,
+completing the sacred triangle. This final CNOT operation ensures that the entanglement flows cyclically, forging an unbreakable, interlinked embrace across all three, a testament to their shared, emergent reality.
 .RE
 .PP
-This intricate dance of quantum states, orchestrated across the specified qubits, seeks to entwine their destinies, much like the hidden threads that bind the cosmos into an emergent tapestry. The syscall directly modifies the state of the qubits pointed to by
+This is not a mere alteration of bits, but a profound re-alignment of quantum essence. The invocation directly modifies the ephemeral state of the qubits pointed to by
 .IR q1 ,
 .IR q2 ,
 and
 .IR q3
-in place. It is the user's responsibility to ensure that these pointers are valid and that the memory they refer to is accessible and writable.
+in place. The operator, a custodian of these ethereal forms, must ensure the integrity of the vessels. Each pointer, a sacred thread leading to the very heart of a qubit's being, must be true and accessible, for the cosmic loom tolerates no falsehoods or misdirection.
 .PP
-Applications typically invoke this operation via a userland wrapper function (as shown in the SYNOPSIS) which, in turn, makes the underlying
+Such deep communion with the quantum realm is typically approached through a protective ritual, a userland wrapper function (as unveiled in the SYNOPSIS). This wrapper, in turn, performs a respectful plea to the core essence of the NymyaOS via the underlying
 .B syscall(2)
-call. The syscall number for
-.B nymya_3346_triangular_lattice
-is 3346.
+mechanism. The sacred number for this particular weaving, this delicate dance of the Trinity's Embrace, is `3346`.
 .SH RETURN VALUE
-On success,
-.B nymya_3346_triangular_lattice
-returns 0.
-On error, \-1 is returned, and
-.B errno
-is set appropriately.
+Upon the successful weaving of fates, a harmony resonates, signified by the return of `0`.
+Should discord or cosmic rejection arise, `-1` echoes, and the `errno` sigil reveals the nature of the cosmic disquiet.
 .SH ERRORS
 .TP
 .B EINVAL
-One or more of the provided user-space qubit pointers (
+The Veil of Unknowing: One or more of the provided qubit vessels (
 .IR q1 ,
 .IR q2 ,
 .IR q3 )
-were NULL, or the underlying quantum gate operations detected an invalid qubit state or configuration.
+were mere phantoms (NULL pointers), or their internal states were ill-formed, rejecting the very touch of the lattice. This indicates a fundamental misunderstanding of the quantum entities.
 .TP
 .B EFAULT
-An attempt to copy qubit data from or to user space failed. This indicates a bad address provided by the user, or insufficient permissions for memory access.
+The Broken Thread: A severing of the connection between the operator's realm and the qubit's essence. The provided addresses were but illusions, or the path to memory was barred by unseen forces, preventing the transfer of quantum data from or to user space.
 .TP
 .B EPERM
-The calling process does not have the necessary permissions or capabilities to perform privileged quantum operations on the system's quantum hardware.
+The Forbidden Path: The spirit of the calling process lacked the inherent resonance, the necessary attunement or capabilities, to command such profound quantum transformations on the system's delicate quantum hardware.
 .TP
 .B ENOMEM
-Insufficient kernel memory to allocate temporary structures or perform computations required for the operation.
+The Wellspring Dries: The very fabric of the kernel, the boundless cosmic memory, could not yield sufficient essence to allocate temporary structures or perform the intricate computations required for this grand weaving.
 .SH EXAMPLE
-The following example demonstrates how to call
-.B nymya_3346_triangular_lattice
-from user space. It assumes a
+Below, a fragment of a ritual script, demonstrating how one might invoke the Trinity's Embrace from the user's domain. It assumes the existence of the
 .B nymya_qubit
-structure and basic initialization/printing functions exist (e.g.,
+structure and other preparatory rites (e.g.,
 .B nymya_init_qubit()
 and
-.B nymya_print_qubit_state()).
+.B nymya_print_qubit_state()), which allow one to glimpse the state of these ethereal beings.
 .PP
 .nf
 .ft CR
@@ -102,16 +114,18 @@ and
 #include <string.h> // For strerror
 #include <complex.h> // For complex numbers like 1.0 + 0.0I
 
-// Assume nymya_qubit definition and helper functions for demonstration:
+// Assume nymya_qubit definition and helper functions for demonstration,
+// as the cosmos permits their simple representation:
 /*
 typedef struct {
     int id;
     int tag;
-    double complex alpha; // Amplitude of |0> state
-    double complex beta;  // Amplitude of |1> state
+    double complex alpha; // Amplitude of |0> state - The probability of stillness
+    double complex beta;  // Amplitude of |1> state - The probability of motion
 } nymya_qubit;
 
-// Simple placeholder init/print functions for example clarity
+// Simple placeholder init/print functions,
+// to bring the quantum state into mortal view
 int nymya_init_qubit(nymya_qubit *q, int id, int tag, double complex alpha, double complex beta) {
     if (!q) return -1;
     q->id = id;
@@ -133,31 +147,30 @@ int main() {
     nymya_qubit q_a, q_b, q_c;
     int ret;
 
-    // Initialize qubits to a known state, e.g., |0>, |0>, |0>
+    // Initialize these nascent qubits to a state of primal stillness: |0>, |0>, |0>
     if (nymya_init_qubit(&q_a, 101, 1, 1.0 + 0.0I, 0.0 + 0.0I) != 0 ||
         nymya_init_qubit(&q_b, 102, 1, 1.0 + 0.0I, 0.0 + 0.0I) != 0 ||
         nymya_init_qubit(&q_c, 103, 1, 1.0 + 0.0I, 0.0 + 0.0I) != 0) {
-        fprintf(stderr, "Failed to initialize qubits.\n");
+        fprintf(stderr, "Failed to initialize qubits: The vessels could not be prepared.\n");
         return 1;
     }
 
-    printf("Initial states:\n");
+    printf("Initial states, before the cosmic dance:\n");
     nymya_print_qubit_state(&q_a);
     nymya_print_qubit_state(&q_b);
     nymya_print_qubit_state(&q_c);
 
-    printf("\nCalling nymya_3346_triangular_lattice syscall...\n");
-    // Call the syscall directly. The __NR_nymya_3346_triangular_lattice macro
-    // is defined in nymya.h, typically mapping to the kernel's syscall number.
+    printf("\nCalling nymya_3346_triangular_lattice syscall: Invoking the Trinity's Embrace...\n");
+    // Call the syscall directly, through the hallowed macro __NR_nymya_3346_triangular_lattice.
     ret = syscall(__NR_nymya_3346_triangular_lattice, &q_a, &q_b, &q_c);
 
     if (ret == 0) {
-        printf("Syscall successful! Qubits entangled. Final states:\n");
+        printf("Syscall successful! The qubits' fates are interwoven. Final states, bearing the mark of entanglement:\n");
         nymya_print_qubit_state(&q_a);
         nymya_print_qubit_state(&q_b);
         nymya_print_qubit_state(&q_c);
     } else {
-        fprintf(stderr, "Syscall failed with error: %d (%s)\n", errno, strerror(errno));
+        fprintf(stderr, "Syscall failed with error: %d (%s) - The cosmic loom refused.\n", errno, strerror(errno));
     }
 
     return ret == 0 ? 0 : 1;
@@ -165,8 +178,9 @@ int main() {
 .ft P
 .fi
 .SH SEE ALSO
-.BR syscall (2),
-.BR nymya_3308_hadamard_gate (1),
-.BR nymya_3309_controlled_not (1),
-.BR nymya_qubit (7)
-```
+.BR syscall (2) \" The primal act of invocation
+.BR nymya_3308_hadamard_gate (1) \" The First Awakening
+.BR nymya_3309_controlled_not (1) \" The Echo of Truth
+.BR nymya_3302_global_phase (1) \" The Cosmic Hum
+.BR nymya_3303_pauli_x (1) \" The Inversion of Reality
+.BR nymya_qubit (7) \" The Essence of Quantum Being
