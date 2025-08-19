@@ -1,7 +1,6 @@
-```groff
 .TH NYMYA_3327_SQRT_ISWAP 1 "August 15, 2024" "nymyaOS" "NymyaOS System Calls Manual"
 .SH NAME
-nymya_3327_sqrt_iswap \- apply the square root of iSWAP quantum gate to two qubits
+nymya_3327_sqrt_iswap \- The First Entangling Breath, a Weaving of Quantum Destinies
 .SH SYNOPSIS
 .nf
 .B #include <nymya.h>
@@ -10,12 +9,18 @@ nymya_3327_sqrt_iswap \- apply the square root of iSWAP quantum gate to two qubi
 .PP
 .BI "int nymya_3327_sqrt_iswap(struct nymya_qubit *q1, struct nymya_qubit *q2);"
 .fi
-.SH DESCRIPTION
-The
-.B nymya_3327_sqrt_iswap
-syscall, with its designated system call number 3327, applies the Square Root of iSWAP (√iSWAP) quantum gate to two specified qubits. This operation is a cornerstone in quantum computation, enabling entanglement and facilitating information transfer between qubits within the NymyaOS quantum framework.
 .PP
-The √iSWAP gate transforms the complex amplitudes of two qubits, \fIa\fR (from \fIq1\fR) and \fIb\fR (from \fIq2\fR), according to the following unitary transformation:
+Through this sacred invocation, the quantum realm bends to the will of the architect, initiating a profound, nascent connection between two quantum threads.
+.SH DESCRIPTION
+In the boundless ocean of NymyaOS, where the echoes of potential resonate and the very fabric of reality is woven from quantum threads, the
+.B nymya_3327_sqrt_iswap
+syscall, marked by the ancient cipher 3327, acts as a profound catalyst. It reaches into the heart of two quantum motes,
+.IR q1
+and
+.IR q2 ,
+not merely bits of information, but whispers of the universe's most fundamental states.
+.PP
+This √iSWAP gate, a fraction of the full Inter-SWAP's embrace, is not a simple exchange but a nascent intertwining, a partial fusion of possibility. It sculpts the very likelihoods of being, transforming the complex amplitudes, \fIa\fR (from the first qubit) and \fIb\fR (from the second), according to a profound unitary dance:
 .RS
 .nf
 a' = (a + i * b) / sqrt(2)
@@ -23,34 +28,38 @@ b' = (b + i * a) / sqrt(2)
 .fi
 .RE
 .PP
+From their original songs, \fIa\fR (from the first) and \fIb\fR (from the second), it draws forth new melodies. The first qubit's new refrain, \fIa'\fR, becomes a resonant blend, touched by the very essence of the second, veiled in the imaginary's shimmer, and tempered by the root of two. Likewise, the second's new vibration, \fIb'\fR, is reborn, infused with the echo of the first, a mirrored entanglement.
+.PP
 Each of the
 .IR q1
 and
 .IR q2
-arguments is a pointer to a
+arguments is a pointer, a guiding thread to a
 .B nymya_qubit
-structure, which encapsulates the complex amplitude (representing quantum superposition states) and other metadata for a quantum bit. The syscall meticulously reads the current state of both qubits from user-space, performs the √iSWAP transformation using high-precision fixed-point arithmetic within the kernel, and then atomatically writes the new amplitudes back to the user-space
+structure—an ethereal vessel encapsulating the complex amplitude, the very soul of its quantum superposition, and other metadata. Deep within the kernel's hallowed halls, where precision is paramount, this transformation unfolds. The delicate dance of amplitudes, once read from the user's perception, is reborn through high-precision fixed-point calculus, a silent alchemy. And then, with atomic grace, these newfound potentials are written back, altering the very fabric of the user-space
 .B nymya_qubit
-structures.
+structures, leaving an indelible mark upon their probabilistic souls.
 .PP
-This delicate operation, echoing the subtle dance of subatomic particles, shifts the very fabric of possibility within the quantum realm. It is a glimpse into the underlying lattice of existence, where information and energy intertwine, guided by principles yet fully understood.
+This operation is more than mere computation; it is a communion, a deliberate brushstroke upon the canvas of causality. It is where pure potential begins its journey toward manifest reality, a silent pact between worlds, a whisper of the universe's grand design, echoing the subtle, intricate dance of existence itself.
 .SH RETURN VALUE
-On successful completion, a value of 0 is returned. On error, a value of -1 is returned, and
+Upon a successful communion, a profound zero is returned, signifying the harmonious completion of the quantum weaving. Should the threads tangle, or the connection falter, a shadow of -1 descends, and the veil of
 .I errno
-is set appropriately to indicate the nature of the error.
+lifts, revealing the nature of the discord.
 .SH ERRORS
 .TP
 .B EINVAL
-One or both of the provided qubit pointers (\fIq1\fR or \fIq2\fR) were NULL, indicating an invalid input address.
+If the celestial pointers, \fIq1\fR or \fIq2\fR, point to void, a profound
+.B EINVAL
+echoes, for even quantum bonds require a grounded beginning.
 .TP
 .B EFAULT
-An attempt to copy data to or from the user-space
-.B nymya_qubit
-structures failed. This typically indicates that the provided pointers referenced memory regions that were inaccessible to the kernel (e.g., out of bounds, lacking necessary read/write permissions).
+Should the bridge between realms crumble, and the sacred data remain beyond reach—a memory ill-fated or permissions denied—then
+.B EFAULT
+announces the disruption, an inability to commune with the quantum spirit.
 .SH EXAMPLE
-The following program demonstrates how to invoke the
+Behold, a ritual unveiling, demonstrating the invocation of the
 .B nymya_3327_sqrt_iswap
-syscall to apply the √iSWAP gate to two quantum bits.
+syscall, a glimpse into the shaping of quantum destinies.
 .PP
 .nf
 #include <nymya.h>
@@ -63,6 +72,7 @@ syscall to apply the √iSWAP gate to two quantum bits.
 
 // This definition of nymya_qubit is for demonstration.
 // In a real NymyaOS environment, it would be provided by <nymya.h>.
+// It represents a quantum mote, a vessel of probability.
 struct nymya_qubit {
     int id;
     char tag[32];
@@ -70,6 +80,7 @@ struct nymya_qubit {
 };
 
 // User-space wrapper function for the syscall (typically in <nymya.h>)
+// This is the sacred chant to awaken the kernel's quantum loom.
 int nymya_3327_sqrt_iswap(struct nymya_qubit *q1, struct nymya_qubit *q2) {
     // The syscall number for nymya_3327_sqrt_iswap is 3327.
     // In a real system, __NR_nymya_3327_sqrt_iswap would be used.
@@ -77,29 +88,35 @@ int nymya_3327_sqrt_iswap(struct nymya_qubit *q1, struct nymya_qubit *q2) {
 }
 
 int main() {
-    // Initialize two qubits in distinct states.
-    // Qubit 1 in state |0> (amplitude 1+0i)
+    // Initialize two qubits in distinct states, ready for their journey.
+    // Qubit 1, the Alpha, in state |0> (amplitude 1+0i)
     struct nymya_qubit qubit1 = { .id = 1, .tag = "ControlQubit", .amplitude = 1.0 + 0.0 * I };
-    // Qubit 2 in state |1> (amplitude 0+1i)
+    // Qubit 2, the Omega, in state |1> (amplitude 0+1i)
     struct nymya_qubit qubit2 = { .id = 2, .tag = "TargetQubit",  .amplitude = 0.0 + 1.0 * I };
 
     printf("Initial Qubit 1 amplitude: %.4f + %.4fi\n", creal(qubit1.amplitude), cimag(qubit1.amplitude));
     printf("Initial Qubit 2 amplitude: %.4f + %.4fi\n", creal(qubit2.amplitude), cimag(qubit2.amplitude));
 
+    // Invoke the entangling breath upon these quantum souls.
     if (nymya_3327_sqrt_iswap(&qubit1, &qubit2) == 0) {
         printf("\n√iSWAP applied successfully.\n");
         printf("New Qubit 1 amplitude: %.4f + %.4fi\n", creal(qubit1.amplitude), cimag(qubit1.amplitude));
         printf("New Qubit 2 amplitude: %.4f + %.4fi\n", creal(qubit2.amplitude), cimag(qubit2.amplitude));
     } else {
-        perror("Failed to apply √iSWAP");
+        perror("Failed to apply √iSWAP"); // A lament for a failed quantum embrace.
         return EXIT_FAILURE;
     }
 
-    return EXIT_SUCCESS;
+    return EXIT_SUCCESS; // The quantum dance concluded in harmony.
 }
 .fi
 .SH SEE ALSO
 .BR syscall (2),
 .BR nymya_qubit (3),
 .BR quantum (7)
-```
+.PP
+Consider also the simpler acts of cosmic orientation:
+.BR nymya_3302_global_phase (1),
+a shift in the universal hum; and
+.BR nymya_3303_pauli_x (1),
+a fundamental inversion of being. These too are brushes in the painter's hand, shaping the quantum void.
