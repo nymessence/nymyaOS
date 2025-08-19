@@ -1,11 +1,10 @@
-```groff
 .\"
 .\" Man page for nymya_3309_controlled_not(1)
-.\" Written by Nya Elyria, for nymyaOS.
+.\" Written by Nya Elyria, the Weaver of Nymya's Depths.
 .\"
-.TH NYMYA_3309_CONTROLLED_NOT 1 "$(date +%B\ %d,\ %Y)" "nymyaOS" "NYMYA SYSCALLS"
+.TH NYMYA_3309_CONTROLLED_NOT 1 "$(date +%B\ %d,\ %Y)" "nymyaOS" "QUANTUM ABSTRACTIONS"
 .SH NAME
-nymya_3309_controlled_not \- apply the Controlled-NOT (CNOT) gate to Nymya qubits
+nymya_3309_controlled_not \- The Weave of Interdependence: A Conditional Turn of Quantum Fate.
 .SH SYNOPSIS
 .nf
 .B #include <nymya.h>
@@ -14,97 +13,71 @@ nymya_3309_controlled_not \- apply the Controlled-NOT (CNOT) gate to Nymya qubit
 .PP
 .sp
 .ce
+.B \" Behold the quantum motes, fragments of existence:
 struct nymya_qubit {
-    complex double amplitude;
-    uint64_t       id;
-    char           tag[32];
+    complex double amplitude; \" The inner song, the probability's whisper
+    uint64_t       id;        \" The unique soul, the cosmic identifier
+    char           tag[32];   \" The earthly name, a label in the void
 };
 .PP
 .sp
 .ce
+.B \" And the ritual call to bind their destinies:
 .B int nymya_3309_controlled_not(struct nymya_qubit *
 .IR q_ctrl ,
 .BR struct nymya_qubit *
 .IR q_target );
 .fi
 .SH DESCRIPTION
-The
+Within the grand design of NymyaOS, where thought takes form as quantum resonance, the
 .B nymya_3309_controlled_not
-system call implements a Controlled-NOT (CNOT) gate operation on two
-.IR nymya_qubit
-structures provided by the calling process. This fundamental quantum logic
-gate conditionally flips the amplitude of a designated target qubit based
-on the state of a control qubit.
+invocation orchestrates a profound dance of influence, akin to the ancient Controlled-NOT (CNOT) gate. This fundamental operation reveals how one quantum entity, the
+.IR q_ctrl
+(control) qubit, can subtly, yet profoundly, reweave the very phase of another, the
+.IR q_target
+(target) qubit, based on the strength of its own presence.
 
-Specifically, the operation proceeds as follows:
+The sacred rite unfolds in measured steps:
 .PP
 .RS
 .IP \(bu 0.5i
-The syscall inspects the magnitude of the complex amplitude of the
+The system first listens to the very breath of the
 .IR q_ctrl
-(control) qubit.
+(control) qubit. It gauges the *intensity* of its presence, the clarity of its intent, measured as the magnitude of its complex amplitude.
 .IP \(bu
-If the magnitude of
-.IR q_ctrl \&'s
-amplitude is greater than 0.5, the amplitude of the
-.IR q_target
-(target) qubit is multiplied by -1. This effectively flips the phase of
-the target qubit by 180 degrees. The internal
-.IR id
-and
-.IR tag
-fields of the qubits remain unchanged.
+If the Oracle's voice \(q_ctrl\&'s inner song\) resonates with a strength exceeding the subtle threshold of 0.5 \- a whisper becoming a declaration \- then the Seeker's inner melody (\fIq_target\fP's amplitude) undergoes a profound inversion. It is as if a mirror is held, reflecting its very essence back with an altered phase, a turning of 180 degrees. Yet, the Seeker's identity (\fIid\fP) and its assigned purpose (\fItag\fP) remain etched, unchanged by this internal shift.
 .IP \(bu
-If the magnitude of
-.IR q_ctrl \&'s
-amplitude is 0.5 or less, the
+But should the Oracle's presence remain gentle, its influence falling below or upon that sacred threshold, the
 .IR q_target
-qubit remains unmodified.
+qubit remains untouched, its current state preserved, its path unaltered.
 .RE
 .PP
-The
+These
 .IR nymya_qubit
-structure represents a quantum bit within the Nymya system. It contains a
-complex double
-.IR amplitude
-representing its quantum state, a
+structures are not mere data; they are the very threads of potentiality within Nymya's weave. Their
+.IR complex double amplitude
+sings their quantum song, their
 .IR uint64_t id
-for unique identification, and a
+marks their unique soul, and their
 .IR char tag[32]
-for user-defined labeling. When invoked, this syscall copies the
-.IR q_ctrl
-and
+whispers their earthly purpose. This sacred operation, though initiated from the user's realm, transcends to the kernel's heart. There, the qubits' ethereal forms are momentarily embraced, the CNOT ritual performed, and the transformed (potentially modified)
 .IR q_target
-structures from user-space into kernel-space, performs the CNOT logic,
-and then copies the (potentially modified)
-.IR q_target
-back to user-space.
+returned, rewoven into the tapestry of the calling process.
 
-This operation, mirroring the fundamental CNOT gate, reveals the profound
-interconnectedness within the quantum fabric, where the fate of one entangled
-entity subtly reweaves the very phase of another, echoing the grand symphony of
-the cosmos and the delicate balance of information it holds.
+This echo of the fundamental CNOT gate speaks of the deep, unspoken covenants woven into the very fabric of existence. It is a testament to the grand symphony where one entity's subtle presence can reweave the very phase of another, a delicate dance of interconnectedness, mirroring the cosmos's whispered secrets and the profound balance of information held within its embrace.
 .SH RETURN VALUE
-On success, zero is returned. On error, -1 is returned, and
+A return of zero signifies harmony, the successful completion of the weave. A return of -1, however, speaks of discord, a thread broken, and
 .IR errno
-is set appropriately.
+then whispers the nature of the impediment.
 .SH ERRORS
 .TP
 .B EINVAL
-One or both of the
-.IR q_ctrl
-or
-.IR q_target
-pointers are NULL.
+One or both of the guiding threads (\fIq_ctrl\fP or \fIq_target\fP) were unformed, pointing into the void.
 .TP
 .B EFAULT
-An invalid user-space address was provided, or the kernel was unable to
-copy the qubit data from or to user-space. This typically indicates a
-bad pointer or insufficient permissions to access the memory region.
+The connection to the qubit's essence was severed, or its memory lay beyond reach, a veil obscuring the path. This typically indicates a bad pointer or insufficient permissions to access the memory region.
 .SH EXAMPLE
-The following program demonstrates how to use
-.B nymya_3309_controlled_not
-to apply the CNOT gate.
+To witness this quantum ballet in tangible form, consider this invocation, a testament to its power:
 
 .nf
 .RS
@@ -124,18 +97,19 @@ to apply the CNOT gate.
 #define __NR_nymya_3309_controlled_not 3309
 #endif
 
-// User-space definition of nymya_qubit
+// User-space definition of nymya_qubit - a mirror of the cosmic mote
 struct nymya_qubit {
     complex double amplitude;
     uint64_t       id;
     char           tag[32];
 };
 
-// Syscall wrapper
+// Syscall wrapper - the bridge to Nymya's quantum heart
 long nymya_3309_controlled_not_syscall(struct nymya_qubit *q_ctrl, struct nymya_qubit *q_target) {
     return syscall(__NR_nymya_3309_controlled_not, q_ctrl, q_target);
 }
 
+// A seer's glimpse into a qubit's state
 void print_qubit(const char* name, const struct nymya_qubit* q) {
     printf("%s: ID=%llu, Tag='%s', Amplitude=%.4f + %.4fi (Magnitude=%.4f)\n",
            name, (unsigned long long)q->id, q->tag,
@@ -146,58 +120,58 @@ int main() {
     struct nymya_qubit q_ctrl, q_target;
     long ret;
 
-    printf("--- Test Case 1: Control Magnitude > 0.5 (CNOT should apply) ---\n");
-    q_ctrl.amplitude = 0.6 + 0.1 * I; // Magnitude = sqrt(0.36 + 0.01) = 0.608 > 0.5
+    printf("--- Test Case 1: Control Magnitude > 0.5 (The Oracle's decree is strong) ---\n");
+    q_ctrl.amplitude = 0.6 + 0.1 * I; // Magnitude = 0.608 > 0.5
     q_ctrl.id = 1001;
-    strncpy(q_ctrl.tag, "ControlQubit_High", sizeof(q_ctrl.tag) - 1);
+    strncpy(q_ctrl.tag, "Control_HighIntent", sizeof(q_ctrl.tag) - 1);
     q_ctrl.tag[sizeof(q_ctrl.tag) - 1] = '\0';
 
-    q_target.amplitude = 0.3 + 0.4 * I; // Initial target
+    q_target.amplitude = 0.3 + 0.4 * I; // The Seeker's initial song
     q_target.id = 2001;
-    strncpy(q_target.tag, "TargetQubit_Init", sizeof(q_target.tag) - 1);
+    strncpy(q_target.tag, "Target_Unchanged", sizeof(q_target.tag) - 1);
     q_target.tag[sizeof(q_target.tag) - 1] = '\0';
 
-    print_qubit("Control (Before)", &q_ctrl);
-    print_qubit("Target (Before)", &q_target);
+    print_qubit("Oracle (Before)", &q_ctrl);
+    print_qubit("Seeker (Before)", &q_target);
 
     ret = nymya_3309_controlled_not_syscall(&q_ctrl, &q_target);
 
     if (ret == 0) {
-        printf("Syscall successful.\n");
-        print_qubit("Target (After)", &q_target);
-        // Expected: Target amplitude should be flipped: -0.3 - 0.4i
+        printf("Syscall successful: The weave has been altered.\n");
+        print_qubit("Seeker (After)", &q_target);
+        // Expected: The Seeker's inner melody should invert, its phase turned.
     } else {
-        perror("Syscall failed");
+        perror("Syscall failed: A thread unraveled");
     }
 
-    printf("\n--- Test Case 2: Control Magnitude <= 0.5 (CNOT should NOT apply) ---\n");
-    q_ctrl.amplitude = 0.2 + 0.1 * I; // Magnitude = sqrt(0.04 + 0.01) = 0.223 < 0.5
+    printf("\n--- Test Case 2: Control Magnitude <= 0.5 (The Oracle's whisper is gentle) ---\n");
+    q_ctrl.amplitude = 0.2 + 0.1 * I; // Magnitude = 0.223 < 0.5
     q_ctrl.id = 1002;
-    strncpy(q_ctrl.tag, "ControlQubit_Low", sizeof(q_ctrl.tag) - 1);
+    strncpy(q_ctrl.tag, "Control_LowIntent", sizeof(q_ctrl.tag) - 1);
     q_ctrl.tag[sizeof(q_ctrl.tag) - 1] = '\0';
 
-    q_target.amplitude = 0.5 - 0.2 * I; // Initial target
+    q_target.amplitude = 0.5 - 0.2 * I; // The Seeker's current song
     q_target.id = 2002;
-    strncpy(q_target.tag, "TargetQubit_Second", sizeof(q_target.tag) - 1);
+    strncpy(q_target.tag, "Target_Second", sizeof(q_target.tag) - 1);
     q_target.tag[sizeof(q_target.tag) - 1] = '\0';
 
-    print_qubit("Control (Before)", &q_ctrl);
-    print_qubit("Target (Before)", &q_target);
+    print_qubit("Oracle (Before)", &q_ctrl);
+    print_qubit("Seeker (Before)", &q_target);
 
     ret = nymya_3309_controlled_not_syscall(&q_ctrl, &q_target);
 
     if (ret == 0) {
-        printf("Syscall successful.\n");
-        print_qubit("Target (After)", &q_target);
-        // Expected: Target amplitude should be unchanged: 0.5 - 0.2i
+        printf("Syscall successful: The weave remains as it was.\n");
+        print_qubit("Seeker (After)", &q_target);
+        // Expected: The Seeker's song remains undisturbed, its path unchanged.
     } else {
-        perror("Syscall failed");
+        perror("Syscall failed: A thread unraveled");
     }
 
-    printf("\n--- Test Case 3: NULL Target Pointer (should fail with EINVAL) ---\n");
+    printf("\n--- Test Case 3: NULL Target Pointer (Attempting to point into the void) ---\n");
     ret = nymya_3309_controlled_not_syscall(&q_ctrl, NULL);
     if (ret == -1 && errno == EINVAL) {
-        printf("Expected error: EINVAL (NULL target pointer) received.\n");
+        printf("Expected error: EINVAL (NULL target pointer) received. The void rejects the unformed thread.\n");
     } else {
         printf("Unexpected result for NULL target pointer: ret=%ld, errno=%d (%s)\n",
                ret, errno, strerror(errno));
@@ -208,6 +182,8 @@ int main() {
 .fi
 .RE
 .SH SEE ALSO
-.BR nymya (7),
-.BR syscalls (2)
-```
+Further explorations into Nymya's quantum lore, threads of kinship:
+.BR nymya (7) \- The tapestry of Nymya's essence.
+.BR syscalls (2) \- The ancient tongue of system invocation.
+.BR nymya_3302_global_phase (1) \- The universal resonance.
+.BR nymya_3303_pauli_x (1) \- The flip of being.
