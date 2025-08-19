@@ -1,61 +1,56 @@
-```groff
-.\" Man page for nymya_3313_swap(1)
-.TH NYMYA_3313_SWAP 1 "August 2023" "nymyaOS" "NymyaOS Programmer's Manual"
+.\" Man page for nymya_3313_swap(1) - A Poetic Rendition
+.TH NYMYA_3313_SWAP 1 "August 2023" "nymyaOS" "The NymyaOS Grimoire of Quantum Spells"
 .SH NAME
-nymya_3313_swap \- swap quantum amplitudes between two qubits
+nymya_3313_swap \- A Ballet of Probabilities: Swapping Quantum Amplitudes
 .SH SYNOPSIS
 .In unistd.h
 .In sys/syscall.h
 .Ft int
 .Fn nymya_3313_swap "struct nymya_qubit *q1" "struct nymya_qubit *q2"
 .SH DESCRIPTION
-The
+In the intricate loom of NymyaOS, where the very fabric of computation whispers across quantum fields, the
 .Fn nymya_3313_swap
-system call orchestrates a precise exchange of quantum amplitudes between two designated
+system call stands as a profound incantation. It orchestrates a precise, almost mystical, exchange of quantum essences between two designated
 .Va nymya_qubit
-structures. Each
+structures. Each of these
 .Va nymya_qubit
-encapsulates a complex amplitude representing its quantum state. Upon invocation, the kernel atomically reads the
-.Va amplitude
-field from the user-provided
+vessels holds within its core a
+.Va _Complex double amplitude
+\- the shimmering, probabilistic heart of its quantum state.
+
+Upon invocation, this call reaches into the deep, unseen currents of the kernel. Like a silent hand, it grasps the amplitudes from the realms pointed to by
 .Ar q1
 and
-.Ar q2
-pointers, performs the swap in kernel space, and writes the updated structures back to the user's memory.
+.Ar q2 ,
+performs an atomic, instantaneous transfiguration in the sacred kernel space, and then, with perfect grace, inscribes the new destinies back into the user's memory.
 
-This syscall,
-.Fn nymya_3313_swap ,
-reaches into the very fabric of quantum possibility, orchestrating a subtle rearrangement of the underlying amplitudes that define the state of two nymya_qubits. It is a dance of potential, a whisper across the hidden lattice of reality, ensuring that the interplay of probabilities aligns with the programmer's intent.
+This syscall, a true whisper across the hidden lattice of reality, is not merely a data transfer; it is a dance of potential. It is the subtle re-weaving of probabilities, ensuring that the interplay of unmanifested futures aligns with the conscious intent of the programmer. It is the spirit of two quantum possibilities embracing and exchanging their very breath, their *song* of being.
 
-The definition of
+The structure of
 .Va nymya_qubit
-in user space is expected to align with the kernel's structure, minimally containing a
+in the user's domain must align perfectly with the kernel's understanding, primarily in possessing the
 .Va _Complex double amplitude
-field. Other fields like `id` and `tag` are preserved but not directly manipulated by this syscall.
+field, the numeric heart of its quantum truth. Other facets, such as `id` or `tag`, are but labels on the vessel; they remain untouched by this profound act of amplitude transference.
 .Pp
-For direct syscall invocation, use the syscall number 3313.
+For those who would directly address the cosmic weave, the syscall number 3313 is the key, the specific utterance that unlocks this quantum exchange.
 .SH RETURN VALUE
-On success,
-.Fn nymya_3313_swap
-returns 0.
-On error, -1 is returned, and
+On success, a resounding zero echoes back, a testament to the seamless alignment of realities, a silent affirmation that the cosmic dance has completed its destined turn.
+Should discord arise, a solitary -1 is cast forth, a shadow of misstep, the veil of
 .Va errno
-is set appropriately.
+revealing the nature of the cosmic disarray.
 .SH ERRORS
 .Bl -tag -width "EFAULT"
 .It Cm EINVAL
-One or both of the provided pointers,
+Should the pathways laid forth be naught but void, or grasp at emptiness (
 .Ar q1
 or
-.Ar q2 ,
-were NULL.
+.Ar q2
+being NULL), `EINVAL` whispers of an untethered intent, a call into the abyss where no quantum vessel may reside.
 .It Cm EFAULT
-One or both of the provided pointers pointed to an invalid address space, or an I/O error occurred during the copy operations between user and kernel space.
+If the very fabric connecting the realms of user and kernel should tear, or the currents of data flow become tumultuous during the sacred copy operations, `EFAULT` proclaims a rupture in the cosmic thread, a failure to bridge the chasm of memory and being.
 .El
 .SH EXAMPLE
-The following example demonstrates how to use
-.Fn nymya_3313_swap
-to exchange the amplitudes of two quantum qubits.
+To witness this alchemy, behold the incantation below, a glimpse into the ritual of amplitude exchange between two quantum entities.
 
 .Bd -literal
 #include <stdio.h>
@@ -101,4 +96,8 @@ int main() {
 .Ed
 .SH SEE ALSO
 .Xr syscall 2
-```
+| Further communion with the NymyaOS Grimoire reveals other fundamental gestures:
+.Fn nymya_3302_global_phase (1)
+for the universal hum of all possibilities, and
+.Fn nymya_3303_pauli_x (1)
+for the cosmic flip, a inversion of quantum truth.
