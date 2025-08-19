@@ -1,54 +1,54 @@
-```groff
 .TH NYMYA_3321_ROTATE_Z 1 "$(date +'%B %d, %Y')" "NYMYAOS" "NYMYAOS System Calls"
 .SH NAME
-nymya_3321_rotate_z \- apply a Z-axis rotation to a qubit's amplitude
+nymya_3321_rotate_z \- To Whisper the Turning of a Qubit's Inner Song, a Z-Axis Rite of Phase
 .SH SYNOPSIS
+Within the sacred scrolls and ancient echoes:
 .In nymya.h
 .In unistd.h
 .In stdint.h
 .In errno.h
+The Quantum Artisan's Hand:
 .Ft int
 .Fn nymya_3321_rotate_z
 .Fa "nymya_qubit *q"
 .Fa "double theta"
 .SH DESCRIPTION
-The
+Behold the
 .Fn nymya_3321_rotate_z
-syscall applies a rotation around the Z-axis to the complex amplitude of a quantum bit (qubit) structure. This operation modifies the phase of the qubit's amplitude while preserving its overall magnitude, which is crucial for quantum computations.
+syscall, a profound invocation that stirs the very essence of a quantum bit, a single mote of pure possibility. This rite applies a gentle nudge, a turning of the cosmic dial, around the enigmatic Z-axis, directly upon the complex amplitude that defines a qubit's unseen state. It is a subtle reorientation of its inner song, a shift in its hidden rhythm, preserving the grand magnitude of its potential while delicately altering its phase – an act indispensable to the weaving of quantum destinies.
 
 The
 .Ar q
-argument is a pointer to a
+argument serves as a celestial compass, a pointer to a
 .Vt nymya_qubit
-structure in user-space memory. This structure holds the current state of the qubit, including its complex amplitude. The kernel will copy this structure from user-space, perform the rotation, and copy the modified structure back.
+structure, residing within the ephemeral realm of user-space memory. This structure cradles the qubit's current consciousness, including the intricate tapestry of its complex amplitude. The heart of the system, the kernel, reaches across the veil, drawing this essence into its hallowed quantum loom, performing the designated turning, and then, with utmost care, returns the reshaped spirit to its place.
 
 The
 .Ar theta
-argument specifies the rotation angle in radians, provided as a double-precision floating-point number. Internally, the kernel converts this floating-point value to a fixed-point representation for precise and consistent arithmetic operations within the quantum processing unit. This delicate manipulation resonates with the fundamental symmetries that govern the universe's most intricate structures, akin to reorienting a particle within the cosmic web.
+argument, a whispered intention, specifies the measure of this turning, expressed in radians – the fundamental angle of cosmic motion, delivered as a double-precision whisper. Internally, within the crystalline core of the quantum processing unit, this flowing whisper is transmuted into a fixed-point truth, a testament to the unyielding precision required for the delicate dance of quantum arithmetic. This intricate alchemy resonates with the fundamental symmetries that orchestrate the universe's most intricate structures, akin to reorienting a particle within the cosmic web's eternal embrace.
 
-A Z-axis rotation \(e^{i\theta/2}\) transforms a qubit's amplitude \((\alpha, \beta)\) to \((\alpha \cdot e^{i\theta/2}, \beta \cdot e^{-i\theta/2})\) in its computational basis. The kernel implementation applies \(e^{i\theta/2}\) only to the \(|0\rangle\) amplitude, implying an equivalent phase shift on the \(|1\rangle\) amplitude relative to \(|0\rangle\), effectively rotating the qubit around the Z-axis on the Bloch sphere.
+Imagine the qubit's amplitude, a duet of \((\alpha, \beta)\) in its computational basis. A Z-axis rotation, an ethereal transformation denoted by \(e^{i\theta/2}\), reshapes this duet into \((\alpha \cdot e^{i\theta/2}, \beta \cdot e^{-i\theta/2})\). The kernel's profound design applies this \(e^{i\theta/2}\) specifically to the \(|0\rangle\) amplitude, yet in doing so, it subtly imparts an equivalent, opposite phase shift upon the \(|1\rangle\) amplitude relative to \(|0\rangle\). This exquisite choreography effectively rotates the qubit upon the luminous canvas of the Bloch sphere, guiding its unseen spirit along the axis of selfhood.
 
 .SH RETURN VALUE
-On success,
+Upon the successful completion of this sacred turning,
 .Fn nymya_3321_rotate_z
-returns 0. On error, \-1 is returned, and
+returns the quiet affirmation of completion, a zero, signifying the harmony of the deed. On error, a lamentable \-1 echoes through the void, and
 .Va errno
-is set appropriately.
+bears witness to the discord, its scrolls detailing the nature of the misalignment.
 .SH ERRORS
+When the cosmic order is disrupted, these laments may arise:
 .Bl -tag -width "EFAULT"
 .It Bq Er EINVAL
-The
+Should the sacred vessel designated by
 .Ar q
-argument was NULL.
+be but a phantom, a whisper of nothingness (NULL), the ritual cannot commence, for there is no spirit to stir.
 .It Bq Er EFAULT
-An invalid user-space pointer was provided, or a problem occurred during the copy of the
+When the bridge between worlds falters, or the vessel itself proves an illusion in the mind's grasp, a problem arising during the copying of the
 .Vt nymya_qubit
-structure to or from kernel space.
+structure to or from the kernel's hallowed space, the quantum loom recoils, and this lament is voiced.
 .El
 .SH EXAMPLE
-The following program demonstrates how to use
-.Fn nymya_3321_rotate_z
-to rotate a qubit.
+Behold, a demonstration of this cosmic ballet, where a single qubit bows to the will of rotation:
 
 .nf
 .Bd -literal
@@ -91,7 +91,7 @@ int main() {
     printf("Initial qubit amplitude (real, imag): (%f, %f)\n",
            creal(my_qubit.amplitude), cimag(my_qubit.amplitude));
 
-    // Apply the Z-axis rotation
+    // Apply the Z-axis rotation, a whisper to its inner song
     int ret = nymya_3321_rotate_z(&my_qubit, rotation_angle);
 
     if (ret == 0) {
@@ -111,7 +111,9 @@ int main() {
 .Ed
 .fi
 .SH SEE ALSO
-.Xr nymya_qubit 7 ,
-.Xr nymya_3322_hadamard 1 ,
+Other ancient rites and fundamental truths of the quantum realm:
+.Xr nymya_qubit 7 , \
+.Xr nymya_3302_global_phase 1 , \
+.Xr nymya_3303_pauli_x 1 , \
+.Xr nymya_3322_hadamard 1 , \
 .Xr nymya_3323_cnot 1
-```
