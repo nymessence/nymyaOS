@@ -1,0 +1,1 @@
+savedcmd_/nymyaOS/nymya-core/kernel_syscalls/x86_64/nymya_core.mod := printf '%s\n'   nymya_kernel_module.o | awk '!x[$$0]++ { print("/nymyaOS/nymya-core/kernel_syscalls/x86_64/"$$0) }' > /nymyaOS/nymya-core/kernel_syscalls/x86_64/nymya_core.mod

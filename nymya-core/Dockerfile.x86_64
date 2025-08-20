@@ -3,14 +3,38 @@ FROM ubuntu:24.04
 
 # Set environment variables to avoid interactive prompts during installation.
 ENV DEBIAN_FRONTEND=noninteractive
+ENV CONCURRENCY=$(($(nproc) + 1))
 
-# Install all necessary dependencies for kernel module compilation.
-# 'linux-headers-generic' is the correct meta-package for Ubuntu.
+# Install core dependencies in multiple steps to work around potential
+# QEMU emulation issues. This can stabilize the build process.
+
+# Install apt-utils first to prevent debconf warnings
+RUN apt-get update && apt-get install -y apt-utils --no-install-recommends
+
+# Install build-essential separately as a core dependency.
+RUN apt-get update && apt-get install -y build-essential --no-install-recommends && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install remaining packages in a separate step.
 RUN apt-get update && apt-get install -y \
-    build-essential \
-    linux-headers-generic \
+    curl \
+    gnupg \
+    ca-certificates \
     --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
+
+# The compile.sh script passes the host's kernel version as a build argument.
+# This line declares the argument so it can be used below.
+ARG HOST_KERNEL_VERSION
+
+# --- Fix for kernel headers ---
+# Attempt to install the specific headers, but fall back to 'generic' if they don't exist.
+# This handles both native builds and cross-compilation from a Pi.
+RUN apt-get update && \
+    apt-get install -y linux-headers-${HOST_KERNEL_VERSION} --no-install-recommends || \
+    apt-get install -y linux-headers-generic --no-install-recommends && \
+    rm -rf /var/lib/apt/lists/*
+# --- End of fix ---
 
 # Set the working directory inside the container.
 WORKDIR /app

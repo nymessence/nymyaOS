@@ -1,38 +1,19 @@
-# Use a Debian base image for compatibility with Raspberry Pi repositories.
-FROM ubuntu:24.04
+# Dockerfile.arm64
+FROM --platform=linux/arm64 ubuntu:24.04
 
-# Set environment variables to avoid interactive prompts during installation.
+# Set environment to avoid interactive prompts
 ENV DEBIAN_FRONTEND=noninteractive
+ENV CONCURRENCY=$(nproc)
 
-# Install all necessary dependencies in one step.
-# This ensures all tools are available before they are used.
+# Install build dependencies - only the cross-compilation toolchain
 RUN apt-get update && apt-get install -y \
-    curl \
-    gnupg \
     build-essential \
-    crossbuild-essential-arm64 \
-    ca-certificates \
-    --no-install-recommends && \
-    rm -rf /var/lib/apt/lists/*
+    gcc-aarch64-linux-gnu \
+    make \
+    dpkg-dev \
+    debhelper \
+    libelf-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# Add the official Raspberry Pi GPG key to a new keyring directory.
-# This is the modern, recommended way to add a repository key.
-RUN curl -sSL https://archive.raspberrypi.org/debian/raspberrypi.gpg.key | gpg --dearmor > /usr/share/keyrings/raspberrypi-archive-keyring.gpg
-
-# Add the Raspberry Pi repository to the sources list, referencing the new GPG key.
-# This step is now separate to ensure apt's cache is updated correctly.
-RUN echo "deb [signed-by=/usr/share/keyrings/raspberrypi-archive-keyring.gpg] http://archive.raspberrypi.org/debian/ bookworm main" > /etc/apt/sources.list.d/raspi.list
-
-# Update package list and install the Raspberry Pi kernel headers in a single command.
-# The package name 'linux-headers-rpi-v8' is correct for a 64-bit kernel on Bookworm.
-RUN apt-get update && apt-get install -y linux-headers-rpi-v8 --no-install-recommends && rm -rf /var/lib/apt/lists/*
-
-# Set the working directory inside the container.
-WORKDIR /app
-
-# Copy the entire project into the container.
-COPY . .
-
-# Set the default command to 'make'.
-CMD ["make"]
-
+# Set working directory
+WORKDIR /nymyaOS/nymya-core
