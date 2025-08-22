@@ -1,1 +1,0 @@
-savedcmd_/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_core.o := aarch64-linux-gnu-ld -EL  -maarch64elf -z noexecstack --no-warn-rwx-segments   -r -o /nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_core.o @/nymyaOS/nymya-core/kernel_syscalls/arm64/nymya_core.mod 

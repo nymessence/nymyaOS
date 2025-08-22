@@ -1,1 +1,0 @@
-savedcmd_/nymyaOS/nymya-core/kernel_syscalls/x86_64/nymya_core.ko := ld -r -EL  -maarch64elf -z noexecstack --no-warn-rwx-segments --build-id=sha1  -T scripts/module.lds -o /nymyaOS/nymya-core/kernel_syscalls/x86_64/nymya_core.ko /nymyaOS/nymya-core/kernel_syscalls/x86_64/nymya_core.o /nymyaOS/nymya-core/kernel_syscalls/x86_64/nymya_core.mod.o

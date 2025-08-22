@@ -1,47 +1,62 @@
-# Use an Ubuntu base image, as requested.
+# Build environment for x86_64 cross-compilation
 FROM ubuntu:24.04
 
-# Set environment variables to avoid interactive prompts during installation.
 ENV DEBIAN_FRONTEND=noninteractive
-ENV CONCURRENCY=$(($(nproc) + 1))
+ENV CONCURRENCY=8
 
-# Install core dependencies in multiple steps to work around potential
-# QEMU emulation issues. This can stabilize the build process.
+# --------------------------
+# Fix APT sources for x86_64 target
+# --------------------------
+# Use standard Ubuntu repos (NOT ports.ubuntu.com) for x86_64
+RUN rm -f /etc/apt/sources.list.d/ubuntu.sources && \
+    echo 'deb http://archive.ubuntu.com/ubuntu noble main restricted universe multiverse' > /etc/apt/sources.list && \
+    echo 'deb http://archive.ubuntu.com/ubuntu noble-updates main restricted universe multiverse' >> /etc/apt/sources.list && \
+    echo 'deb http://archive.ubuntu.com/ubuntu noble-security main restricted universe multiverse' >> /etc/apt/sources.list && \
+    echo 'deb http://archive.ubuntu.com/ubuntu noble-backports main restricted universe multiverse' >> /etc/apt/sources.list
 
-# Install apt-utils first to prevent debconf warnings
-RUN apt-get update && apt-get install -y apt-utils --no-install-recommends
-
-# Install build-essential separately as a core dependency.
-RUN apt-get update && apt-get install -y build-essential --no-install-recommends && \
-    rm -rf /var/lib/apt/lists/*
-
-# Install remaining packages in a separate step.
-RUN apt-get update && apt-get install -y \
-    curl \
-    gnupg \
-    ca-certificates \
-    --no-install-recommends && \
-    rm -rf /var/lib/apt/lists/*
-
-# The compile.sh script passes the host's kernel version as a build argument.
-# This line declares the argument so it can be used below.
-ARG HOST_KERNEL_VERSION
-
-# --- Fix for kernel headers ---
-# Attempt to install the specific headers, but fall back to 'generic' if they don't exist.
-# This handles both native builds and cross-compilation from a Pi.
+# --------------------------
+# Install essential build packages
+# --------------------------
 RUN apt-get update && \
-    apt-get install -y linux-headers-${HOST_KERNEL_VERSION} --no-install-recommends || \
-    apt-get install -y linux-headers-generic --no-install-recommends && \
-    rm -rf /var/lib/apt/lists/*
-# --- End of fix ---
+    apt-get install -y --no-install-recommends \
+        curl \
+        && rm -rf /var/lib/apt/lists/*
 
-# Set the working directory inside the container.
-WORKDIR /app
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        build-essential \
+        make \
+        gcc \
+        g++ \
+        gcc-x86-64-linux-gnu \
+        g++-x86-64-linux-gnu \
+        libssl-dev \
+        libelf-dev \
+        libncurses-dev \
+        flex \
+        bison \
+        bc \
+        rsync \
+        git \
+        python3 \
+        qemu-user-static \
+        && rm -rf /var/lib/apt/lists/*
 
-# Copy the entire project into the container.
+# --------------------------
+# Install x86_64 kernel headers
+# --------------------------
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        linux-headers-generic \
+        && rm -rf /var/lib/apt/lists/*
+
+# --------------------------
+# Set up proper kernel build environment
+# --------------------------
+RUN ln -sf /usr/src/linux-headers-$(uname -r | sed 's/-.*//')-generic /lib/modules/x86_64/build
+
+# --------------------------
+# Set working directory
+# --------------------------
+WORKDIR /nymyaOS/nymya-core
 COPY . .
-
-# Set the default command to 'make'.
-CMD ["make"]
-

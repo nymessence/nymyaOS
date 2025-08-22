@@ -1,1 +1,0 @@
-savedcmd_/nymyaOS/nymya-core/kernel_syscalls/arm64/Module.symvers :=  scripts/mod/modpost -M -m -a      -o /nymyaOS/nymya-core/kernel_syscalls/arm64/Module.symvers -T /nymyaOS/nymya-core/kernel_syscalls/arm64/modules.order -i Module.symvers -e 
