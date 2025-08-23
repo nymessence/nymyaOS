@@ -6,12 +6,13 @@ RUN apt-get update && apt-get install -y \
     debhelper \
     devscripts \
     fakeroot \
+    docker.io \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /nymyaOS
 COPY . /nymyaOS
 
-RUN useradd -m -s /bin/bash builder
+RUN useradd -m -s /bin/bash builder && usermod -aG docker builder
 USER builder
 
 CMD ["/bin/bash"]
