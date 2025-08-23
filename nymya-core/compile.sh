@@ -119,7 +119,7 @@ for TARGET in "${TARGETS[@]}"; do
         *) DEB_ARCH="$TARGET" ;;
     esac
 
-    docker run --rm --platform=${DOCKER_PLATFORM[$TARGET]} \
+    docker run --rm --privileged --platform=${DOCKER_PLATFORM[$TARGET]} \
         -w /nymyaOS/nymya-core \
         -v "$(pwd)":/nymyaOS/nymya-core \
         -v "${KERNEL_SRC_COPY}":/nymyaOS/kernel-src:rw \
