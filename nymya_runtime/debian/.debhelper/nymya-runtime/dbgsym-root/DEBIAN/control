@@ -1,0 +1,13 @@
+Package: nymya-runtime-dbgsym
+Package-Type: ddeb
+Source: nymya-runtime
+Version: 0.1.0-1
+Auto-Built-Package: debug-symbols
+Architecture: arm64
+Maintainer: Nymessence
+Installed-Size: 16
+Depends: nymya-runtime (= 0.1.0-1)
+Section: debug
+Priority: optional
+Description: debug symbols for nymya-runtime
+Build-Ids: 7457b53c3afe4c8691e56a76b6fcc9cec433b511
