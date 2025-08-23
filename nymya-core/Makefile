@@ -24,7 +24,9 @@ userland:
 	@echo "#ifndef NYMYA_H" >> $(LIB_HEADERS_DIR)/nymya.h  # Fixed typo: NYMAYA -> NYMYA
 	@echo "#define NYMYA_H" >> $(LIB_HEADERS_DIR)/nymya.h  # Fixed typo: NYMAYA -> NYMYA
 	@echo "" >> $(LIB_HEADERS_DIR)/nymya.h
-	@echo "int nymya_syscall(int syscall_number, ...);" >> $(LIB_HEADERS_DIR)/nymya.h
+	@echo "CFLAGS += -mretpoline
+LDFLAGS += -mretpoline
+AFLAGS += -mretpoline" >> $(LIB_HEADERS_DIR)/nymya.h
 	@echo "" >> $(LIB_HEADERS_DIR)/nymya.h
 	@echo "#endif /* NYMYA_H */" >> $(LIB_HEADERS_DIR)/nymya.h  # Fixed typo: NYMAYA -> NYMYA
 	@gcc -shared -o $(LIB_FILE) -fPIC nymya.c
