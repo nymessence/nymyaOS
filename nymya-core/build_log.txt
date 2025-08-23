@@ -18,7 +18,7 @@ Detected host architecture: aarch64
 #1 DONE 0.0s
 
 #2 [internal] load metadata for docker.io/library/ubuntu:22.04
-#2 DONE 1.1s
+#2 DONE 1.0s
 
 #3 [internal] load .dockerignore
 #3 transferring context: 2B done
@@ -28,22 +28,22 @@ Detected host architecture: aarch64
 #4 DONE 0.0s
 
 #5 [internal] load build context
-#5 transferring context: 303.11kB 0.1s done
-#5 DONE 0.1s
+#5 transferring context: 26.12kB 0.0s done
+#5 DONE 0.0s
 
 #6 [6/8] RUN mkdir -p /lib/modules/x86_64 && ln -sf /usr/src/linux-headers-$(uname -r | sed 's/-.*//')-generic /lib/modules/x86_64/build
 #6 CACHED
 
-#7 [2/8] RUN rm -f /etc/apt/trusted.gpg.d/ubuntu-keyring-2012-cdimage.gpg &&     rm -f /etc/apt/trusted.gpg.d/ubuntu-keyring-2018-archive.gpg &&     rm -f /etc/apt/sources.list.d/ubuntu.sources &&     echo 'deb http://archive.ubuntu.com/ubuntu noble main restricted universe multiverse' > /etc/apt/sources.list &&     echo 'deb http://archive.ubuntu.com/ubuntu noble-updates main restricted universe multiverse' >> /etc/apt/sources.list &&     echo 'deb http://archive.ubuntu.com/ubuntu noble-security main restricted universe multiverse' >> /etc/apt/sources.list &&     echo 'deb http://archive.ubuntu.com/ubuntu noble-backports main restricted universe multiverse' >> /etc/apt/sources.list
+#7 [3/8] RUN apt-get update -o Acquire::AllowInsecureRepositories=true &&     apt-get install -y --allow-unauthenticated --no-install-recommends gnupg &&     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 871920D1991BC93C &&     apt-get update &&     apt-get install -y --no-install-recommends curl &&     rm -rf /var/lib/apt/lists/*
 #7 CACHED
 
-#8 [4/8] RUN apt-get update &&     apt-get install -y --no-install-recommends         build-essential         make         gcc         g++         gcc-x86-64-linux-gnu         g++-x86-64-linux-gnu         libssl-dev         libelf-dev         libncurses-dev         flex         bison         bc         rsync         git         python3         qemu-user-static         && rm -rf /var/lib/apt/lists/*
+#8 [5/8] RUN apt-get update &&     apt-get install -y --no-install-recommends         linux-headers-generic         && rm -rf /var/lib/apt/lists/*
 #8 CACHED
 
-#9 [5/8] RUN apt-get update &&     apt-get install -y --no-install-recommends         linux-headers-generic         && rm -rf /var/lib/apt/lists/*
+#9 [2/8] RUN rm -f /etc/apt/trusted.gpg.d/ubuntu-keyring-2012-cdimage.gpg &&     rm -f /etc/apt/trusted.gpg.d/ubuntu-keyring-2018-archive.gpg &&     rm -f /etc/apt/sources.list.d/ubuntu.sources &&     echo 'deb http://archive.ubuntu.com/ubuntu noble main restricted universe multiverse' > /etc/apt/sources.list &&     echo 'deb http://archive.ubuntu.com/ubuntu noble-updates main restricted universe multiverse' >> /etc/apt/sources.list &&     echo 'deb http://archive.ubuntu.com/ubuntu noble-security main restricted universe multiverse' >> /etc/apt/sources.list &&     echo 'deb http://archive.ubuntu.com/ubuntu noble-backports main restricted universe multiverse' >> /etc/apt/sources.list
 #9 CACHED
 
-#10 [3/8] RUN apt-get update -o Acquire::AllowInsecureRepositories=true &&     apt-get install -y --allow-unauthenticated --no-install-recommends gnupg &&     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 871920D1991BC93C &&     apt-get update &&     apt-get install -y --no-install-recommends curl &&     rm -rf /var/lib/apt/lists/*
+#10 [4/8] RUN apt-get update &&     apt-get install -y --no-install-recommends         build-essential         make         gcc         g++         gcc-x86-64-linux-gnu         g++-x86-64-linux-gnu         libssl-dev         libelf-dev         libncurses-dev         flex         bison         bc         rsync         git         python3         qemu-user-static         && rm -rf /var/lib/apt/lists/*
 #10 CACHED
 
 #11 [7/8] WORKDIR /nymyaOS/nymya-core
@@ -54,14 +54,15 @@ Detected host architecture: aarch64
 
 #13 exporting to image
 #13 exporting layers 0.1s done
-#13 writing image sha256:da66514f1316de2d5f02c378cabf311be5e992ac777fffb5b5360374d72616fd 0.0s done
+#13 writing image sha256:f6eb77e56b2f2833e51aaf10e3d3bab8fcf98834c08519e1a0415bd93525f362 0.0s done
 #13 naming to docker.io/library/nymya-build-env-x86_64
 #13 naming to docker.io/library/nymya-build-env-x86_64 0.0s done
-#13 DONE 0.1s
+#13 DONE 0.2s
 
  [33m1 warning found (use docker --debug to expand):
 [0m - NoEmptyContinuation: Empty continuation line (line 18)
 📁 Creating clean kernel source copy for x86_64
+WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
 x86_64-binfmt-P: QEMU internal SIGSEGV {code=MAPERR, addr=0x20}
 Segmentation fault (core dumped)
 x86_64-binfmt-P: QEMU internal SIGSEGV {code=MAPERR, addr=0x20}

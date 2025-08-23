@@ -39,7 +39,6 @@ RUN apt-get update && \
         rsync \
         git \
         python3 \
-        qemu-user-static \
         && rm -rf /var/lib/apt/lists/*
 
 # --------------------------
