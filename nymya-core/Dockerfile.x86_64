@@ -28,8 +28,8 @@ RUN apt-get update && \
         make \
         gcc \
         g++ \
-        gcc-x86_64-linux-gnu \
-        g++-x86_64-linux-gnu \
+        gcc-x86-64-linux-gnu \
+        g++-x86-64-linux-gnu \
         libssl-dev \
         libelf-dev \
         libncurses-dev \
