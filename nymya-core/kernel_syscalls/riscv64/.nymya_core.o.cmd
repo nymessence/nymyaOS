@@ -1,0 +1,1 @@
+savedcmd_/nymyaOS/nymya-core/kernel_syscalls/riscv64/nymya_core.o := ld -EL  -maarch64elf -z noexecstack   -r -o /nymyaOS/nymya-core/kernel_syscalls/riscv64/nymya_core.o @/nymyaOS/nymya-core/kernel_syscalls/riscv64/nymya_core.mod 

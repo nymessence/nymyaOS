@@ -1,0 +1,1 @@
+savedcmd_/nymyaOS/nymya-core/kernel_syscalls/riscv64/Module.symvers :=  scripts/mod/modpost -M        -o /nymyaOS/nymya-core/kernel_syscalls/riscv64/Module.symvers -T /nymyaOS/nymya-core/kernel_syscalls/riscv64/modules.order -i Module.symvers -e 
