@@ -86,6 +86,8 @@ for TARGET in "${TARGETS[@]}"; do
     KERNEL_SRC_COPY="/tmp/linux-src-${TARGET}"
 
     echo -e "\n🐳 Building for target: ${TARGET} using CROSS_COMPILE=${CROSS_COMPILE}"
+    echo "🐳 Building docker image for ${TARGET}"
+    docker build -t ${IMAGE_NAME} -f Dockerfile.${TARGET} .
 
     if [ "$TARGET" = "arm64" ]; then
         KERNEL_SRC="${RPI_KERNEL_SRC}"
