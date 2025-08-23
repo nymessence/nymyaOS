@@ -1,0 +1,5 @@
+Package: nymya-core-kernel
+Version: 0.1.0
+Architecture: x86_64
+Maintainer: Unknown <>
+Description: NymyaOS Core Syscall SDK (Kernel for x86_64)
