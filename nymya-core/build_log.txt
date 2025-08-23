@@ -14,142 +14,69 @@ Detected host architecture: aarch64
 
 #1 [internal] load build definition from Dockerfile.x86_64
 #1 transferring dockerfile: 2.08kB done
-#1 DONE 0.1s
+#1 DONE 0.0s
 
 #2 [internal] load metadata for docker.io/library/ubuntu:24.04
-#2 DONE 5.7s
+#2 DONE 1.4s
 
 #3 [internal] load .dockerignore
-#3 transferring context:
 #3 transferring context: 2B done
-#3 DONE 1.3s
+#3 DONE 0.0s
 
-#4 [1/8] FROM docker.io/library/ubuntu:24.04@sha256:7c06e91f61fa88c08cc74f7e1b7c69ae24910d745357e0dfe1d2c0322aaf20f9
+#4 [internal] load build context
+#4 transferring context: 24.41kB 0.0s done
 #4 DONE 0.0s
 
-#5 [internal] load build context
-#5 ...
+#5 [1/8] FROM docker.io/library/ubuntu:24.04@sha256:7c06e91f61fa88c08cc74f7e1b7c69ae24910d745357e0dfe1d2c0322aaf20f9
+#5 resolve docker.io/library/ubuntu:24.04@sha256:7c06e91f61fa88c08cc74f7e1b7c69ae24910d745357e0dfe1d2c0322aaf20f9 0.0s done
+#5 DONE 0.1s
 
 #6 [2/8] RUN rm -f /etc/apt/sources.list.d/ubuntu.sources &&     echo 'deb http://archive.ubuntu.com/ubuntu noble main restricted universe multiverse' > /etc/apt/sources.list &&     echo 'deb http://archive.ubuntu.com/ubuntu noble-updates main restricted universe multiverse' >> /etc/apt/sources.list &&     echo 'deb http://archive.ubuntu.com/ubuntu noble-security main restricted universe multiverse' >> /etc/apt/sources.list &&     echo 'deb http://archive.ubuntu.com/ubuntu noble-backports main restricted universe multiverse' >> /etc/apt/sources.list
-#6 CACHED
-
-#5 [internal] load build context
-#5 transferring context: 209.79kB 0.4s done
-#5 DONE 1.4s
+#6 DONE 0.4s
 
 #7 [3/8] RUN apt-get update &&     apt-get install -y --no-install-recommends         curl         && rm -rf /var/lib/apt/lists/*
-#7 6.630 Get:1 http://archive.ubuntu.com/ubuntu noble InRelease [256 kB]
-#7 6.925 Get:2 http://archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
-#7 6.991 Get:3 http://archive.ubuntu.com/ubuntu noble-security InRelease [126 kB]
-#7 7.065 Get:4 http://archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
-#7 7.137 Ign:5 http://archive.ubuntu.com/ubuntu noble/multiverse arm64 Packages
-#7 7.138 Ign:6 http://archive.ubuntu.com/ubuntu noble/universe arm64 Packages
-#7 7.138 Ign:7 http://archive.ubuntu.com/ubuntu noble/main arm64 Packages
-#7 7.139 Ign:8 http://archive.ubuntu.com/ubuntu noble/restricted arm64 Packages
-#7 7.185 Ign:5 http://archive.ubuntu.com/ubuntu noble/multiverse arm64 Packages
-#7 7.185 Ign:6 http://archive.ubuntu.com/ubuntu noble/universe arm64 Packages
-#7 7.241 Ign:7 http://archive.ubuntu.com/ubuntu noble/main arm64 Packages
-#7 7.298 Ign:8 http://archive.ubuntu.com/ubuntu noble/restricted arm64 Packages
-#7 7.298 Ign:9 http://archive.ubuntu.com/ubuntu noble-updates/restricted arm64 Packages
-#7 7.298 Ign:10 http://archive.ubuntu.com/ubuntu noble-updates/main arm64 Packages
-#7 7.298 Ign:11 http://archive.ubuntu.com/ubuntu noble-updates/universe arm64 Packages
-#7 7.298 Ign:12 http://archive.ubuntu.com/ubuntu noble-updates/multiverse arm64 Packages
-#7 7.298 Ign:5 http://archive.ubuntu.com/ubuntu noble/multiverse arm64 Packages
-#7 7.344 Ign:6 http://archive.ubuntu.com/ubuntu noble/universe arm64 Packages
-#7 7.397 Ign:7 http://archive.ubuntu.com/ubuntu noble/main arm64 Packages
-#7 7.397 Ign:8 http://archive.ubuntu.com/ubuntu noble/restricted arm64 Packages
-#7 7.398 Ign:9 http://archive.ubuntu.com/ubuntu noble-updates/restricted arm64 Packages
-#7 7.398 Ign:10 http://archive.ubuntu.com/ubuntu noble-updates/main arm64 Packages
-#7 7.398 Ign:11 http://archive.ubuntu.com/ubuntu noble-updates/universe arm64 Packages
-#7 7.399 Ign:12 http://archive.ubuntu.com/ubuntu noble-updates/multiverse arm64 Packages
-#7 7.450 Ign:5 http://archive.ubuntu.com/ubuntu noble/multiverse arm64 Packages
-#7 7.450 Ign:13 http://archive.ubuntu.com/ubuntu noble-security/multiverse arm64 Packages
-#7 7.450 Ign:14 http://archive.ubuntu.com/ubuntu noble-security/restricted arm64 Packages
-#7 7.450 Ign:15 http://archive.ubuntu.com/ubuntu noble-security/universe arm64 Packages
-#7 7.505 Ign:16 http://archive.ubuntu.com/ubuntu noble-security/main arm64 Packages
-#7 7.505 Ign:6 http://archive.ubuntu.com/ubuntu noble/universe arm64 Packages
-#7 7.505 Ign:7 http://archive.ubuntu.com/ubuntu noble/main arm64 Packages
-#7 7.505 Ign:8 http://archive.ubuntu.com/ubuntu noble/restricted arm64 Packages
-#7 7.506 Ign:9 http://archive.ubuntu.com/ubuntu noble-updates/restricted arm64 Packages
-#7 7.506 Ign:10 http://archive.ubuntu.com/ubuntu noble-updates/main arm64 Packages
-#7 7.554 Ign:11 http://archive.ubuntu.com/ubuntu noble-updates/universe arm64 Packages
-#7 7.554 Ign:12 http://archive.ubuntu.com/ubuntu noble-updates/multiverse arm64 Packages
-#7 7.554 Ign:17 http://archive.ubuntu.com/ubuntu noble-backports/universe arm64 Packages
-#7 7.558 Ign:18 http://archive.ubuntu.com/ubuntu noble-backports/main arm64 Packages
-#7 7.612 Ign:5 http://archive.ubuntu.com/ubuntu noble/multiverse arm64 Packages
-#7 7.612 Ign:13 http://archive.ubuntu.com/ubuntu noble-security/multiverse arm64 Packages
-#7 7.612 Ign:14 http://archive.ubuntu.com/ubuntu noble-security/restricted arm64 Packages
-#7 7.612 Ign:15 http://archive.ubuntu.com/ubuntu noble-security/universe arm64 Packages
-#7 7.612 Ign:16 http://archive.ubuntu.com/ubuntu noble-security/main arm64 Packages
-#7 7.613 Ign:6 http://archive.ubuntu.com/ubuntu noble/universe arm64 Packages
-#7 7.667 Ign:7 http://archive.ubuntu.com/ubuntu noble/main arm64 Packages
-#7 7.667 Ign:8 http://archive.ubuntu.com/ubuntu noble/restricted arm64 Packages
-#7 7.667 Ign:9 http://archive.ubuntu.com/ubuntu noble-updates/restricted arm64 Packages
-#7 7.669 Ign:10 http://archive.ubuntu.com/ubuntu noble-updates/main arm64 Packages
-#7 7.720 Ign:11 http://archive.ubuntu.com/ubuntu noble-updates/universe arm64 Packages
-#7 7.720 Ign:12 http://archive.ubuntu.com/ubuntu noble-updates/multiverse arm64 Packages
-#7 7.720 Ign:17 http://archive.ubuntu.com/ubuntu noble-backports/universe arm64 Packages
-#7 7.720 Ign:18 http://archive.ubuntu.com/ubuntu noble-backports/main arm64 Packages
-#7 7.721 Err:5 http://archive.ubuntu.com/ubuntu noble/multiverse arm64 Packages
-#7 7.721   404  Not Found [IP: 91.189.91.83 80]
-#7 7.721 Ign:13 http://archive.ubuntu.com/ubuntu noble-security/multiverse arm64 Packages
-#7 7.770 Ign:14 http://archive.ubuntu.com/ubuntu noble-security/restricted arm64 Packages
-#7 7.770 Ign:15 http://archive.ubuntu.com/ubuntu noble-security/universe arm64 Packages
-#7 7.770 Ign:16 http://archive.ubuntu.com/ubuntu noble-security/main arm64 Packages
-#7 7.770 Ign:6 http://archive.ubuntu.com/ubuntu noble/universe arm64 Packages
-#7 8.138 Ign:7 http://archive.ubuntu.com/ubuntu noble/main arm64 Packages
-#7 8.138 Ign:8 http://archive.ubuntu.com/ubuntu noble/restricted arm64 Packages
-#7 8.138 Ign:9 http://archive.ubuntu.com/ubuntu noble-updates/restricted arm64 Packages
-#7 8.138 Ign:10 http://archive.ubuntu.com/ubuntu noble-updates/main arm64 Packages
-#7 8.138 Ign:11 http://archive.ubuntu.com/ubuntu noble-updates/universe arm64 Packages
-#7 8.139 Ign:12 http://archive.ubuntu.com/ubuntu noble-updates/multiverse arm64 Packages
-#7 8.139 Ign:17 http://archive.ubuntu.com/ubuntu noble-backports/universe arm64 Packages
-#7 8.139 Ign:18 http://archive.ubuntu.com/ubuntu noble-backports/main arm64 Packages
-#7 8.139 Ign:13 http://archive.ubuntu.com/ubuntu noble-security/multiverse arm64 Packages
-#7 8.139 Ign:14 http://archive.ubuntu.com/ubuntu noble-security/restricted arm64 Packages
-#7 8.188 Ign:15 http://archive.ubuntu.com/ubuntu noble-security/universe arm64 Packages
-#7 8.188 Ign:16 http://archive.ubuntu.com/ubuntu noble-security/main arm64 Packages
-#7 8.188 Err:9 http://archive.ubuntu.com/ubuntu noble-updates/restricted arm64 Packages
-#7 8.188   404  Not Found [IP: 91.189.91.83 80]
-#7 8.248 Ign:10 http://archive.ubuntu.com/ubuntu noble-updates/main arm64 Packages
-#7 8.248 Ign:11 http://archive.ubuntu.com/ubuntu noble-updates/universe arm64 Packages
-#7 8.248 Ign:12 http://archive.ubuntu.com/ubuntu noble-updates/multiverse arm64 Packages
-#7 8.248 Ign:17 http://archive.ubuntu.com/ubuntu noble-backports/universe arm64 Packages
-#7 8.249 Ign:18 http://archive.ubuntu.com/ubuntu noble-backports/main arm64 Packages
-#7 8.249 Ign:13 http://archive.ubuntu.com/ubuntu noble-security/multiverse arm64 Packages
-#7 8.304 Ign:14 http://archive.ubuntu.com/ubuntu noble-security/restricted arm64 Packages
-#7 8.304 Ign:15 http://archive.ubuntu.com/ubuntu noble-security/universe arm64 Packages
-#7 8.304 Ign:16 http://archive.ubuntu.com/ubuntu noble-security/main arm64 Packages
-#7 8.359 Ign:17 http://archive.ubuntu.com/ubuntu noble-backports/universe arm64 Packages
-#7 8.359 Ign:18 http://archive.ubuntu.com/ubuntu noble-backports/main arm64 Packages
-#7 8.417 Err:13 http://archive.ubuntu.com/ubuntu noble-security/multiverse arm64 Packages
-#7 8.417   404  Not Found [IP: 91.189.91.83 80]
-#7 8.417 Ign:14 http://archive.ubuntu.com/ubuntu noble-security/restricted arm64 Packages
-#7 8.417 Ign:15 http://archive.ubuntu.com/ubuntu noble-security/universe arm64 Packages
-#7 8.473 Ign:16 http://archive.ubuntu.com/ubuntu noble-security/main arm64 Packages
-#7 8.473 Err:17 http://archive.ubuntu.com/ubuntu noble-backports/universe arm64 Packages
-#7 8.473   404  Not Found [IP: 91.189.91.83 80]
-#7 8.535 Ign:18 http://archive.ubuntu.com/ubuntu noble-backports/main arm64 Packages
-#7 8.544 Fetched 634 kB in 2s (296 kB/s)
-#7 8.544 Reading package lists...
-#7 8.564 E: Failed to fetch http://archive.ubuntu.com/ubuntu/dists/noble/multiverse/binary-arm64/Packages  404  Not Found [IP: 91.189.91.83 80]
-#7 8.564 E: Failed to fetch http://archive.ubuntu.com/ubuntu/dists/noble-updates/restricted/binary-arm64/Packages  404  Not Found [IP: 91.189.91.83 80]
-#7 8.564 E: Failed to fetch http://archive.ubuntu.com/ubuntu/dists/noble-security/multiverse/binary-arm64/Packages  404  Not Found [IP: 91.189.91.83 80]
-#7 8.564 E: Failed to fetch http://archive.ubuntu.com/ubuntu/dists/noble-backports/universe/binary-arm64/Packages  404  Not Found [IP: 91.189.91.83 80]
-#7 8.564 E: Some index files failed to download. They have been ignored, or old ones used instead.
+#7 1.348 Get:1 http://archive.ubuntu.com/ubuntu noble InRelease [256 kB]
+#7 1.992 Get:2 http://archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+#7 2.133 Get:3 http://archive.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+#7 2.295 Get:4 http://archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+#7 5.863 Err:1 http://archive.ubuntu.com/ubuntu noble InRelease
+#7 5.863   The following signatures couldn't be verified because the public key is not available: NO_PUBKEY 871920D1991BC93C
+#7 9.531 Err:2 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+#7 9.531   The following signatures couldn't be verified because the public key is not available: NO_PUBKEY 871920D1991BC93C
+#7 13.22 Err:3 http://archive.ubuntu.com/ubuntu noble-security InRelease
+#7 13.22   The following signatures couldn't be verified because the public key is not available: NO_PUBKEY 871920D1991BC93C
+#7 16.92 Err:4 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+#7 16.92   The following signatures couldn't be verified because the public key is not available: NO_PUBKEY 871920D1991BC93C
+#7 17.02 Reading package lists...
+#7 17.21 W: http://archive.ubuntu.com/ubuntu/dists/noble/InRelease: The key(s) in the keyring /etc/apt/trusted.gpg.d/ubuntu-keyring-2012-cdimage.gpg are ignored as the file has an unsupported filetype.
+#7 17.21 W: http://archive.ubuntu.com/ubuntu/dists/noble/InRelease: The key(s) in the keyring /etc/apt/trusted.gpg.d/ubuntu-keyring-2018-archive.gpg are ignored as the file has an unsupported filetype.
+#7 17.21 W: GPG error: http://archive.ubuntu.com/ubuntu noble InRelease: The following signatures couldn't be verified because the public key is not available: NO_PUBKEY 871920D1991BC93C
+#7 17.21 E: The repository 'http://archive.ubuntu.com/ubuntu noble InRelease' is not signed.
+#7 17.21 W: http://archive.ubuntu.com/ubuntu/dists/noble-updates/InRelease: The key(s) in the keyring /etc/apt/trusted.gpg.d/ubuntu-keyring-2012-cdimage.gpg are ignored as the file has an unsupported filetype.
+#7 17.21 W: http://archive.ubuntu.com/ubuntu/dists/noble-updates/InRelease: The key(s) in the keyring /etc/apt/trusted.gpg.d/ubuntu-keyring-2018-archive.gpg are ignored as the file has an unsupported filetype.
+#7 17.21 W: GPG error: http://archive.ubuntu.com/ubuntu noble-updates InRelease: The following signatures couldn't be verified because the public key is not available: NO_PUBKEY 871920D1991BC93C
+#7 17.21 E: The repository 'http://archive.ubuntu.com/ubuntu noble-updates InRelease' is not signed.
+#7 17.21 W: http://archive.ubuntu.com/ubuntu/dists/noble-security/InRelease: The key(s) in the keyring /etc/apt/trusted.gpg.d/ubuntu-keyring-2012-cdimage.gpg are ignored as the file has an unsupported filetype.
+#7 17.21 W: http://archive.ubuntu.com/ubuntu/dists/noble-security/InRelease: The key(s) in the keyring /etc/apt/trusted.gpg.d/ubuntu-keyring-2018-archive.gpg are ignored as the file has an unsupported filetype.
+#7 17.21 W: GPG error: http://archive.ubuntu.com/ubuntu noble-security InRelease: The following signatures couldn't be verified because the public key is not available: NO_PUBKEY 871920D1991BC93C
+#7 17.21 E: The repository 'http://archive.ubuntu.com/ubuntu noble-security InRelease' is not signed.
+#7 17.21 W: http://archive.ubuntu.com/ubuntu/dists/noble-backports/InRelease: The key(s) in the keyring /etc/apt/trusted.gpg.d/ubuntu-keyring-2012-cdimage.gpg are ignored as the file has an unsupported filetype.
+#7 17.21 W: http://archive.ubuntu.com/ubuntu/dists/noble-backports/InRelease: The key(s) in the keyring /etc/apt/trusted.gpg.d/ubuntu-keyring-2018-archive.gpg are ignored as the file has an unsupported filetype.
+#7 17.21 W: GPG error: http://archive.ubuntu.com/ubuntu noble-backports InRelease: The following signatures couldn't be verified because the public key is not available: NO_PUBKEY 871920D1991BC93C
+#7 17.21 E: The repository 'http://archive.ubuntu.com/ubuntu noble-backports InRelease' is not signed.
 #7 ERROR: process "/bin/sh -c apt-get update &&     apt-get install -y --no-install-recommends         curl         && rm -rf /var/lib/apt/lists/*" did not complete successfully: exit code: 100
 ------
  > [3/8] RUN apt-get update &&     apt-get install -y --no-install-recommends         curl         && rm -rf /var/lib/apt/lists/*:
-8.473 Err:17 http://archive.ubuntu.com/ubuntu noble-backports/universe arm64 Packages
-8.473   404  Not Found [IP: 91.189.91.83 80]
-8.535 Ign:18 http://archive.ubuntu.com/ubuntu noble-backports/main arm64 Packages
-8.544 Fetched 634 kB in 2s (296 kB/s)
-8.544 Reading package lists...
-8.564 E: Failed to fetch http://archive.ubuntu.com/ubuntu/dists/noble/multiverse/binary-arm64/Packages  404  Not Found [IP: 91.189.91.83 80]
-8.564 E: Failed to fetch http://archive.ubuntu.com/ubuntu/dists/noble-updates/restricted/binary-arm64/Packages  404  Not Found [IP: 91.189.91.83 80]
-8.564 E: Failed to fetch http://archive.ubuntu.com/ubuntu/dists/noble-security/multiverse/binary-arm64/Packages  404  Not Found [IP: 91.189.91.83 80]
-8.564 E: Failed to fetch http://archive.ubuntu.com/ubuntu/dists/noble-backports/universe/binary-arm64/Packages  404  Not Found [IP: 91.189.91.83 80]
-8.564 E: Some index files failed to download. They have been ignored, or old ones used instead.
+17.21 W: GPG error: http://archive.ubuntu.com/ubuntu noble-updates InRelease: The following signatures couldn't be verified because the public key is not available: NO_PUBKEY 871920D1991BC93C
+17.21 E: The repository 'http://archive.ubuntu.com/ubuntu noble-updates InRelease' is not signed.
+17.21 W: http://archive.ubuntu.com/ubuntu/dists/noble-security/InRelease: The key(s) in the keyring /etc/apt/trusted.gpg.d/ubuntu-keyring-2012-cdimage.gpg are ignored as the file has an unsupported filetype.
+17.21 W: http://archive.ubuntu.com/ubuntu/dists/noble-security/InRelease: The key(s) in the keyring /etc/apt/trusted.gpg.d/ubuntu-keyring-2018-archive.gpg are ignored as the file has an unsupported filetype.
+17.21 W: GPG error: http://archive.ubuntu.com/ubuntu noble-security InRelease: The following signatures couldn't be verified because the public key is not available: NO_PUBKEY 871920D1991BC93C
+17.21 E: The repository 'http://archive.ubuntu.com/ubuntu noble-security InRelease' is not signed.
+17.21 W: http://archive.ubuntu.com/ubuntu/dists/noble-backports/InRelease: The key(s) in the keyring /etc/apt/trusted.gpg.d/ubuntu-keyring-2012-cdimage.gpg are ignored as the file has an unsupported filetype.
+17.21 W: http://archive.ubuntu.com/ubuntu/dists/noble-backports/InRelease: The key(s) in the keyring /etc/apt/trusted.gpg.d/ubuntu-keyring-2018-archive.gpg are ignored as the file has an unsupported filetype.
+17.21 W: GPG error: http://archive.ubuntu.com/ubuntu noble-backports InRelease: The following signatures couldn't be verified because the public key is not available: NO_PUBKEY 871920D1991BC93C
+17.21 E: The repository 'http://archive.ubuntu.com/ubuntu noble-backports InRelease' is not signed.
 ------
 Dockerfile.x86_64:20
 --------------------
