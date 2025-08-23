@@ -15,7 +15,7 @@ LIB_NAME     = nymyaruntime
 LIB_FILE     = lib$(LIB_NAME).so
 
 # Runtime sources
-SOURCES      = nymya_runtime.c backend_sim.c backend_gateqpu.c
+SOURCES      = nymya_runtime.c backend_sim.c backend_qpu.c
 OBJECTS      = $(patsubst %.c,$(OBJ_DIR)/%.o,$(SOURCES))
 
 .PHONY: all clean install

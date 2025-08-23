@@ -67,14 +67,10 @@ int backend_gateqpu_apply_gate(int gate_code, void* args) {
         case 3341: { qpu_arg_q2* a = args; printf("[QPU] CZ+SWAP %ju,%ju\n", a->q1->id, a->q2->id); break; }
 
         // Three-qubit gates
-        case 3330: { qpu_arg_q3* a = args; printf("[QPU] Rotate '%c' %f on %ju\n", *((char*)&a->q1), a->q2->amplitude, a->q1->id); break; }
+        case 3330: { qpu_arg_q3* a = args; printf("[QPU] Rotate \'%c\' %f+%fi on %ju\n", *((char*)&a->q1), creal(a->q2->amplitude), cimag(a->q2->amplitude), a->q1->id); break; }
         case 3331: { qpu_arg_q3* a = args; printf("[QPU] Barenco %ju,%ju,%ju\n", a->q1->id, a->q2->id, a->q3->id); break; }
         case 3332: { qpu_arg_q2_theta* a = args; printf("[QPU] Berkeley(%f) %ju,%ju\n", a->theta, a->q1->id, a->q2->id); break; }
         case 3335: { qpu_arg_q3* a = args; printf("[QPU] Dagwood %ju,%ju,%ju\n", a->q1->id, a->q2->id, a->q3->id); break; }
-        case 3336: /* also two-qubit, covered */ break;
-        case 3337: /* two-qubit, covered */ break;
-        case 3338: /* two-qubit, covered */ break;
-        case 3339: /* two-qubit, covered */ break;
         case 3342: { qpu_arg_q3* a = args; printf("[QPU] Deutsch oracle %ju,%ju\n", a->q1->id, a->q2->id); break; }
         case 3343: { qpu_arg_q3* a = args; printf("[QPU] Margolis %ju,%ju->%ju\n", a->q1->id, a->q2->id, a->q3->id); break; }
         case 3344: { qpu_arg_q3* a = args; printf("[QPU] Peres %ju,%ju,%ju\n", a->q1->id, a->q2->id, a->q3->id); break; }
@@ -88,7 +84,7 @@ int backend_gateqpu_apply_gate(int gate_code, void* args) {
         case 3349: { qpu_arg_q_arr* a = args; printf("[QPU] Tessellate triangles count=%zu\n", a->count); break; }
         case 3350: { qpu_arg_q_arr* a = args; printf("[QPU] Tessellate hexagons count=%zu\n", a->count); break; }
         case 3351: { qpu_arg_q_arr* a = args; printf("[QPU] Tessellate hex rhombi count=%zu\n", a->count); break; }
-        case 3352: { qpu_arg_q_arr* a = args; printf("[QPU] E8 group on 8 qubits\n"); break; }
+        case 3352: { printf("[QPU] E8 group on 8 qubits\n"); break; }
         case 3353: { qpu_arg_q_arr* a = args; printf("[QPU] Flower of Life count=%zu\n", a->count); break; }
         case 3354: { qpu_arg_q_arr* a = args; printf("[QPU] Metatron’s Cube count=%zu\n", a->count); break; }
         case 3355: { qpu_arg_q3d* a = args; printf("[QPU] FCC lattice count=%zu\n", a->count); break; }
@@ -108,7 +104,7 @@ int backend_gateqpu_apply_gate(int gate_code, void* args) {
         default:
             printf("[QPU] Unknown gate code %d\n", gate_code);
             return -1;
-    }n
+    }
 
     return 0;
 }
