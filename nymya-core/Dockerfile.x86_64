@@ -5,7 +5,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV CONCURRENCY=8
 
 # --------------------------
-# Fix APT sources for x86_64 target
+# Fix APT sources for x86_64
 # --------------------------
 # Use standard Ubuntu repos (NOT ports.ubuntu.com) for x86_64
 RUN rm -f /etc/apt/sources.list.d/ubuntu.sources && \
@@ -28,8 +28,8 @@ RUN apt-get update && \
         make \
         gcc \
         g++ \
-        gcc-x86-64-linux-gnu \
-        g++-x86-64-linux-gnu \
+        gcc-x86_64-linux-gnu \
+        g++-x86_64-linux-gnu \
         libssl-dev \
         libelf-dev \
         libncurses-dev \
@@ -43,7 +43,7 @@ RUN apt-get update && \
         && rm -rf /var/lib/apt/lists/*
 
 # --------------------------
-# Install x86_64 kernel headers
+# Install kernel headers for x86_64
 # --------------------------
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \

@@ -42,14 +42,6 @@ RUN apt-get update && \
         && rm -rf /var/lib/apt/lists/*
 
 # --------------------------
-# Install arm64 kernel headers
-# --------------------------
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        linux-headers-generic-arm64 \
-        && rm -rf /var/lib/apt/lists/*
-
-# --------------------------
 # Set working directory
 # --------------------------
 WORKDIR /nymyaOS/nymya-core

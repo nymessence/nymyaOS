@@ -42,12 +42,6 @@ RUN apt-get update && \
         && rm -rf /var/lib/apt/lists/*
 
 # --------------------------
-# Install riscv64 kernel headers
-# --------------------------
-# Note: Ubuntu doesn't provide riscv64 kernel headers in standard repos
-# For now, we'll skip this step but it's critical for proper build
-
-# --------------------------
 # Set working directory
 # --------------------------
 WORKDIR /nymyaOS/nymya-core

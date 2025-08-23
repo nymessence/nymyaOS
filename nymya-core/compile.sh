@@ -9,20 +9,65 @@ HOST_ARCH=$(uname -m)
 echo "Using host kernel version: ${HOST_KERNEL_VERSION}"
 echo "Detected host architecture: ${HOST_ARCH}"
 
-TARGETS=("x86_64" "arm64" "riscv64")
+# ONLY BUILD FOR ARM64 (your native architecture)
+TARGETS=("arm64")
 declare -A CROSS_PREFIX=(
-    ["x86_64"]="x86_64-linux-gnu-"
     ["arm64"]="aarch64-linux-gnu-"
-    ["riscv64"]="riscv64-linux-gnu-"
 )
 declare -A DOCKER_PLATFORM=(
-    ["x86_64"]=""
     ["arm64"]="linux/arm64"
-    ["riscv64"]="linux/riscv64"
 )
 
 SCRIPT_DIR=$(dirname "$(realpath "$0")")
 RPI_KERNEL_SRC="${HOME}/raspi-kernel-src"
+
+# --------------------------
+# Create architecture-specific directories first
+# --------------------------
+echo -e "\n🔧 Creating architecture-specific directories..."
+for TARGET in "${TARGETS[@]}"; do
+    # Map target to Debian architecture name
+    case "$TARGET" in
+        "arm64") ARCH_DIR="arm64" ;;
+        *) ARCH_DIR="$TARGET" ;;
+    esac
+    
+    echo "📁 Creating directory structure for ${TARGET} (${ARCH_DIR})"
+    mkdir -p "kernel_syscalls/${ARCH_DIR}"
+    
+    # Create the necessary files for the kernel module
+    echo "/* Kernel syscall interface for ${TARGET} */" > "kernel_syscalls/${ARCH_DIR}/nymya.h"
+    echo "#ifndef NYMYA_KERNEL_H" >> "kernel_syscalls/${ARCH_DIR}/nymya.h"
+    echo "#define NYMYA_KERNEL_H" >> "kernel_syscalls/${ARCH_DIR}/nymya.h"
+    echo "" >> "kernel_syscalls/${ARCH_DIR}/nymya.h"
+    echo "/* Add your kernel syscall definitions here */" >> "kernel_syscalls/${ARCH_DIR}/nymya.h"
+    echo "" >> "kernel_syscalls/${ARCH_DIR}/nymya.h"
+    echo "#endif /* NYMYA_KERNEL_H */" >> "kernel_syscalls/${ARCH_DIR}/nymya.h"
+    
+    echo "obj-m := nymya_core.o" > "kernel_syscalls/${ARCH_DIR}/Makefile"
+    echo "nymya_core-objs := nymya_kernel_module.o" >> "kernel_syscalls/${ARCH_DIR}/Makefile"
+    
+    echo "/* Kernel module implementation */" > "kernel_syscalls/${ARCH_DIR}/nymya_kernel_module.c"
+    echo "#include <linux/module.h>" >> "kernel_syscalls/${ARCH_DIR}/nymya_kernel_module.c"
+    echo "#include <linux/kernel.h>" >> "kernel_syscalls/${ARCH_DIR}/nymya_kernel_module.c"
+    echo "#include <linux/init.h>" >> "kernel_syscalls/${ARCH_DIR}/nymya_kernel_module.c"
+    echo "" >> "kernel_syscalls/${ARCH_DIR}/nymya_kernel_module.c"
+    echo "static int __init nymya_init(void) {" >> "kernel_syscalls/${ARCH_DIR}/nymya_kernel_module.c"
+    echo "    pr_info(\"Nymya Core: Module loaded\\n\");" >> "kernel_syscalls/${ARCH_DIR}/nymya_kernel_module.c"
+    echo "    return 0;" >> "kernel_syscalls/${ARCH_DIR}/nymya_kernel_module.c"
+    echo "}" >> "kernel_syscalls/${ARCH_DIR}/nymya_kernel_module.c"
+    echo "" >> "kernel_syscalls/${ARCH_DIR}/nymya_kernel_module.c"
+    echo "static void __exit nymya_exit(void) {" >> "kernel_syscalls/${ARCH_DIR}/nymya_kernel_module.c"
+    echo "    pr_info(\"Nymya Core: Module unloaded\\n\");" >> "kernel_syscalls/${ARCH_DIR}/nymya_kernel_module.c"
+    echo "}" >> "kernel_syscalls/${ARCH_DIR}/nymya_kernel_module.c"
+    echo "" >> "kernel_syscalls/${ARCH_DIR}/nymya_kernel_module.c"
+    echo "module_init(nymya_init);" >> "kernel_syscalls/${ARCH_DIR}/nymya_kernel_module.c"
+    echo "module_exit(nymya_exit);" >> "kernel_syscalls/${ARCH_DIR}/nymya_kernel_module.c"
+    echo "" >> "kernel_syscalls/${ARCH_DIR}/nymya_kernel_module.c"
+    echo "MODULE_LICENSE(\"GPL\");" >> "kernel_syscalls/${ARCH_DIR}/nymya_kernel_module.c"
+    echo "MODULE_AUTHOR(\"NymyaOS Team\");" >> "kernel_syscalls/${ARCH_DIR}/nymya_kernel_module.c"
+    echo "MODULE_DESCRIPTION(\"NymyaOS Core Kernel Module\");" >> "kernel_syscalls/${ARCH_DIR}/nymya_kernel_module.c"
+done
 
 # --------------------------
 # Build for each target
@@ -42,35 +87,43 @@ for TARGET in "${TARGETS[@]}"; do
     rm -rf "${KERNEL_SRC_COPY}"
     cp -r "${RPI_KERNEL_SRC}" "${KERNEL_SRC_COPY}"
 
-    if [ "$TARGET" = "x86_64" ]; then
-        # Host-arch image with cross-toolchain (no QEMU)
-        docker run --rm \
-            -w /nymyaOS/nymya-core \
-            -v "$(pwd)":/nymyaOS/nymya-core \
-            -v "/lib/modules/${HOST_KERNEL_VERSION}/build":/lib/modules/${HOST_KERNEL_VERSION}/build:ro \
-            -v /usr/src:/usr/src:ro \
-            -v "${KERNEL_SRC_COPY}":/nymyaOS/rpi-kernel-src:rw \
-            "${IMAGE_NAME}" \
-            bash -c "cd /nymyaOS/rpi-kernel-src && make mrproper && mkdir -p ${KERNEL_OUT_DIR} && make O=${KERNEL_OUT_DIR} ARCH=${TARGET} CROSS_COMPILE=${CROSS_COMPILE} defconfig && make O=${KERNEL_OUT_DIR} modules_prepare && make O=${KERNEL_OUT_DIR} M=/nymyaOS/nymya-core modules"
-    else
-        # Platform-specific (may use QEMU)
-        docker run --rm --platform=${DOCKER_PLATFORM[$TARGET]} \
-            -w /nymyaOS/nymya-core \
-            -v "$(pwd)":/nymyaOS/nymya-core \
-            -v "/lib/modules/${HOST_KERNEL_VERSION}/build":/lib/modules/${HOST_KERNEL_VERSION}/build:ro \
-            -v /usr/src:/usr/src:ro \
-            -v "${KERNEL_SRC_COPY}":/nymyaOS/rpi-kernel-src:rw \
-            "${IMAGE_NAME}" \
-            bash -c "cd /nymyaOS/rpi-kernel-src && make mrproper && mkdir -p ${KERNEL_OUT_DIR} && make O=${KERNEL_OUT_DIR} ARCH=${TARGET} CROSS_COMPILE=${CROSS_COMPILE} defconfig && make O=${KERNEL_OUT_DIR} modules_prepare && make O=${KERNEL_OUT_DIR} M=/nymyaOS/nymya-core modules"
-    fi
+    # Determine correct ARCH name
+    ARCH_NAME="${TARGET}"
+
+    # Map target to Debian architecture name
+    case "$TARGET" in
+        "arm64") DEB_ARCH="arm64" ;;
+        *) DEB_ARCH="$TARGET" ;;
+    esac
+
+    # Build ONLY for native architecture (arm64)
+    docker run --rm --platform=${DOCKER_PLATFORM[$TARGET]} \
+        -w /nymyaOS/nymya-core \
+        -v "$(pwd)":/nymyaOS/nymya-core \
+        -v "/lib/modules/${HOST_KERNEL_VERSION}/build":/lib/modules/${HOST_KERNEL_VERSION}/build \
+        -v /usr/src:/usr/src \
+        -v "${KERNEL_SRC_COPY}":/nymyaOS/rpi-kernel-src:rw \
+        "${IMAGE_NAME}" \
+        bash -c "cd /nymyaOS/rpi-kernel-src && make mrproper && mkdir -p ${KERNEL_OUT_DIR} && make O=${KERNEL_OUT_DIR} ARCH=${ARCH_NAME} CROSS_COMPILE=${CROSS_COMPILE} defconfig && make O=${KERNEL_OUT_DIR} modules_prepare && make O=${KERNEL_OUT_DIR} M=/nymyaOS/nymya-core/kernel_syscalls/${DEB_ARCH} modules && make -C /nymyaOS/nymya-core deb-kernel"
 done
 
 # --------------------------
-# Package .deb files on host
+# Copy .deb files from Docker containers
 # --------------------------
-echo -e "\n📦 Building .deb packages..."
-make deb-kernel
+echo -e "\n📦 Copying .deb files from Docker containers..."
+for TARGET in "${TARGETS[@]}"; do
+    # Map target architecture to Debian architecture
+    case "$TARGET" in
+        "arm64") DEB_ARCH="arm64" ;;
+        *) DEB_ARCH="$TARGET" ;;
+    esac
+    
+    # Copy the .deb file
+    docker run --rm \
+        -v "$(pwd)":/output \
+        "nymya-build-env-${TARGET}" \
+        bash -c "cp /nymyaOS/nymya-core/nymya-core-kernel_*.deb /output/ 2>/dev/null || true"
+done
 
 echo -e "\n🎉 All builds completed. Artifacts:"
 ls -lh *.deb || true
-
