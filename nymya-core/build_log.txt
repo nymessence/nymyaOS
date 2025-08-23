@@ -18,7 +18,7 @@ Detected host architecture: aarch64
 #1 DONE 0.0s
 
 #2 [internal] load metadata for docker.io/library/ubuntu:24.04
-#2 DONE 0.6s
+#2 DONE 1.0s
 
 #3 [internal] load .dockerignore
 #3 transferring context: 2B done
@@ -27,37 +27,37 @@ Detected host architecture: aarch64
 #4 [1/8] FROM docker.io/library/ubuntu:24.04@sha256:7c06e91f61fa88c08cc74f7e1b7c69ae24910d745357e0dfe1d2c0322aaf20f9
 #4 DONE 0.0s
 
-#5 [2/8] RUN rm -f /etc/apt/trusted.gpg.d/ubuntu-keyring-2012-cdimage.gpg &&     rm -f /etc/apt/trusted.gpg.d/ubuntu-keyring-2018-archive.gpg &&     rm -f /etc/apt/sources.list.d/ubuntu.sources &&     echo 'deb http://archive.ubuntu.com/ubuntu noble main restricted universe multiverse' > /etc/apt/sources.list &&     echo 'deb http://archive.ubuntu.com/ubuntu noble-updates main restricted universe multiverse' >> /etc/apt/sources.list &&     echo 'deb http://archive.ubuntu.com/ubuntu noble-security main restricted universe multiverse' >> /etc/apt/sources.list &&     echo 'deb http://archive.ubuntu.com/ubuntu noble-backports main restricted universe multiverse' >> /etc/apt/sources.list
-#5 CACHED
+#5 [internal] load build context
+#5 transferring context: 24.34kB 0.0s done
+#5 DONE 0.0s
 
-#6 [3/8] RUN apt-get update -o Acquire::AllowInsecureRepositories=true &&     apt-get install -y --allow-unauthenticated --no-install-recommends gnupg &&     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 871920D1991BC93C &&     apt-get update &&     apt-get install -y --no-install-recommends curl &&     rm -rf /var/lib/apt/lists/*
+#6 [5/8] RUN apt-get update &&     apt-get install -y --no-install-recommends         linux-headers-generic         && rm -rf /var/lib/apt/lists/*
 #6 CACHED
 
-#7 [4/8] RUN apt-get update &&     apt-get install -y --no-install-recommends         build-essential         make         gcc         g++         gcc-x86-64-linux-gnu         g++-x86-64-linux-gnu         libssl-dev         libelf-dev         libncurses-dev         flex         bison         bc         rsync         git         python3         qemu-user-static         && rm -rf /var/lib/apt/lists/*
+#7 [6/8] RUN mkdir -p /lib/modules/x86_64 && ln -sf /usr/src/linux-headers-$(uname -r | sed 's/-.*//')-generic /lib/modules/x86_64/build
 #7 CACHED
 
-#8 [5/8] RUN apt-get update &&     apt-get install -y --no-install-recommends         linux-headers-generic         && rm -rf /var/lib/apt/lists/*
+#8 [2/8] RUN rm -f /etc/apt/trusted.gpg.d/ubuntu-keyring-2012-cdimage.gpg &&     rm -f /etc/apt/trusted.gpg.d/ubuntu-keyring-2018-archive.gpg &&     rm -f /etc/apt/sources.list.d/ubuntu.sources &&     echo 'deb http://archive.ubuntu.com/ubuntu noble main restricted universe multiverse' > /etc/apt/sources.list &&     echo 'deb http://archive.ubuntu.com/ubuntu noble-updates main restricted universe multiverse' >> /etc/apt/sources.list &&     echo 'deb http://archive.ubuntu.com/ubuntu noble-security main restricted universe multiverse' >> /etc/apt/sources.list &&     echo 'deb http://archive.ubuntu.com/ubuntu noble-backports main restricted universe multiverse' >> /etc/apt/sources.list
 #8 CACHED
 
-#9 [internal] load build context
-#9 transferring context: 20.11kB 0.0s done
-#9 DONE 0.0s
+#9 [3/8] RUN apt-get update -o Acquire::AllowInsecureRepositories=true &&     apt-get install -y --allow-unauthenticated --no-install-recommends gnupg &&     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 871920D1991BC93C &&     apt-get update &&     apt-get install -y --no-install-recommends curl &&     rm -rf /var/lib/apt/lists/*
+#9 CACHED
 
-#10 [6/8] RUN mkdir -p /lib/modules/x86_64 && ln -sf /usr/src/linux-headers-$(uname -r | sed 's/-.*//')-generic /lib/modules/x86_64/build
-#10 DONE 0.7s
+#10 [4/8] RUN apt-get update &&     apt-get install -y --no-install-recommends         build-essential         make         gcc         g++         gcc-x86-64-linux-gnu         g++-x86-64-linux-gnu         libssl-dev         libelf-dev         libncurses-dev         flex         bison         bc         rsync         git         python3         qemu-user-static         && rm -rf /var/lib/apt/lists/*
+#10 CACHED
 
 #11 [7/8] WORKDIR /nymyaOS/nymya-core
-#11 DONE 0.1s
+#11 CACHED
 
 #12 [8/8] COPY . .
 #12 DONE 0.2s
 
 #13 exporting to image
-#13 exporting layers
-#13 exporting layers 7.3s done
-#13 writing image sha256:f3214db44556fb300a96f9163943e010fc14b12bfaa672b4488ef2b21fb8c215 done
+#13 exporting layers 0.1s done
+#13 writing image sha256:5e5c494cb504dca3d4559a8031f0f7d50ac5d5c5acf8ead7fc9eb745c3bab870 0.0s done
+#13 naming to docker.io/library/nymya-build-env-x86_64
 #13 naming to docker.io/library/nymya-build-env-x86_64 done
-#13 DONE 7.3s
+#13 DONE 0.1s
 
  [33m1 warning found (use docker --debug to expand):
 [0m - NoEmptyContinuation: Empty continuation line (line 18)

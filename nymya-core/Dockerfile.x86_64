@@ -1,5 +1,5 @@
 # Build environment for x86_64 cross-compilation
-FROM ubuntu:24.04
+FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV CONCURRENCY=8
