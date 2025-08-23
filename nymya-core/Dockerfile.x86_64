@@ -1,61 +1,31 @@
-# Build environment for x86_64 cross-compilation
-FROM ubuntu:22.04
+# Base image for ARM64 host
+FROM --platform=linux/arm64 ubuntu:22.04
 
+# Set non-interactive frontend
 ENV DEBIAN_FRONTEND=noninteractive
-ENV CONCURRENCY=8
 
-# --------------------------
-# Fix APT sources for x86_64
-# --------------------------
-# Use standard Ubuntu repos (NOT ports.ubuntu.com) for x86_64
-RUN rm -f /etc/apt/trusted.gpg.d/ubuntu-keyring-2012-cdimage.gpg && \
-    rm -f /etc/apt/trusted.gpg.d/ubuntu-keyring-2018-archive.gpg && \
-    rm -f /etc/apt/sources.list.d/ubuntu.sources && \
-    echo 'deb http://archive.ubuntu.com/ubuntu noble main restricted universe multiverse' > /etc/apt/sources.list && \
-
-    echo 'deb http://archive.ubuntu.com/ubuntu noble-updates main restricted universe multiverse' >> /etc/apt/sources.list && \
-    echo 'deb http://archive.ubuntu.com/ubuntu noble-security main restricted universe multiverse' >> /etc/apt/sources.list && \
-    echo 'deb http://archive.ubuntu.com/ubuntu noble-backports main restricted universe multiverse' >> /etc/apt/sources.list
-
-# --------------------------
-# Install essential build packages
-# --------------------------
-RUN apt-get update -o Acquire::AllowInsecureRepositories=true &&     apt-get install -y --allow-unauthenticated --no-install-recommends gnupg &&     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 871920D1991BC93C &&     apt-get update &&     apt-get install -y --no-install-recommends curl &&     rm -rf /var/lib/apt/lists/*
-
+# Update and install dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        build-essential \
-        make \
-        gcc \
-        g++ \
-        gcc-x86-64-linux-gnu \
-        g++-x86-64-linux-gnu \
-        libssl-dev \
-        libelf-dev \
-        libncurses-dev \
-        flex \
-        bison \
-        bc \
-        rsync \
-        git \
-        python3 \
-        && rm -rf /var/lib/apt/lists/*
+    build-essential \
+    make \
+    gcc \
+    g++ \
+    gcc-x86-64-linux-gnu \
+    g++-x86-64-linux-gnu \
+    libssl-dev \
+    libelf-dev \
+    libncurses-dev \
+    flex \
+    bison \
+    bc \
+    rsync \
+    git \
+    python3 \
+    && rm -rf /var/lib/apt/lists/*
 
-# --------------------------
-# Install kernel headers for x86_64
-# --------------------------
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        linux-headers-generic \
-        && rm -rf /var/lib/apt/lists/*
-
-# --------------------------
-# Set up proper kernel build environment
-# --------------------------
-RUN mkdir -p /lib/modules/x86_64 && ln -sf /usr/src/linux-headers-$(uname -r | sed 's/-.*//')-generic /lib/modules/x86_64/build
-
-# --------------------------
 # Set working directory
-# --------------------------
 WORKDIR /nymyaOS/nymya-core
+
+# Copy project files
 COPY . .
