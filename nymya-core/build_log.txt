@@ -13,83 +13,19 @@ Detected host architecture: aarch64
 #0 building with "default" instance using docker driver
 
 #1 [internal] load build definition from Dockerfile.x86_64
-#1 transferring dockerfile: 2.10kB done
-#1 WARN: NoEmptyContinuation: Empty continuation line (line 25)
+#1 transferring dockerfile: 2.24kB done
+#1 WARN: NoEmptyContinuation: Empty continuation line (line 26)
 #1 DONE 0.0s
 
-#2 [internal] load metadata for docker.io/library/ubuntu:24.04
-#2 DONE 0.6s
-
-#3 [internal] load .dockerignore
-#3 transferring context: 2B done
-#3 DONE 0.0s
-
-#4 [1/8] FROM docker.io/library/ubuntu:24.04@sha256:7c06e91f61fa88c08cc74f7e1b7c69ae24910d745357e0dfe1d2c0322aaf20f9
-#4 DONE 0.0s
-
-#5 [2/8] RUN rm -f /etc/apt/sources.list.d/ubuntu.sources &&     echo 'deb http://archive.ubuntu.com/ubuntu noble main restricted universe multiverse' > /etc/apt/sources.list &&     echo 'deb http://archive.ubuntu.com/ubuntu noble-updates main restricted universe multiverse' >> /etc/apt/sources.list &&     echo 'deb http://archive.ubuntu.com/ubuntu noble-security main restricted universe multiverse' >> /etc/apt/sources.list &&     echo 'deb http://archive.ubuntu.com/ubuntu noble-backports main restricted universe multiverse' >> /etc/apt/sources.list
-#5 CACHED
-
-#6 [internal] load build context
-#6 transferring context: 23.05kB 0.0s done
-#6 DONE 0.0s
-
-#7 [3/8] RUN apt-get update &&     apt-get install -y --no-install-recommends         ubuntu-keyring         curl         && rm -rf /var/lib/apt/lists/*
-#7 1.006 Get:1 http://archive.ubuntu.com/ubuntu noble InRelease [256 kB]
-#7 1.636 Get:2 http://archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
-#7 1.799 Get:3 http://archive.ubuntu.com/ubuntu noble-security InRelease [126 kB]
-#7 1.958 Get:4 http://archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
-#7 5.384 Err:1 http://archive.ubuntu.com/ubuntu noble InRelease
-#7 5.384   The following signatures couldn't be verified because the public key is not available: NO_PUBKEY 871920D1991BC93C
-#7 9.041 Err:2 http://archive.ubuntu.com/ubuntu noble-updates InRelease
-#7 9.041   The following signatures couldn't be verified because the public key is not available: NO_PUBKEY 871920D1991BC93C
-#7 12.71 Err:3 http://archive.ubuntu.com/ubuntu noble-security InRelease
-#7 12.71   The following signatures couldn't be verified because the public key is not available: NO_PUBKEY 871920D1991BC93C
-#7 16.41 Err:4 http://archive.ubuntu.com/ubuntu noble-backports InRelease
-#7 16.41   The following signatures couldn't be verified because the public key is not available: NO_PUBKEY 871920D1991BC93C
-#7 16.50 Reading package lists...
-#7 16.70 W: http://archive.ubuntu.com/ubuntu/dists/noble/InRelease: The key(s) in the keyring /etc/apt/trusted.gpg.d/ubuntu-keyring-2012-cdimage.gpg are ignored as the file has an unsupported filetype.
-#7 16.70 W: http://archive.ubuntu.com/ubuntu/dists/noble/InRelease: The key(s) in the keyring /etc/apt/trusted.gpg.d/ubuntu-keyring-2018-archive.gpg are ignored as the file has an unsupported filetype.
-#7 16.70 W: GPG error: http://archive.ubuntu.com/ubuntu noble InRelease: The following signatures couldn't be verified because the public key is not available: NO_PUBKEY 871920D1991BC93C
-#7 16.70 E: The repository 'http://archive.ubuntu.com/ubuntu noble InRelease' is not signed.
-#7 16.70 W: http://archive.ubuntu.com/ubuntu/dists/noble-updates/InRelease: The key(s) in the keyring /etc/apt/trusted.gpg.d/ubuntu-keyring-2012-cdimage.gpg are ignored as the file has an unsupported filetype.
-#7 16.70 W: http://archive.ubuntu.com/ubuntu/dists/noble-updates/InRelease: The key(s) in the keyring /etc/apt/trusted.gpg.d/ubuntu-keyring-2018-archive.gpg are ignored as the file has an unsupported filetype.
-#7 16.70 W: GPG error: http://archive.ubuntu.com/ubuntu noble-updates InRelease: The following signatures couldn't be verified because the public key is not available: NO_PUBKEY 871920D1991BC93C
-#7 16.70 E: The repository 'http://archive.ubuntu.com/ubuntu noble-updates InRelease' is not signed.
-#7 16.70 W: http://archive.ubuntu.com/ubuntu/dists/noble-security/InRelease: The key(s) in the keyring /etc/apt/trusted.gpg.d/ubuntu-keyring-2012-cdimage.gpg are ignored as the file has an unsupported filetype.
-#7 16.70 W: http://archive.ubuntu.com/ubuntu/dists/noble-security/InRelease: The key(s) in the keyring /etc/apt/trusted.gpg.d/ubuntu-keyring-2018-archive.gpg are ignored as the file has an unsupported filetype.
-#7 16.70 W: GPG error: http://archive.ubuntu.com/ubuntu noble-security InRelease: The following signatures couldn't be verified because the public key is not available: NO_PUBKEY 871920D1991BC93C
-#7 16.70 E: The repository 'http://archive.ubuntu.com/ubuntu noble-security InRelease' is not signed.
-#7 16.70 W: http://archive.ubuntu.com/ubuntu/dists/noble-backports/InRelease: The key(s) in the keyring /etc/apt/trusted.gpg.d/ubuntu-keyring-2012-cdimage.gpg are ignored as the file has an unsupported filetype.
-#7 16.70 W: http://archive.ubuntu.com/ubuntu/dists/noble-backports/InRelease: The key(s) in the keyring /etc/apt/trusted.gpg.d/ubuntu-keyring-2018-archive.gpg are ignored as the file has an unsupported filetype.
-#7 16.70 W: GPG error: http://archive.ubuntu.com/ubuntu noble-backports InRelease: The following signatures couldn't be verified because the public key is not available: NO_PUBKEY 871920D1991BC93C
-#7 16.70 E: The repository 'http://archive.ubuntu.com/ubuntu noble-backports InRelease' is not signed.
-#7 ERROR: process "/bin/sh -c apt-get update &&     apt-get install -y --no-install-recommends         ubuntu-keyring         curl         && rm -rf /var/lib/apt/lists/*" did not complete successfully: exit code: 100
-------
- > [3/8] RUN apt-get update &&     apt-get install -y --no-install-recommends         ubuntu-keyring         curl         && rm -rf /var/lib/apt/lists/*:
-16.70 W: GPG error: http://archive.ubuntu.com/ubuntu noble-updates InRelease: The following signatures couldn't be verified because the public key is not available: NO_PUBKEY 871920D1991BC93C
-16.70 E: The repository 'http://archive.ubuntu.com/ubuntu noble-updates InRelease' is not signed.
-16.70 W: http://archive.ubuntu.com/ubuntu/dists/noble-security/InRelease: The key(s) in the keyring /etc/apt/trusted.gpg.d/ubuntu-keyring-2012-cdimage.gpg are ignored as the file has an unsupported filetype.
-16.70 W: http://archive.ubuntu.com/ubuntu/dists/noble-security/InRelease: The key(s) in the keyring /etc/apt/trusted.gpg.d/ubuntu-keyring-2018-archive.gpg are ignored as the file has an unsupported filetype.
-16.70 W: GPG error: http://archive.ubuntu.com/ubuntu noble-security InRelease: The following signatures couldn't be verified because the public key is not available: NO_PUBKEY 871920D1991BC93C
-16.70 E: The repository 'http://archive.ubuntu.com/ubuntu noble-security InRelease' is not signed.
-16.70 W: http://archive.ubuntu.com/ubuntu/dists/noble-backports/InRelease: The key(s) in the keyring /etc/apt/trusted.gpg.d/ubuntu-keyring-2012-cdimage.gpg are ignored as the file has an unsupported filetype.
-16.70 W: http://archive.ubuntu.com/ubuntu/dists/noble-backports/InRelease: The key(s) in the keyring /etc/apt/trusted.gpg.d/ubuntu-keyring-2018-archive.gpg are ignored as the file has an unsupported filetype.
-16.70 W: GPG error: http://archive.ubuntu.com/ubuntu noble-backports InRelease: The following signatures couldn't be verified because the public key is not available: NO_PUBKEY 871920D1991BC93C
-16.70 E: The repository 'http://archive.ubuntu.com/ubuntu noble-backports InRelease' is not signed.
-------
-
  [33m1 warning found (use docker --debug to expand):
-[0m - NoEmptyContinuation: Empty continuation line (line 25)
-Dockerfile.x86_64:20
+[0m - NoEmptyContinuation: Empty continuation line (line 26)
+Dockerfile.x86_64:13
 --------------------
-  19 |     # --------------------------
-  20 | >>> RUN apt-get update && \
-  21 | >>>     apt-get install -y --no-install-recommends \
-  22 | >>>         ubuntu-keyring \
-  23 | >>>         curl \
-  24 | >>> 
-  25 | >>>         && rm -rf /var/lib/apt/lists/*
-  26 |     
+  12 |     RUN rm -f /etc/apt/sources.list.d/ubuntu.sources &&     
+  13 | >>>     echo 'deb http://archive.ubuntu.com/ubuntu noble main restricted universe multiverse' > /etc/apt/sources.list && \
+  14 | >>>     echo 'deb http://archive.ubuntu.com/ubuntu noble-updates main restricted universe multiverse' >> /etc/apt/sources.list && \
+  15 | >>>     echo 'deb http://archive.ubuntu.com/ubuntu noble-security main restricted universe multiverse' >> /etc/apt/sources.list && \
+  16 | >>>     echo 'deb http://archive.ubuntu.com/ubuntu noble-backports main restricted universe multiverse' >> /etc/apt/sources.list
+  17 |     
 --------------------
-ERROR: failed to build: failed to solve: process "/bin/sh -c apt-get update &&     apt-get install -y --no-install-recommends         ubuntu-keyring         curl         && rm -rf /var/lib/apt/lists/*" did not complete successfully: exit code: 100
+ERROR: failed to build: failed to solve: dockerfile parse error on line 13: unknown instruction: echo

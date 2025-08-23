@@ -7,9 +7,11 @@ ENV CONCURRENCY=8
 # --------------------------
 # Fix APT sources for riscv64
 # --------------------------
-RUN rm -f /etc/apt/trusted.gpg.d/ubuntu-keyring-2012-cdimage.gpg &&     rm -f /etc/apt/trusted.gpg.d/ubuntu-keyring-2018-archive.gpg
-RUN rm -f /etc/apt/sources.list.d/ubuntu.sources &&     
+RUN rm -f /etc/apt/trusted.gpg.d/ubuntu-keyring-2012-cdimage.gpg && \
+    rm -f /etc/apt/trusted.gpg.d/ubuntu-keyring-2018-archive.gpg && \
+    rm -f /etc/apt/sources.list.d/ubuntu.sources && \
     echo 'deb [arch=riscv64] http://ports.ubuntu.com/ubuntu-ports noble main restricted universe multiverse' > /etc/apt/sources.list && \
+
     echo 'deb [arch=riscv64] http://ports.ubuntu.com/ubuntu-ports noble-updates main restricted universe multiverse' >> /etc/apt/sources.list && \
     echo 'deb [arch=riscv64] http://ports.ubuntu.com/ubuntu-ports noble-security main restricted universe multiverse' >> /etc/apt/sources.list && \
     echo 'deb [arch=riscv64] http://ports.ubuntu.com/ubuntu-ports noble-backports main restricted universe multiverse' >> /etc/apt/sources.list

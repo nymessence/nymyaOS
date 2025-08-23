@@ -8,9 +8,11 @@ ENV CONCURRENCY=8
 # Fix APT sources for x86_64
 # --------------------------
 # Use standard Ubuntu repos (NOT ports.ubuntu.com) for x86_64
-RUN rm -f /etc/apt/trusted.gpg.d/ubuntu-keyring-2012-cdimage.gpg &&     rm -f /etc/apt/trusted.gpg.d/ubuntu-keyring-2018-archive.gpg
-RUN rm -f /etc/apt/sources.list.d/ubuntu.sources &&     
+RUN rm -f /etc/apt/trusted.gpg.d/ubuntu-keyring-2012-cdimage.gpg && \
+    rm -f /etc/apt/trusted.gpg.d/ubuntu-keyring-2018-archive.gpg && \
+    rm -f /etc/apt/sources.list.d/ubuntu.sources && \
     echo 'deb http://archive.ubuntu.com/ubuntu noble main restricted universe multiverse' > /etc/apt/sources.list && \
+
     echo 'deb http://archive.ubuntu.com/ubuntu noble-updates main restricted universe multiverse' >> /etc/apt/sources.list && \
     echo 'deb http://archive.ubuntu.com/ubuntu noble-security main restricted universe multiverse' >> /etc/apt/sources.list && \
     echo 'deb http://archive.ubuntu.com/ubuntu noble-backports main restricted universe multiverse' >> /etc/apt/sources.list
