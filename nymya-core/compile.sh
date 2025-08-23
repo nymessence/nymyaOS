@@ -83,14 +83,24 @@ for TARGET in "${TARGETS[@]}"; do
     CROSS_COMPILE=${CROSS_PREFIX[$TARGET]}
     CC="${CROSS_COMPILE}gcc"
     KERNEL_OUT_DIR="/tmp/build-${TARGET}"
-    KERNEL_SRC_COPY="/tmp/rpi-kernel-src-${TARGET}"
+    KERNEL_SRC_COPY="/tmp/linux-src-${TARGET}"
 
     echo -e "\n🐳 Building for target: ${TARGET} using CROSS_COMPILE=${CROSS_COMPILE}"
+
+    if [ "$TARGET" = "arm64" ]; then
+        KERNEL_SRC="${RPI_KERNEL_SRC}"
+    else
+        if [ ! -d "/tmp/linux-src" ]; then
+            echo "Cloning generic linux kernel..."
+            git clone --depth 1 --branch v6.8 https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git /tmp/linux-src
+        fi
+        KERNEL_SRC="/tmp/linux-src"
+    fi
 
     # Create clean kernel source copy for this target
     echo "📁 Creating clean kernel source copy for ${TARGET}"
     rm -rf "${KERNEL_SRC_COPY}"
-    cp -r "${RPI_KERNEL_SRC}" "${KERNEL_SRC_COPY}"
+    cp -r "${KERNEL_SRC}" "${KERNEL_SRC_COPY}"
 
     # Determine correct ARCH name (riscv vs riscv64)
     if [ "$TARGET" = "riscv64" ]; then
@@ -114,9 +124,9 @@ for TARGET in "${TARGETS[@]}"; do
             -v "$(pwd)":/nymyaOS/nymya-core \
             -v "/lib/modules/${HOST_KERNEL_VERSION}/build":/lib/modules/${HOST_KERNEL_VERSION}/build \
             -v /usr/src:/usr/src \
-            -v "${KERNEL_SRC_COPY}":/nymyaOS/rpi-kernel-src:rw \
+            -v "${KERNEL_SRC_COPY}":/nymyaOS/kernel-src:rw \
             "${IMAGE_NAME}" \
-            bash -c "cd /nymyaOS/rpi-kernel-src && make mrproper && mkdir -p ${KERNEL_OUT_DIR} && make O=${KERNEL_OUT_DIR} ARCH=${ARCH_NAME} CROSS_COMPILE=${CROSS_COMPILE} defconfig && make O=${KERNEL_OUT_DIR} modules_prepare && make O=${KERNEL_OUT_DIR} M=/nymyaOS/nymya-core/kernel_syscalls/${DEB_ARCH} modules && make -C /nymyaOS/nymya-core deb-kernel"
+            bash -c "cd /nymyaOS/kernel-src && make mrproper && mkdir -p ${KERNEL_OUT_DIR} && make O=${KERNEL_OUT_DIR} ARCH=${ARCH_NAME} CROSS_COMPILE=${CROSS_COMPILE} defconfig && make O=${KERNEL_OUT_DIR} modules_prepare && make O=${KERNEL_OUT_DIR} M=/nymyaOS/nymya-core/kernel_syscalls/${DEB_ARCH} modules && make -C /nymyaOS/nymya-core deb-kernel"
     else
         # Platform-specific (may use QEMU)
         docker run --rm --platform=${DOCKER_PLATFORM[$TARGET]} \
@@ -124,9 +134,9 @@ for TARGET in "${TARGETS[@]}"; do
             -v "$(pwd)":/nymyaOS/nymya-core \
             -v "/lib/modules/${HOST_KERNEL_VERSION}/build":/lib/modules/${HOST_KERNEL_VERSION}/build \
             -v /usr/src:/usr/src \
-            -v "${KERNEL_SRC_COPY}":/nymyaOS/rpi-kernel-src:rw \
+            -v "${KERNEL_SRC_COPY}":/nymyaOS/kernel-src:rw \
             "${IMAGE_NAME}" \
-            bash -c "cd /nymyaOS/rpi-kernel-src && make mrproper && mkdir -p ${KERNEL_OUT_DIR} && make O=${KERNEL_OUT_DIR} ARCH=${ARCH_NAME} CROSS_COMPILE=${CROSS_COMPILE} defconfig && make O=${KERNEL_OUT_DIR} modules_prepare && make O=${KERNEL_OUT_DIR} M=/nymyaOS/nymya-core/kernel_syscalls/${DEB_ARCH} modules && make -C /nymyaOS/nymya-core deb-kernel"
+            bash -c "cd /nymyaOS/kernel-src && make mrproper && mkdir -p ${KERNEL_OUT_DIR} && make O=${KERNEL_OUT_DIR} ARCH=${ARCH_NAME} CROSS_COMPILE=${CROSS_COMPILE} defconfig && make O=${KERNEL_OUT_DIR} modules_prepare && make O=${KERNEL_OUT_DIR} M=/nymyaOS/nymya-core/kernel_syscalls/${DEB_ARCH} modules && make -C /nymyaOS/nymya-core deb-kernel"
     fi
 done
 
