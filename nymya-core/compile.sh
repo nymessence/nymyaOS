@@ -9,7 +9,7 @@ HOST_ARCH=$(uname -m)
 echo "Using host kernel version: ${HOST_KERNEL_VERSION}"
 echo "Detected host architecture: ${HOST_ARCH}"
 
-TARGETS=("x86_64" "arm64" "riscv64")
+TARGETS=("arm64")
 declare -A CROSS_PREFIX=(
     ["x86_64"]="x86_64-linux-gnu-"
     ["arm64"]="aarch64-linux-gnu-"
