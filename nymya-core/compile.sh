@@ -124,7 +124,7 @@ for TARGET in "${TARGETS[@]}"; do
         -v "$(pwd)":/nymyaOS/nymya-core \
         -v "${KERNEL_SRC_COPY}":/nymyaOS/kernel-src:rw \
         "${IMAGE_NAME}" \
-        bash -c "cd /nymyaOS/kernel-src && make mrproper && mkdir -p ${KERNEL_OUT_DIR} && make O=${KERNEL_OUT_DIR} ARCH=${ARCH_NAME} CROSS_COMPILE=${CROSS_COMPILE} defconfig && make O=${KERNEL_OUT_DIR} modules_prepare && make O=${KERNEL_OUT_DIR} modules && make O=${KERNEL_OUT_DIR} M=/nymyaOS/nymya-core/kernel_syscalls/${DEB_ARCH} modules && make -C /nymyaOS/nymya-core deb-kernel"
+        bash -c "cd /nymyaOS/kernel-src && make mrproper && mkdir -p ${KERNEL_OUT_DIR} && make O=${KERNEL_OUT_DIR} ARCH=${ARCH_NAME} CROSS_COMPILE=${CROSS_COMPILE} defconfig && make O=${KERNEL_OUT_DIR} modules_prepare && make O=${KERNEL_OUT_DIR} && make O=${KERNEL_OUT_DIR} modules && make O=${KERNEL_OUT_DIR} M=/nymyaOS/nymya-core/kernel_syscalls/${DEB_ARCH} modules && make -C /nymyaOS/nymya-core deb-kernel"
 done
 
 # --------------------------
