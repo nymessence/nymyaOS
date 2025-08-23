@@ -1,8 +1,11 @@
-savedcmd_/nymyaOS/nymya-core/kernel_syscalls/amd64/nymya_kernel_module.o := gcc -Wp,-MMD,/nymyaOS/nymya-core/kernel_syscalls/amd64/.nymya_kernel_module.o.d -nostdinc -I/nymyaOS/kernel-src/arch/arm64/include -I./arch/arm64/include/generated -I/nymyaOS/kernel-src/include -I./include -I/nymyaOS/kernel-src/arch/arm64/include/uapi -I./arch/arm64/include/generated/uapi -I/nymyaOS/kernel-src/include/uapi -I./include/generated/uapi -include /nymyaOS/kernel-src/include/linux/compiler-version.h -include /nymyaOS/kernel-src/include/linux/kconfig.h -include /nymyaOS/kernel-src/include/linux/compiler_types.h -D__KERNEL__ -mlittle-endian -DKASAN_SHADOW_SCALE_SHIFT= -fmacro-prefix-map=/nymyaOS/kernel-src/= -Werror -std=gnu11 -fshort-wchar -funsigned-char -fno-common -fno-PIE -fno-strict-aliasing -mgeneral-regs-only -DCONFIG_CC_HAS_K_CONSTRAINT=1 -Wno-psabi -mabi=lp64 -fno-asynchronous-unwind-tables -fno-unwind-tables -mbranch-protection=pac-ret -Wa,-march=armv8.5-a -DARM64_ASM_ARCH='"armv8.5-a"' -DKASAN_SHADOW_SCALE_SHIFT= -fno-delete-null-pointer-checks -O2 -fno-allow-store-data-races -fstack-protector-strong -fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-stack-clash-protection -falign-functions=4 -fno-strict-overflow -fno-stack-check -fconserve-stack -Wall -Wundef -Werror=implicit-function-declaration -Werror=implicit-int -Werror=return-type -Werror=strict-prototypes -Wno-format-security -Wno-trigraphs -Wno-frame-address -Wno-address-of-packed-member -Wmissing-declarations -Wmissing-prototypes -Wframe-larger-than=2048 -Wno-main -Wno-unused-but-set-variable -Wno-unused-const-variable -Wvla -Wno-pointer-sign -Wcast-function-type -Wno-stringop-overflow -Wno-array-bounds -Wno-alloc-size-larger-than -Wimplicit-fallthrough=5 -Werror=date-time -Werror=incompatible-pointer-types -Werror=designated-init -Wenum-conversion -Wno-unused-but-set-variable -Wno-unused-const-variable -Wno-restrict -Wno-packed-not-aligned -Wno-format-overflow -Wno-format-truncation -Wno-stringop-truncation -Wno-missing-field-initializers -Wno-type-limits -Wno-shift-negative-value -Wno-maybe-uninitialized -Wno-sign-compare -mstack-protector-guard=sysreg -mstack-protector-guard-reg=sp_el0 -mstack-protector-guard-offset=1328  -DMODULE  -DKBUILD_BASENAME='"nymya_kernel_module"' -DKBUILD_MODNAME='"nymya_core"' -D__KBUILD_MODNAME=kmod_nymya_core -c -o /nymyaOS/nymya-core/kernel_syscalls/amd64/nymya_kernel_module.o /nymyaOS/nymya-core/kernel_syscalls/amd64/nymya_kernel_module.c  
+savedcmd_/nymyaOS/nymya-core/kernel_syscalls/riscv64/nymya_core.mod.o := gcc -Wp,-MMD,/nymyaOS/nymya-core/kernel_syscalls/riscv64/.nymya_core.mod.o.d -nostdinc -I/nymyaOS/kernel-src/arch/arm64/include -I./arch/arm64/include/generated -I/nymyaOS/kernel-src/include -I./include -I/nymyaOS/kernel-src/arch/arm64/include/uapi -I./arch/arm64/include/generated/uapi -I/nymyaOS/kernel-src/include/uapi -I./include/generated/uapi -include /nymyaOS/kernel-src/include/linux/compiler-version.h -include /nymyaOS/kernel-src/include/linux/kconfig.h -include /nymyaOS/kernel-src/include/linux/compiler_types.h -D__KERNEL__ -mlittle-endian -DKASAN_SHADOW_SCALE_SHIFT= -fmacro-prefix-map=/nymyaOS/kernel-src/= -std=gnu11 -fshort-wchar -funsigned-char -fno-common -fno-PIE -fno-strict-aliasing -mgeneral-regs-only -DCONFIG_CC_HAS_K_CONSTRAINT=1 -Wno-psabi -mabi=lp64 -fno-asynchronous-unwind-tables -fno-unwind-tables -mbranch-protection=pac-ret -Wa,-march=armv8.5-a -DARM64_ASM_ARCH='"armv8.5-a"' -DKASAN_SHADOW_SCALE_SHIFT= -fno-delete-null-pointer-checks -O2 -fno-allow-store-data-races -fstack-protector-strong -fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-stack-clash-protection -falign-functions=4 -fno-strict-overflow -fno-stack-check -fconserve-stack -Wall -Wundef -Werror=implicit-function-declaration -Werror=implicit-int -Werror=return-type -Werror=strict-prototypes -Wno-format-security -Wno-trigraphs -Wno-frame-address -Wno-address-of-packed-member -Wmissing-declarations -Wmissing-prototypes -Wframe-larger-than=2048 -Wno-main -Wno-unused-but-set-variable -Wno-unused-const-variable -Wvla -Wno-pointer-sign -Wcast-function-type -Wno-stringop-overflow -Wno-array-bounds -Wno-alloc-size-larger-than -Wimplicit-fallthrough=5 -Werror=date-time -Werror=incompatible-pointer-types -Werror=designated-init -Wenum-conversion -Wno-unused-but-set-variable -Wno-unused-const-variable -Wno-restrict -Wno-packed-not-aligned -Wno-format-overflow -Wno-format-truncation -Wno-stringop-truncation -Wno-missing-field-initializers -Wno-type-limits -Wno-shift-negative-value -Wno-maybe-uninitialized -Wno-sign-compare -mstack-protector-guard=sysreg -mstack-protector-guard-reg=sp_el0 -mstack-protector-guard-offset=1080 -DMODULE -DKBUILD_BASENAME='"nymya_core.mod"' -DKBUILD_MODNAME='"nymya_core"' -D__KBUILD_MODNAME=kmod_nymya_core -c -o /nymyaOS/nymya-core/kernel_syscalls/riscv64/nymya_core.mod.o /nymyaOS/nymya-core/kernel_syscalls/riscv64/nymya_core.mod.c
 
-source_/nymyaOS/nymya-core/kernel_syscalls/amd64/nymya_kernel_module.o := /nymyaOS/nymya-core/kernel_syscalls/amd64/nymya_kernel_module.c
+source_/nymyaOS/nymya-core/kernel_syscalls/riscv64/nymya_core.mod.o := /nymyaOS/nymya-core/kernel_syscalls/riscv64/nymya_core.mod.c
 
-deps_/nymyaOS/nymya-core/kernel_syscalls/amd64/nymya_kernel_module.o := \
+deps_/nymyaOS/nymya-core/kernel_syscalls/riscv64/nymya_core.mod.o := \
+    $(wildcard include/config/UNWINDER_ORC) \
+    $(wildcard include/config/MODULE_UNLOAD) \
+    $(wildcard include/config/RETPOLINE) \
   /nymyaOS/kernel-src/include/linux/compiler-version.h \
     $(wildcard include/config/CC_VERSION_TEXT) \
   /nymyaOS/kernel-src/include/linux/kconfig.h \
@@ -20,7 +23,6 @@ deps_/nymyaOS/nymya-core/kernel_syscalls/amd64/nymya_kernel_module.o := \
     $(wildcard include/config/CC_HAS_ASM_INLINE) \
   /nymyaOS/kernel-src/include/linux/compiler_attributes.h \
   /nymyaOS/kernel-src/include/linux/compiler-gcc.h \
-    $(wildcard include/config/RETPOLINE) \
     $(wildcard include/config/GCC_ASM_GOTO_OUTPUT_WORKAROUND) \
     $(wildcard include/config/ARCH_USE_BUILTIN_BSWAP) \
     $(wildcard include/config/SHADOW_CALL_STACK) \
@@ -52,7 +54,6 @@ deps_/nymyaOS/nymya-core/kernel_syscalls/amd64/nymya_kernel_module.o := \
     $(wildcard include/config/HAVE_STATIC_CALL_INLINE) \
     $(wildcard include/config/KUNIT) \
     $(wildcard include/config/PRINTK_INDEX) \
-    $(wildcard include/config/MODULE_UNLOAD) \
     $(wildcard include/config/CONSTRUCTORS) \
     $(wildcard include/config/FUNCTION_ERROR_INJECTION) \
     $(wildcard include/config/DYNAMIC_DEBUG_CORE) \
@@ -333,7 +334,6 @@ deps_/nymyaOS/nymya-core/kernel_syscalls/amd64/nymya_kernel_module.o := \
     $(wildcard include/config/NUMA_KEEP_MEMINFO) \
     $(wildcard include/config/NUMA) \
     $(wildcard include/config/HAVE_ARCH_NODE_DEV_GROUP) \
-  /nymyaOS/kernel-src/arch/arm64/include/asm/sparsemem.h \
   /nymyaOS/kernel-src/include/linux/smp.h \
     $(wildcard include/config/UP_LATE_INIT) \
     $(wildcard include/config/DEBUG_PREEMPT) \
@@ -670,6 +670,7 @@ deps_/nymyaOS/nymya-core/kernel_syscalls/amd64/nymya_kernel_module.o := \
     $(wildcard include/config/HUGETLB_PAGE_SIZE_VARIABLE) \
   /nymyaOS/kernel-src/include/linux/page-flags-layout.h \
   include/generated/bounds.h \
+  /nymyaOS/kernel-src/arch/arm64/include/asm/sparsemem.h \
   /nymyaOS/kernel-src/include/linux/mm_types.h \
     $(wildcard include/config/HAVE_ALIGNED_STRUCT_PAGE) \
     $(wildcard include/config/USERFAULTFD) \
@@ -711,10 +712,6 @@ deps_/nymyaOS/nymya-core/kernel_syscalls/amd64/nymya_kernel_module.o := \
   /nymyaOS/kernel-src/include/linux/completion.h \
   /nymyaOS/kernel-src/include/linux/swait.h \
   /nymyaOS/kernel-src/include/linux/uprobes.h \
-  /nymyaOS/kernel-src/arch/arm64/include/asm/uprobes.h \
-  /nymyaOS/kernel-src/arch/arm64/include/asm/debug-monitors.h \
-  /nymyaOS/kernel-src/arch/arm64/include/asm/esr.h \
-  /nymyaOS/kernel-src/arch/arm64/include/asm/probes.h \
   /nymyaOS/kernel-src/include/linux/workqueue.h \
     $(wildcard include/config/DEBUG_OBJECTS_WORK) \
     $(wildcard include/config/FREEZER) \
@@ -760,17 +757,14 @@ deps_/nymyaOS/nymya-core/kernel_syscalls/amd64/nymya_kernel_module.o := \
   /nymyaOS/kernel-src/include/linux/rcu_node_tree.h \
     $(wildcard include/config/RCU_FANOUT) \
     $(wildcard include/config/RCU_FANOUT_LEAF) \
-  /nymyaOS/kernel-src/arch/arm64/include/asm/mmzone.h \
-  /nymyaOS/kernel-src/arch/arm64/include/asm/numa.h \
-  /nymyaOS/kernel-src/arch/arm64/include/asm/topology.h \
-    $(wildcard include/config/ACPI_CPPC_LIB) \
-  /nymyaOS/kernel-src/include/linux/arch_topology.h \
-    $(wildcard include/config/GENERIC_ARCH_TOPOLOGY) \
-  /nymyaOS/kernel-src/include/asm-generic/topology.h \
-  /nymyaOS/kernel-src/include/asm-generic/numa.h \
   /nymyaOS/kernel-src/include/linux/topology.h \
     $(wildcard include/config/USE_PERCPU_NUMA_NODE_ID) \
     $(wildcard include/config/SCHED_SMT) \
+  /nymyaOS/kernel-src/include/linux/arch_topology.h \
+    $(wildcard include/config/ACPI_CPPC_LIB) \
+    $(wildcard include/config/GENERIC_ARCH_TOPOLOGY) \
+  /nymyaOS/kernel-src/arch/arm64/include/asm/topology.h \
+  /nymyaOS/kernel-src/include/asm-generic/topology.h \
   /nymyaOS/kernel-src/include/linux/sysctl.h \
     $(wildcard include/config/SYSCTL) \
   /nymyaOS/kernel-src/include/uapi/linux/sysctl.h \
@@ -934,7 +928,17 @@ deps_/nymyaOS/nymya-core/kernel_syscalls/amd64/nymya_kernel_module.o := \
     $(wildcard include/config/HAVE_MOD_ARCH_SPECIFIC) \
     $(wildcard include/config/MODULES_USE_ELF_REL) \
     $(wildcard include/config/MODULES_USE_ELF_RELA) \
+  /nymyaOS/kernel-src/include/linux/build-salt.h \
+    $(wildcard include/config/BUILD_SALT) \
+  /nymyaOS/kernel-src/include/linux/elfnote.h \
+  /nymyaOS/kernel-src/include/linux/elfnote-lto.h \
+  /nymyaOS/kernel-src/include/linux/export-internal.h \
+    $(wildcard include/config/PARISC) \
+  /nymyaOS/kernel-src/include/linux/vermagic.h \
+    $(wildcard include/config/PREEMPT_BUILD) \
+  include/generated/utsrelease.h \
+  /nymyaOS/kernel-src/arch/arm64/include/asm/vermagic.h \
 
-/nymyaOS/nymya-core/kernel_syscalls/amd64/nymya_kernel_module.o: $(deps_/nymyaOS/nymya-core/kernel_syscalls/amd64/nymya_kernel_module.o)
+/nymyaOS/nymya-core/kernel_syscalls/riscv64/nymya_core.mod.o: $(deps_/nymyaOS/nymya-core/kernel_syscalls/riscv64/nymya_core.mod.o)
 
-$(deps_/nymyaOS/nymya-core/kernel_syscalls/amd64/nymya_kernel_module.o):
+$(deps_/nymyaOS/nymya-core/kernel_syscalls/riscv64/nymya_core.mod.o):

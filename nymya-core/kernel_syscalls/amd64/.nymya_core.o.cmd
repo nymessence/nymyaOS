@@ -1,1 +1,1 @@
-savedcmd_/nymyaOS/nymya-core/kernel_syscalls/amd64/nymya_core.o := ld -EL  -maarch64elf -z noexecstack --no-warn-rwx-segments   -r -o /nymyaOS/nymya-core/kernel_syscalls/amd64/nymya_core.o @/nymyaOS/nymya-core/kernel_syscalls/amd64/nymya_core.mod 
+savedcmd_/nymyaOS/nymya-core/kernel_syscalls/amd64/nymya_core.o := ld -EL  -maarch64elf -z noexecstack   -r -o /nymyaOS/nymya-core/kernel_syscalls/amd64/nymya_core.o @/nymyaOS/nymya-core/kernel_syscalls/amd64/nymya_core.mod 
