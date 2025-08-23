@@ -9,13 +9,27 @@ Detected host architecture: aarch64
 🚀 Starting build for all targets...
 
 🐳 Building for target: x86_64 using CROSS_COMPILE=x86_64-linux-gnu-
+Cloning generic linux kernel...
+Cloning into '/tmp/linux-src'...
+Note: switching to 'e8f897f4afef0031fe618a8e94127a0934896aba'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+Updating files:  16% (13835/83475)Updating files:  17% (14191/83475)Updating files:  18% (15026/83475)Updating files:  19% (15861/83475)Updating files:  20% (16695/83475)Updating files:  21% (17530/83475)Updating files:  22% (18365/83475)Updating files:  23% (19200/83475)Updating files:  24% (20034/83475)Updating files:  25% (20869/83475)Updating files:  26% (21704/83475)Updating files:  27% (22539/83475)Updating files:  28% (23373/83475)Updating files:  29% (24208/83475)Updating files:  30% (25043/83475)Updating files:  31% (25878/83475)Updating files:  32% (26712/83475)Updating files:  32% (26933/83475)Updating files:  33% (27547/83475)Updating files:  34% (28382/83475)Updating files:  35% (29217/83475)Updating files:  36% (30051/83475)Updating files:  37% (30886/83475)Updating files:  38% (31721/83475)Updating files:  39% (32556/83475)Updating files:  40% (33390/83475)Updating files:  40% (33480/83475)Updating files:  40% (33645/83475)Updating files:  41% (34225/83475)Updating files:  42% (35060/83475)Updating files:  43% (35895/83475)Updating files:  44% (36729/83475)Updating files:  45% (37564/83475)Updating files:  46% (38399/83475)Updating files:  46% (38804/83475)Updating files:  47% (39234/83475)Updating files:  48% (40068/83475)Updating files:  49% (40903/83475)Updating files:  50% (41738/83475)Updating files:  51% (42573/83475)Updating files:  52% (43407/83475)Updating files:  53% (44242/83475)Updating files:  54% (45077/83475)Updating files:  55% (45912/83475)Updating files:  56% (46746/83475)Updating files:  56% (47099/83475)Updating files:  57% (47581/83475)Updating files:  58% (48416/83475)Updating files:  59% (49251/83475)Updating files:  60% (50085/83475)Updating files:  61% (50920/83475)Updating files:  62% (51755/83475)Updating files:  63% (52590/83475)Updating files:  64% (53424/83475)Updating files:  64% (53522/83475)Updating files:  65% (54259/83475)Updating files:  66% (55094/83475)Updating files:  67% (55929/83475)Updating files:  68% (56763/83475)Updating files:  69% (57598/83475)Updating files:  70% (58433/83475)Updating files:  71% (59268/83475)Updating files:  72% (60102/83475)Updating files:  73% (60937/83475)Updating files:  73% (60979/83475)Updating files:  74% (61772/83475)Updating files:  75% (62607/83475)Updating files:  76% (63441/83475)Updating files:  77% (64276/83475)Updating files:  78% (65111/83475)Updating files:  79% (65946/83475)Updating files:  80% (66780/83475)Updating files:  81% (67615/83475)Updating files:  82% (68450/83475)Updating files:  83% (69285/83475)Updating files:  84% (70119/83475)Updating files:  84% (70164/83475)Updating files:  85% (70954/83475)Updating files:  86% (71789/83475)Updating files:  87% (72624/83475)Updating files:  88% (73458/83475)Updating files:  89% (74293/83475)Updating files:  90% (75128/83475)Updating files:  91% (75963/83475)Updating files:  92% (76797/83475)Updating files:  93% (77632/83475)Updating files:  94% (78467/83475)Updating files:  94% (78703/83475)Updating files:  95% (79302/83475)Updating files:  96% (80136/83475)Updating files:  97% (80971/83475)Updating files:  98% (81806/83475)Updating files:  99% (82641/83475)Updating files: 100% (83475/83475)Updating files: 100% (83475/83475), done.
 📁 Creating clean kernel source copy for x86_64
-  CLEAN   scripts/basic
-  CLEAN   scripts/dtc
-  CLEAN   scripts/kconfig
-  CLEAN   scripts/mod
-  CLEAN   scripts
-  CLEAN   include/config include/generated arch/arm64/include/generated .config .config.old
 make[1]: Entering directory '/tmp/build-x86_64'
   GEN     Makefile
   HOSTCC  scripts/basic/fixdep
@@ -76,6 +90,190 @@ Realtek Platforms (ARCH_REALTEK) [N/y/?] (NEW)
 Renesas SoC Platforms (ARCH_RENESAS) [N/y/?] (NEW) 
 Rockchip Platforms (ARCH_ROCKCHIP) [N/y/?] (NEW) 
 AMD Seattle SoC Family (ARCH_SEATTLE) [N/y/?] (NEW) 
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
 Intel's SoCFPGA ARMv8 Families (ARCH_INTEL_SOCFPGA) [N/y/?] (NEW) 
 STMicroelectronics STM32 SoC Family (ARCH_STM32) [N/y/?] (NEW) 
 Socionext SynQuacer SoC Family (ARCH_SYNQUACER) [N/y/?] (NEW) 
@@ -142,227 +340,7 @@ Page size
 > 1. 4KB (ARM64_4K_PAGES) (NEW)
   2. 16KB (ARM64_16K_PAGES) (NEW)
   3. 64KB (ARM64_64K_PAGES) (NEW)
-choice[1-3?]: 
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-Virtual address space size
+choice[1-3?]: Virtual address space size
 > 1. 39-bit (ARM64_VA_BITS_39) (NEW)
   2. 48-bit (ARM64_VA_BITS_48) (NEW)
 choice[1-2?]: Physical address space size
@@ -456,6 +434,44 @@ Error in reading or end of file.
 
 Error in reading or end of file.
 
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
 *
 * CPU Frequency scaling
 *
@@ -493,30 +509,6 @@ Enable seccomp to safely execute untrusted bytecode (SECCOMP) [Y/n/?] y
 Stack Protector buffer overflow detection (STACKPROTECTOR) [Y/n/?] y
   Strong Stack Protector (STACKPROTECTOR_STRONG) [Y/n/?] y
 Shadow Call Stack (SHADOW_CALL_STACK) [N/y/?] (NEW) 
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
 Link Time Optimization (LTO)
 > 1. None (LTO_NONE)
 choice[1]: 1
@@ -557,6 +549,32 @@ PCI support (PCI) [Y/n/?] y
   Cavium Thunder ECAM controller to on-chip devices on pass-1.x silicon (PCI_HOST_THUNDER_ECAM) [N/y/?] (NEW) 
   Faraday Technology FTPCI100 PCI controller (PCI_FTPCI100) [N/y/?] (NEW) 
   Generic PCI host controller (PCI_HOST_GENERIC) [N/m/y/?] (NEW) 
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
   Microchip AXI PCIe controller (PCIE_MICROCHIP_HOST) [N/m/y/?] (NEW) 
   X-Gene PCIe controller (PCI_XGENE) [N/y/?] (NEW) 
   Xilinx AXI PCIe controller (PCIE_XILINX) [N/y/?] (NEW) 
@@ -568,35 +586,9 @@ PCI support (PCI) [Y/n/?] y
   * DesignWare-based PCIe controllers
   *
   Amazon Annapurna Labs PCIe controller (PCIE_AL) [N/y/?] (NEW) 
-Error in reading or end of file.
-
-Error in reading or end of file.
-
   Amlogic Meson PCIe controller (PCI_MESON) [N/m/y/?] n
   HiSilicon Hip05 and Hip06 SoCs PCIe controller (PCI_HISI) [N/y/?] (NEW) 
   HiSilicon Kirin PCIe controller (PCIE_KIRIN) [N/m/y/?] (NEW) 
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
   Platform bus based DesignWare PCIe controller (host mode) (PCIE_DW_PLAT_HOST) [N/y/?] n
 *
 * Bus devices
@@ -639,7 +631,6 @@ SoC bus device for the ARM SMCCC SOC_ID (ARM_SMCCC_SOC_ID) [Y/n/?] (NEW)
 Device Tree and Open Firmware support (OF) [Y/?] y
   Device Tree runtime unit tests (OF_UNITTEST) [N/y/?] (NEW) 
   Device Tree overlays (OF_OVERLAY) [N/y/?] (NEW) 
-  Device Tree Overlay ConfigFS interface (OF_CONFIGFS) [N/y/?] (NEW) 
 *
 * Misc devices
 *
@@ -816,16 +807,6 @@ Serial ATA and Parallel ATA drivers (libata) (ATA) [Y/n/m/?] y
     OPTI621/6215 PATA support (Very Experimental) (PATA_OPTI) [N/m/y/?] n
     PCMCIA PATA support (PATA_PCMCIA) [N/m/y/?] n
     OpenFirmware platform device PATA support (PATA_OF_PLATFORM) [N/m/y/?] (NEW) 
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
     PC Tech RZ1000 PATA support (PATA_RZ1000) [N/m/y/?] n
     *
     * Generic fallback / legacy drivers
@@ -881,6 +862,64 @@ Ethernet driver support (ETHERNET) [Y/n/?] y
     Broadcom NetXtreme-C/E support (BNXT) [N/m/y/?] n
   Cadence devices (NET_VENDOR_CADENCE) [Y/n/?] y
     Cadence MACB/GEM support (MACB) [N/m/y/?] (NEW) 
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
   Cavium ethernet drivers (NET_VENDOR_CAVIUM) [Y/n/?] y
     Thunder Physical function driver (THUNDER_NIC_PF) [N/m/y/?] n
     Thunder Virtual function driver (THUNDER_NIC_VF) [N/m/y/?] n
@@ -917,12 +956,6 @@ Ethernet driver support (ETHERNET) [Y/n/?] y
     TSN endpoint support (TSNEP) [N/m/y/?] n
   EZchip devices (NET_VENDOR_EZCHIP) [Y/n/?] y
     EZchip NPS management enet support (EZCHIP_NPS_MANAGEMENT_ENET) [N/m/y/?] (NEW) 
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
   Fujitsu devices (NET_VENDOR_FUJITSU) [Y/n/?] y
     Fujitsu FMV-J18x PCMCIA support (PCMCIA_FMVJ18X) [N/m/y/?] n
   Fungible devices (NET_VENDOR_FUNGIBLE) [Y/n/?] y
@@ -930,26 +963,12 @@ Error in reading or end of file.
   Google Devices (NET_VENDOR_GOOGLE) [Y/n/?] y
     Google Virtual NIC (gVNIC) support (GVE) [N/m/y/?] n
   Hisilicon devices (NET_VENDOR_HISILICON) [Y/n/?] (NEW) 
-Error in reading or end of file.
-
     Hisilicon HIX5HD2 Family Network Device Support (HIX5HD2_GMAC) [N/m/y/?] (NEW) 
-Error in reading or end of file.
-
     Hisilicon Fast Ethernet MAC device support (HISI_FEMAC) [N/m/y/?] (NEW) 
     HISILICON P04 Ethernet support (HIP04_ETH) [N/m/y/?] (NEW) 
     Hisilicon HNS DSAF device Support (HNS_DSAF) [N/m/y/?] (NEW) 
     Hisilicon HNS Ethernet Device Support (HNS_ENET) [N/m/y/?] (NEW) 
     Hisilicon Network Subsystem Support HNS3 (Framework) (HNS3) [N/m/y/?] (NEW) 
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
   Huawei devices (NET_VENDOR_HUAWEI) [Y/n/?] y
     Huawei Intelligent PCIE Network Interface Card (HINIC) [N/m/y/?] n
   Intel (82586/82593/82596) devices (NET_VENDOR_I825XX) [Y/n/?] y
@@ -984,6 +1003,10 @@ Error in reading or end of file.
     Mellanox Technologies Switch ASICs support (MLXSW_CORE) [N/m/y/?] n
     Mellanox Technologies firmware flash module (MLXFW) [N/m/y/?] n
     Mellanox Technologies BlueField Gigabit Ethernet support (MLXBF_GIGE) [N/m/y/?] (NEW) 
+Error in reading or end of file.
+
+Error in reading or end of file.
+
   Micrel devices (NET_VENDOR_MICREL) [Y/n/?] y
     Micrel KSZ8841/42 with generic bus interface (KS8842) [N/m/y/?] n
     Micrel KS8851 MLL (KS8851_MLL) [N/m/y/?] n
@@ -1050,17 +1073,7 @@ Error in reading or end of file.
   Solarflare devices (NET_VENDOR_SOLARFLARE) [Y/n/?] y
     Solarflare SFC9100/EF100-family support (SFC) [N/m/y/?] n
     Solarflare SFC4000 support (SFC_FALCON) [N/m/y/?] n
- 
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-   Solarflare SFC9000 support (SFC_SIENA) [N/m/y/?] n
+    Solarflare SFC9000 support (SFC_SIENA) [N/m/y/?] n
   SMC (SMSC)/Western Digital devices (NET_VENDOR_SMSC) [Y/n/?] y
     SMC 91Cxx PCMCIA support (PCMCIA_SMC91C92) [N/m/y/?] n
     SMC EtherPower II (EPIC100) [N/m/y/?] n
@@ -1088,16 +1101,6 @@ Error in reading or end of file.
   Wangxun devices (NET_VENDOR_WANGXUN) [Y/n/?] y
     Wangxun(R) GbE PCI Express adapters support (NGBE) [N/m/y/?] n
     Wangxun(R) 10GbE PCI Express adapters support (TXGBE) [N/m/y/?] (NEW) 
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
   WIZnet devices (NET_VENDOR_WIZNET) [Y/n/?] y
     WIZnet W5100 Ethernet support (WIZNET_W5100) [N/m/y/?] n
     WIZnet W5300 Ethernet support (WIZNET_W5300) [N/m/y/?] n
@@ -1116,11 +1119,55 @@ MDIO bus device drivers (MDIO_DEVICE) [Y/?] y
   Marvell USB to MDIO Adapter (MDIO_MVUSB) [N/m/y/?] n
   Octeon and some ThunderX SOCs MDIO buses (MDIO_OCTEON) [N/m/y/?] (NEW) 
   Qualcomm IPQ4019 MDIO interface support (MDIO_IPQ4019) [N/m/y/?] (NEW) 
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
   ThunderX SOCs MDIO buses (MDIO_THUNDER) [N/m/y/?] n
   *
   * MDIO Multiplexers
   *
   MDIO bus multiplexer using kernel multiplexer subsystem (MDIO_BUS_MUX_MULTIPLEXER) [N/m/y/?] (NEW) 
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
   MMIO device-controlled MDIO bus multiplexers (MDIO_BUS_MUX_MMIOREG) [N/m/y/?] (NEW) 
 *
 * Keyboards
@@ -1151,48 +1198,6 @@ Keyboards (INPUT_KEYBOARD) [Y/n/?] y
   XT keyboard (KEYBOARD_XTKBD) [N/m/y/?] n
   Microchip CAP11XX based touch sensors (KEYBOARD_CAP11XX) [N/m/y/?] (NEW) 
   Broadcom keypad driver (KEYBOARD_BCM) [N/m/y/?] (NEW) 
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
   Cypress StreetFighter touchkey support (KEYBOARD_CYPRESS_SF) [N/m/y/?] n
 *
 * Touchscreens
@@ -1368,17 +1373,11 @@ Hardware Random Number Generator Core support (HW_RANDOM) [Y/n/m/?] y
   Silex Insight BA431 Random Number Generator support (HW_RANDOM_BA431) [N/m/y/?] n
   VirtIO Random Number Generator support (HW_RANDOM_VIRTIO) [N/m/y/?] n
   Arm CryptoCell True Random Number Generator support (HW_RANDOM_CCTRNG) [N/m/y/?] (NEW) 
+Error in reading or end of file.
+
   Xiphera FPGA based True Random Number Generator support (HW_RANDOM_XIPHERA) [N/m/y/?] n
   Arm SMCCC TRNG firmware interface support (HW_RANDOM_ARM_SMCCC_TRNG) [Y/n/m/?] (NEW) 
   Marvell CN10K Random Number Generator support (HW_RANDOM_CN10K) [Y/n/m/?] (NEW) 
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
 Error in reading or end of file.
 
 Error in reading or end of file.
@@ -1390,7 +1389,6 @@ Applicom intelligent fieldbus card support (APPLICOM) [N/m/y/?] n
 /dev/port character device (DEVPORT) [Y/n/?] y
 Xillybus generic FPGA interface (XILLYBUS) [N/m/y/?] n
 XillyUSB: Xillybus generic FPGA interface for USB (XILLYUSB) [N/m/y/?] n
-Rootless GPIO access via mmap() on Raspberry Pi boards (RASPBERRYPI_GPIOMEM) [N/m/y/?] n
 *
 * I2C Hardware Bus support
 *
@@ -1425,7 +1423,15 @@ Synopsys DesignWare Platform (I2C_DESIGNWARE_PLATFORM) [N/m/y/?] (NEW)
 Synopsys DesignWare PCI (I2C_DESIGNWARE_PCI) [N/m/y/?] n
 EMMA Mobile series I2C adapter (I2C_EMEV2) [N/m/y/?] (NEW) 
 HiSilicon I2C controller (I2C_HISI) [N/m/y/?] (NEW) 
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
 ST-Ericsson Nomadik/Ux500 I2C Controller (I2C_NOMADIK) [N/m/y/?] (NEW) 
+Error in reading or end of file.
+
 OpenCores I2C Controller (I2C_OCORES) [N/m/y/?] n
 PCA9564/PCA9665 as platform device (I2C_PCA_PLATFORM) [N/m/y/?] n
 Rockchip RK3xxx I2C adapter (I2C_RK3X) [N/m/y/?] (NEW) 
@@ -1454,19 +1460,7 @@ Board level reset or power off (POWER_RESET) [Y/?] y
   APM SoC X-Gene reset driver (POWER_RESET_XGENE) [N/y/?] (NEW) 
   Generic SYSCON regmap reset driver (POWER_RESET_SYSCON) [N/y/?] (NEW) 
   Generic SYSCON regmap poweroff driver (POWER_RESET_SYSCON_POWEROFF) [N/y/?] (NEW) 
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
   Generic NVMEM reboot mode driver (NVMEM_REBOOT_MODE) [N/m/y/?] (NEW) 
-Error in reading or end of file.
-
 *
 * Power supply class support
 *
@@ -1489,6 +1483,70 @@ Power supply class support (POWER_SUPPLY) [Y/?] y
   TI/National Semiconductor LP8727 charger driver (CHARGER_LP8727) [N/m/y/?] n
   LTC4162-L charger (CHARGER_LTC4162L) [N/m/y/?] n
   Maxim MAX14656 USB charger detector (CHARGER_DETECTOR_MAX14656) [N/m/y/?] (NEW) 
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
   Maxim MAX77976 battery charger driver (CHARGER_MAX77976) [N/m/y/?] n
   TI BQ2415x battery charger driver (CHARGER_BQ2415X) [N/m/y/?] n
   LTC2941/LTC2943 Battery Gauge Driver (BATTERY_GAUGE_LTC2941) [N/m/y/?] n
@@ -1518,24 +1576,8 @@ Thermal drivers (THERMAL) [Y/?] y
   Bang Bang thermal governor (THERMAL_GOV_BANG_BANG) [N/y/?] n
   User_space thermal governor (THERMAL_GOV_USER_SPACE) [Y/n/?] y
   Generic cpu cooling support (CPU_THERMAL) [N/y/?] (NEW) 
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
   Thermal emulation mode support (THERMAL_EMULATION) [N/y/?] n
   Generic Thermal MMIO driver (THERMAL_MMIO) [N/m/y/?] (NEW) 
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
 *
 * Watchdog Timer Support
 *
@@ -1578,183 +1620,10 @@ Watchdog Timer Support (WATCHDOG) [Y/n/?] y
 *
 * Multifunction device drivers
 *
-Raspberry Pi Sense HAT core functions (MFD_RPISENSE_CORE) [N/m/y/?] n
 Active-semi ACT8945A (MFD_ACT8945A) [N/m/y/?] (NEW) 
 AMS AS3711 (MFD_AS3711) [N/y/?] n
 Ampere Computing SMpro core driver (MFD_SMPRO) [N/m/y/?] n
 ams AS3722 Power Management IC (MFD_AS3722) [N/m/y/?] (NEW) 
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
 Analog Devices ADP5520/01 MFD PMIC Core Support (PMIC_ADP5520) [N/y/?] n
 Atmel Flexcom (Flexible Serial Communication Unit) (MFD_ATMEL_FLEXCOM) [N/m/y/?] (NEW) 
 Atmel HLCDC (High-end LCD Controller) (MFD_ATMEL_HLCDC) [N/m/y/?] (NEW) 
@@ -1804,7 +1673,6 @@ Netronix embedded controller (EC) (MFD_NTXEC) [N/m/y/?] (NEW)
 Nokia Retu and Tahvo multi-function device (MFD_RETU) [N/m/y/?] n
 NXP PCF50633 (MFD_PCF50633) [N/m/y/?] n
 Silergy SY7636A voltage regulator (MFD_SY7636A) [N/m/y/?] n
-Raspberry Pi PoE HAT MFD (MFD_RASPBERRYPI_POE_HAT) [N/m/y/?] n
 RDC R-321x southbridge (MFD_RDC321X) [N/m/y/?] n
 Richtek RT4831 four channel WLED and Display Bias Voltage (MFD_RT4831) [N/m/y/?] n
 Richtek RT5033 Power Management IC (MFD_RT5033) [N/m/y/?] n
@@ -1848,13 +1716,154 @@ Wolfson Microelectronics WM831x/2x PMICs with I2C (MFD_WM831X_I2C) [N/y/?] n
 Wolfson Microelectronics WM8350 with I2C (MFD_WM8350_I2C) [N/y/?] n
 Wolfson Microelectronics WM8994 (MFD_WM8994) [N/m/y/?] n
 ROHM BD71837 Power Management IC (MFD_ROHM_BD718XX) [N/m/y/?] (NEW) 
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
 ROHM BD71828 and BD71815 Power Management IC (MFD_ROHM_BD71828) [N/m/y/?] (NEW) 
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
 ROHM BD9576MUF and BD9573MUF Power Management ICs (MFD_ROHM_BD957XMUF) [N/m/y/?] (NEW) 
 Support for STPMIC1 PMIC (MFD_STPMIC1) [N/m/y/?] (NEW) 
 Support for STMicroelectronics Multi-Function eXpander (STMFX) (MFD_STMFX) [N/m/y/?] (NEW) 
 Actions Semi ATC260x PMICs with I2C (MFD_ATC260X_I2C) [N/m/y/?] n
 QCOM PM8008 Power Management IC (MFD_QCOM_PM8008) [N/m/y/?] (NEW) 
-RP1 MFD driver (MFD_RP1) [N/m/y/?] n
 Renesas Synchronization Management Unit with I2C (MFD_RSMU_I2C) [N/m/y/?] (NEW) 
 *
 * ARM devices
@@ -1949,8 +1958,6 @@ DRM Support for TI Keystone (DRM_TIDSS) [N/m/y/?] (NEW)
 GUD USB Display (DRM_GUD) [N/m/y/?] n
 DRM support for Solomon SSD13xx OLED displays (DRM_SSD130X) [N/m/y/?] n
 Imagination Technologies PowerVR (Series 6 and later) & IMG Graphics (DRM_POWERVR) [N/m/y/?] (NEW) 
-Error in reading or end of file.
-
 *
 * Backlight & LCD device support
 *
@@ -1973,6 +1980,10 @@ I2C HID support (I2C_HID) [Y/n/m/?] y
   HID over I2C transport layer Open Firmware driver (I2C_HID_OF) [N/m/y/?] n
   Driver for Elan hid-i2c based devices on OF systems (I2C_HID_OF_ELAN) [N/m/y/?] (NEW) 
   Driver for Goodix hid-i2c based devices on OF systems (I2C_HID_OF_GOODIX) [N/m/y/?] (NEW) 
+Error in reading or end of file.
+
+Error in reading or end of file.
+
 Error in reading or end of file.
 
 Error in reading or end of file.
@@ -2019,7 +2030,6 @@ USB support (USB_SUPPORT) [Y/n/?] y
   UHCI HCD (most Intel and VIA) support (USB_UHCI_HCD) [Y/n/m/?] y
   SL811HS HCD support (USB_SL811_HCD) [N/m/y/?] n
   R8A66597 HCD support (USB_R8A66597_HCD) [N/m/y/?] n
-  Synopsis DWC host support (USB_DWCOTG) [N/y/?] (NEW) 
   HCD test mode support (USB_HCD_TEST_MODE) [N/y/?] n
   *
   * USB Device Class drivers
@@ -2098,42 +2108,6 @@ USB support (USB_SUPPORT) [Y/n/?] y
   USB Link Layer Test driver (USB_LINK_LAYER_TEST) [N/m/y/?] n
   ChaosKey random number generator driver support (USB_CHAOSKEY) [N/m/y/?] n
   Onboard USB hub support (USB_ONBOARD_HUB) [N/m/y/?] (NEW) 
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
   *
   * USB Physical Layer drivers
   *
@@ -2153,9 +2127,25 @@ LED Support (NEW_LEDS) [Y/n/?] y
   * LED drivers
   *
   LED support for Panasonic AN30259A (LEDS_AN30259A) [N/m/y/?] (NEW) 
+Error in reading or end of file.
+
   LED support for Awinic AW20036/AW20054/AW20072/AW20108 (LEDS_AW200XX) [N/m/y/?] n
   LED support for Awinic AW2013 (LEDS_AW2013) [N/m/y/?] (NEW) 
+Error in reading or end of file.
+
   LED Support for Broadcom BCM6328 (LEDS_BCM6328) [N/m/y/?] (NEW) 
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
   LED Support for Broadcom BCM6358 (LEDS_BCM6358) [N/m/y/?] (NEW) 
   LCD Backlight driver for LM3530 (LEDS_LM3530) [N/m/y/?] n
   LCD Backlight driver for LM3532 (LEDS_LM3532) [N/m/y/?] n
@@ -2182,6 +2172,16 @@ LED Support (NEW_LEDS) [Y/n/?] y
   LED support for the Mellanox switches management control (LEDS_MLXREG) [N/m/y/?] n
   Userspace LED support (LEDS_USER) [N/m/y/?] n
   LED driver for LM3697 (LEDS_LM3697) [N/m/y/?] (NEW) 
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
   *
   * Flash and Torch LED drivers
   *
@@ -2273,14 +2273,26 @@ Real Time Clock (RTC_CLASS) [Y/n/?] y
   Oki MSM6242 (RTC_DRV_MSM6242) [N/m/y/?] n
   Ricoh RP5C01 (RTC_DRV_RP5C01) [N/m/y/?] n
   Xilinx Zynq Ultrascale+ MPSoC RTC (RTC_DRV_ZYNQMP) [N/m/y/?] (NEW) 
+Error in reading or end of file.
+
+Error in reading or end of file.
+
   *
   * on-CPU RTC drivers
   *
   ARM AMBA PL030 RTC (RTC_DRV_PL030) [N/m/y/?] (NEW) 
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
   ARM AMBA PL031 RTC (RTC_DRV_PL031) [N/m/y/?] (NEW) 
   Cadence RTC driver (RTC_DRV_CADENCE) [N/m/y/?] (NEW) 
   Faraday Technology FTRTC010 RTC (RTC_DRV_FTRTC010) [N/m/y/?] n
   EPSON TOYOCOM RTC-7301SF/DG (RTC_DRV_R7301) [N/m/y/?] (NEW) 
+Error in reading or end of file.
+
   *
   * HID Sensor RTC drivers
   *
@@ -2301,35 +2313,11 @@ DMA Engine support (DMADEVICES) [Y/n/?] y
   Intel integrated DMA 64-bit support (INTEL_IDMA64) [N/m/y/?] n
   Marvell XOR engine version 2 support  (MV_XOR_V2) [N/y/?] (NEW) 
   DMA API Driver for PL330 (PL330_DMA) [N/m/y/?] (NEW) 
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
   PLX ExpressLane PEX Switch DMA Engine Support (PLX_DMA) [N/m/y/?] n
   Xilinx AXI DMAS Engine (XILINX_DMA) [N/m/y/?] n
   Xilinx DMA/Bridge Subsystem DMA Engine (XILINX_XDMA) [N/m/y/?] n
   Xilinx ZynqMP DMA Engine (XILINX_ZYNQMP_DMA) [N/m/y/?] (NEW) 
   Xilinx DPDMA Engine (XILINX_ZYNQMP_DPDMA) [N/m/y/?] (NEW) 
-Error in reading or end of file.
-
-Error in reading or end of file.
-
   Qualcomm Technologies HIDMA Management support (QCOM_HIDMA_MGMT) [N/m/y/?] n
   Qualcomm Technologies HIDMA Channel support (QCOM_HIDMA) [N/m/y/?] n
   Synopsys DesignWare AHB DMA platform driver (DW_DMAC) [N/m/y/?] n
@@ -2351,7 +2339,6 @@ Clock driver for ARM SP810 System Controller (CLK_SP810) [N/y/?] (NEW)
 *
 Common Clock Framework (COMMON_CLK) [Y/?] y
   Maxim 9485 Programmable Clock Generator (COMMON_CLK_MAX9485) [N/m/y/?] (NEW) 
-  Raspberry Pi RP1-based clock support (COMMON_CLK_RP1) [N/m/y/?] (NEW) 
   Clock driver for SiLabs 5341 and 5340 A/B/C/D devices (COMMON_CLK_SI5341) [N/m/y/?] (NEW) 
   Clock driver for SiLabs 5351A/B/C (COMMON_CLK_SI5351) [N/m/y/?] (NEW) 
   Clock driver for SiLabs 514 devices (COMMON_CLK_SI514) [N/m/y/?] (NEW) 
@@ -2407,6 +2394,92 @@ IOMMU Hardware Support (IOMMU_SUPPORT) [Y/n/?] y
   IOMMU Userspace API (IOMMUFD) [N/m/y/?] n
   ARM Ltd. System MMU (SMMU) Support (ARM_SMMU) [N/m/y/?] (NEW) 
   ARM Ltd. System MMU Version 3 (SMMUv3) Support (ARM_SMMU_V3) [N/m/y/?] (NEW) 
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
   Virtio IOMMU driver (VIRTIO_IOMMU) [N/m/y/?] n
 *
 * NXP/Freescale QorIQ SoC drivers
@@ -2425,7 +2498,18 @@ Enable LiteX SoC Controller driver (LITEX_SOC_CONTROLLER) [N/m/y/?] (NEW)
 * IRQ chip support
 *
 Amazon's Annapurna Labs Fabric Interrupt Controller (AL_FIC) [N/y/?] (NEW) 
-Broadcom 2712 MSI-X Interrupt Peripheral support (BCM2712_MIP) [N/y/?] (NEW) 
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
 Xilinx Interrupt Controller IP (XILINX_INTC) [N/y/?] (NEW) 
 *
 * PHY Subsystem
@@ -2459,7 +2543,45 @@ ARM Coresight Architecture PMU (ARM_CORESIGHT_PMU_ARCH_SYSTEM_PMU) [N/m/y/?] (NE
 * Layout Types
 *
 Kontron sl28 VPD layout support (NVMEM_LAYOUT_SL28_VPD) [N/m/y/?] (NEW) 
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
 ONIE tlv support (NVMEM_LAYOUT_ONIE_TLV) [N/m/y/?] (NEW) 
+Error in reading or end of file.
+
+Error in reading or end of file.
+
 *
 * HW tracing support
 *
@@ -2476,200 +2598,10 @@ Error in reading or end of file.
 
 Error in reading or end of file.
 
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
 *
 * Device Drivers
 *
 CDX Bus driver (CDX_BUS) [N/y/?] (NEW) 
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
 *
 * Accelerated Cryptographic Algorithms for CPU (arm64)
 *
@@ -2714,6 +2646,62 @@ Hardware crypto devices (CRYPTO_HW) [Y/n/?] y
   Support for Intel(R) C3XXX Virtual Function (CRYPTO_DEV_QAT_C3XXXVF) [N/m/y/?] n
   Support for Intel(R) C62X Virtual Function (CRYPTO_DEV_QAT_C62XVF) [N/m/y/?] n
   Cavium ZIP driver (CRYPTO_DEV_CAVIUM_ZIP) [N/m/y/?] (NEW) 
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
   VirtIO crypto driver (CRYPTO_DEV_VIRTIO) [N/m/y/?] n
   Inside Secure's SafeXcel cryptographic engine driver (CRYPTO_DEV_SAFEXCEL) [N/m/y/?] n
   Support for ARM TrustZone CryptoCell family of security processors (CRYPTO_DEV_CCREE) [N/m/y/?] (NEW) 
@@ -2721,6 +2709,14 @@ Hardware crypto devices (CRYPTO_HW) [Y/n/?] y
   Support for HiSilicon SEC2 crypto block cipher accelerator (CRYPTO_DEV_HISI_SEC2) [N/m/y/?] (NEW) 
   Support for HiSilicon ZIP accelerator (CRYPTO_DEV_HISI_ZIP) [N/m/y/?] (NEW) 
   Support for HISI HPRE accelerator (CRYPTO_DEV_HISI_HPRE) [N/m/y/?] (NEW) 
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
   Support for HISI TRNG Driver (CRYPTO_DEV_HISI_TRNG) [N/m/y/?] (NEW) 
   Support for amlogic cryptographic offloader (CRYPTO_DEV_AMLOGIC_GXL) [N/m/y/?] n
 *
@@ -2730,6 +2726,16 @@ Generic bitfield packing and unpacking (PACKING) [N/y/?] n
 CORDIC algorithm (CORDIC) [N/m/y/?] n
 Simple prime number generator for testing (PRIME_NUMBERS) [N/m/y/?] n
 Access I/O in non-MMIO mode (INDIRECT_PIO) [N/y/?] (NEW) 
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
+Error in reading or end of file.
+
 Register read/write tracing (TRACE_MMIO_ACCESS) [N/y/?] (NEW) 
 CRC-CCITT functions (CRC_CCITT) [Y/?] y
 CRC16 functions (CRC16) [Y/?] y
@@ -2770,14 +2776,6 @@ Relocation testing module (ARM64_RELOC_TEST) [N/m/?] (NEW)
 * CoreSight Tracing Support
 *
 CoreSight Tracing Support (CORESIGHT) [N/m/y/?] (NEW) 
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
-Error in reading or end of file.
-
   GEN     Makefile
   HOSTCC  scripts/dtc/dtc.o
   HOSTCC  scripts/dtc/flattree.o
@@ -2875,10 +2873,10 @@ Error in reading or end of file.
   UPD     include/generated/bounds.h
   CC      arch/arm64/kernel/asm-offsets.s
   UPD     include/generated/asm-offsets.h
-  CALL    /nymyaOS/rpi-kernel-src/scripts/checksyscalls.sh
-  CHKSHA1 /nymyaOS/rpi-kernel-src/include/linux/atomic/atomic-arch-fallback.h
-  CHKSHA1 /nymyaOS/rpi-kernel-src/include/linux/atomic/atomic-instrumented.h
-  CHKSHA1 /nymyaOS/rpi-kernel-src/include/linux/atomic/atomic-long.h
+  CALL    /nymyaOS/kernel-src/scripts/checksyscalls.sh
+  CHKSHA1 /nymyaOS/kernel-src/include/linux/atomic/atomic-arch-fallback.h
+  CHKSHA1 /nymyaOS/kernel-src/include/linux/atomic/atomic-instrumented.h
+  CHKSHA1 /nymyaOS/kernel-src/include/linux/atomic/atomic-long.h
   LDS     arch/arm64/kernel/vdso/vdso.lds
   CC      arch/arm64/kernel/vdso/vgettimeofday.o
   AS      arch/arm64/kernel/vdso/note.o
@@ -2891,15 +2889,15 @@ make[1]: Leaving directory '/tmp/build-x86_64'
 make[1]: Entering directory '/tmp/build-x86_64'
   CC [M]  /nymyaOS/nymya-core/kernel_syscalls/amd64/nymya_kernel_module.o
   LD [M]  /nymyaOS/nymya-core/kernel_syscalls/amd64/nymya_core.o
-  MODPOST /nymyaOS/nymya-core/kernel_syscalls/amd64/Module.symvers
 WARNING: Module.symvers is missing.
          Modules may not have dependencies or modversions.
          You may get many unresolved symbol errors.
          You can set KBUILD_MODPOST_WARN=1 to turn errors into warning
          if you want to proceed at your own risk.
+  MODPOST /nymyaOS/nymya-core/kernel_syscalls/amd64/Module.symvers
 ERROR: modpost: "_printk" [/nymyaOS/nymya-core/kernel_syscalls/amd64/nymya_core.ko] undefined!
-make[3]: *** [/nymyaOS/rpi-kernel-src/scripts/Makefile.modpost:145: /nymyaOS/nymya-core/kernel_syscalls/amd64/Module.symvers] Error 1
-make[2]: *** [/nymyaOS/rpi-kernel-src/Makefile:1873: modpost] Error 2
+make[3]: *** [/nymyaOS/kernel-src/scripts/Makefile.modpost:145: /nymyaOS/nymya-core/kernel_syscalls/amd64/Module.symvers] Error 1
+make[2]: *** [/nymyaOS/kernel-src/Makefile:1873: modpost] Error 2
+make[1]: *** [/nymyaOS/kernel-src/Makefile:240: __sub-make] Error 2
 make[1]: Leaving directory '/tmp/build-x86_64'
-make[1]: *** [/nymyaOS/rpi-kernel-src/Makefile:240: __sub-make] Error 2
 make: *** [Makefile:240: __sub-make] Error 2

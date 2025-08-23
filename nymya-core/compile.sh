@@ -16,7 +16,7 @@ declare -A CROSS_PREFIX=(
     ["riscv64"]="riscv64-linux-gnu-"
 )
 declare -A DOCKER_PLATFORM=(
-    ["x86_64"]=""
+    ["x86_64"]="linux/amd64"
     ["arm64"]="linux/arm64"
     ["riscv64"]="linux/riscv64"
 )
@@ -117,27 +117,14 @@ for TARGET in "${TARGETS[@]}"; do
         *) DEB_ARCH="$TARGET" ;;
     esac
 
-    if [ "$TARGET" = "x86_64" ]; then
-        # Host-arch image with cross-toolchain (no QEMU)
-        docker run --rm \
-            -w /nymyaOS/nymya-core \
-            -v "$(pwd)":/nymyaOS/nymya-core \
-            -v "/lib/modules/${HOST_KERNEL_VERSION}/build":/lib/modules/${HOST_KERNEL_VERSION}/build \
-            -v /usr/src:/usr/src \
-            -v "${KERNEL_SRC_COPY}":/nymyaOS/kernel-src:rw \
-            "${IMAGE_NAME}" \
-            bash -c "cd /nymyaOS/kernel-src && make mrproper && mkdir -p ${KERNEL_OUT_DIR} && make O=${KERNEL_OUT_DIR} ARCH=${ARCH_NAME} CROSS_COMPILE=${CROSS_COMPILE} defconfig && make O=${KERNEL_OUT_DIR} modules_prepare && make O=${KERNEL_OUT_DIR} M=/nymyaOS/nymya-core/kernel_syscalls/${DEB_ARCH} modules && make -C /nymyaOS/nymya-core deb-kernel"
-    else
-        # Platform-specific (may use QEMU)
-        docker run --rm --platform=${DOCKER_PLATFORM[$TARGET]} \
-            -w /nymyaOS/nymya-core \
-            -v "$(pwd)":/nymyaOS/nymya-core \
-            -v "/lib/modules/${HOST_KERNEL_VERSION}/build":/lib/modules/${HOST_KERNEL_VERSION}/build \
-            -v /usr/src:/usr/src \
-            -v "${KERNEL_SRC_COPY}":/nymyaOS/kernel-src:rw \
-            "${IMAGE_NAME}" \
-            bash -c "cd /nymyaOS/kernel-src && make mrproper && mkdir -p ${KERNEL_OUT_DIR} && make O=${KERNEL_OUT_DIR} ARCH=${ARCH_NAME} CROSS_COMPILE=${CROSS_COMPILE} defconfig && make O=${KERNEL_OUT_DIR} modules_prepare && make O=${KERNEL_OUT_DIR} M=/nymyaOS/nymya-core/kernel_syscalls/${DEB_ARCH} modules && make -C /nymyaOS/nymya-core deb-kernel"
-    fi
+    docker run --rm --platform=${DOCKER_PLATFORM[$TARGET]} \
+        -w /nymyaOS/nymya-core \
+        -v "$(pwd)":/nymyaOS/nymya-core \
+        -v "/lib/modules/${HOST_KERNEL_VERSION}/build":/lib/modules/${HOST_KERNEL_VERSION}/build \
+        -v /usr/src:/usr/src \
+        -v "${KERNEL_SRC_COPY}":/nymyaOS/kernel-src:rw \
+        "${IMAGE_NAME}" \
+        bash -c "cd /nymyaOS/kernel-src && make mrproper && mkdir -p ${KERNEL_OUT_DIR} && make O=${KERNEL_OUT_DIR} ARCH=${ARCH_NAME} CROSS_COMPILE=${CROSS_COMPILE} defconfig && make O=${KERNEL_OUT_DIR} modules_prepare && make O=${KERNEL_OUT_DIR} M=/nymyaOS/nymya-core/kernel_syscalls/${DEB_ARCH} modules && make -C /nymyaOS/nymya-core deb-kernel"
 done
 
 # --------------------------
