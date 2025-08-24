@@ -19,6 +19,8 @@ cd "${KERNEL_SRC_DIR}"
 make mrproper
 apt-get update && apt-get install -y gcc-11
 export CC=gcc-11
+apt-get update && apt-get install -y gcc-11
+export CC=gcc-11
 make O="${KERNEL_OUT_DIR}" ARCH="${ARCH}" defconfig
 make O="${KERNEL_OUT_DIR}" ARCH="${ARCH}" modules_prepare
 
