@@ -1,4 +1,4 @@
-FROM arm64v8/ubuntu:24.04
+FROM arm64v8/ubuntu:22.04
 
 RUN apt-get update && apt-get install -y \
     build-essential \
@@ -9,7 +9,10 @@ RUN apt-get update && apt-get install -y \
     docker.io \
     flex \
     bison \
+    crossbuild-essential-amd64 \
+    crossbuild-essential-riscv64 \
     && rm -rf /var/lib/apt/lists/*
+
 
 WORKDIR /nymyaOS
 COPY . /nymyaOS
