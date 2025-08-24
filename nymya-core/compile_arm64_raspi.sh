@@ -1,6 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
+# NOTE: REQUIRES A RASPERRY PI 4 OR LATER TO BUILD & RUN
+
 # --------------------------
 # Configuration
 # --------------------------
