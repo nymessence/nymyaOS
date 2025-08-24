@@ -13,7 +13,7 @@ docker build -t nymyaos-arm64 -f Dockerfile.arm64 .
 docker build --platform linux/riscv64 -t nymyaos-riscv64 -f Dockerfile.riscv64 .
 
 echo "Cross-compiling nymya-core..."
-docker run --rm -it -v $(pwd):/nymyaOS -v $(pwd)/linux-kernel-src:/kernel-src --user root nymyaos-x86_64 /bin/bash
+docker run --rm -v $(pwd):/nymyaOS -v $(pwd)/linux-kernel-src:/kernel-src --user root nymyaos-x86_64 /bin/bash -c "cd /nymyaOS/nymya-core && ./compile_x86_64.sh"
 docker run --rm -v $(pwd):/nymyaOS -v $(pwd)/linux-kernel-src:/kernel-src --user root nymyaos-arm64 /bin/bash -c "cd /nymyaOS/nymya-core && ./compile_arm64_generic.sh"
 docker run --rm -v $(pwd):/nymyaOS -v $(pwd)/linux-kernel-src:/kernel-src --user root nymyaos-riscv64 /bin/bash -c "cd /nymyaOS/nymya-core && ./compile_riscv64.sh"
 
