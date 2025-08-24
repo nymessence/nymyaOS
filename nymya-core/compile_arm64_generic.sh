@@ -18,9 +18,8 @@ echo "🔧 Preparing kernel headers..."
 cd "${KERNEL_SRC_DIR}"
 make mrproper
 make O="${KERNEL_OUT_DIR}" ARCH="${ARCH}" KBUILD_CFLAGS="-mretpoline -Wno-error" defconfig
-apt-get update && apt-get install -y gcc-11
-export CC=gcc-11
 make O="${KERNEL_OUT_DIR}" ARCH="${ARCH}" defconfig
+sed -i 's/CONFIG_RETPOLINE=y/# CONFIG_RETPOLINE is not set/' "${KERNEL_OUT_DIR}/.config"
 make O="${KERNEL_OUT_DIR}" ARCH="${ARCH}" modules_prepare
 
 # Build the kernel module
