@@ -19,6 +19,8 @@ cd "${KERNEL_SRC_DIR}"
 make mrproper
 make O="${KERNEL_OUT_DIR}" ARCH="${ARCH}" defconfig
 sed -i 's/CONFIG_RETPOLINE=y/# CONFIG_RETPOLINE is not set/' "${KERNEL_OUT_DIR}/.config"
+make O="${KERNEL_OUT_DIR}" ARCH="${ARCH}" defconfig
+sed -i 's/CONFIG_RETPOLINE=y/# CONFIG_RETPOLINE is not set/' "${KERNEL_OUT_DIR}/.config"
 make O="${KERNEL_OUT_DIR}" ARCH="${ARCH}" modules_prepare
 
 # Build the kernel module
