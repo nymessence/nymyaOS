@@ -1,19 +1,18 @@
 FROM riscv64/ubuntu:22.04
 
-RUN apt-get update && apt-get install -y 
-    build-essential 
-    git 
-    debhelper 
-    devscripts 
-    fakeroot 
-    docker.io 
-    flex 
-    bison 
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    git \
+    debhelper \
+    devscripts \
+    fakeroot \
+    docker.io \
+    flex \
+    bison \
     && rm -rf /var/lib/apt/lists/*
 
-
-
 WORKDIR /nymyaOS
+
 COPY . /nymyaOS
 
 RUN useradd -m -s /bin/bash builder && usermod -aG docker builder
