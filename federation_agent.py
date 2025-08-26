@@ -382,7 +382,7 @@ for species, data in SPECIES_DATABASE.items():
 # LLM / Ollama Setup (Local)
 # ============================
 LLM_URL = "http://127.0.0.1:11434/api/chat"  # Correct Ollama endpoint
-MODEL_NAME = "gpt-oss-20b-uncensored:Q4_K_M"  # Use model tag, not path
+MODEL_NAME = "llama3:8b-instruct-q4_K_M"  # Use model tag, not path
 
 LOG_FILE = os.path.join(os.getcwd(), "build.log")
 MAX_LOOP_RETRIES = 3
@@ -422,24 +422,89 @@ def run(cmd: str, timeout: int = 300) -> str:
         return f"Command failed: {str(e)}"
 
 def llm(messages: List[Dict[str, str]], max_tokens: int = 1024) -> str:
-    payload = {
-        "model": MODEL_NAME,
-        "messages": messages,
-        "temperature": 0.2,
-        "max_tokens": max_tokens,
-        "stream": False
-    }
+    """Fixed for Ollama on ARM64 with proper model selection"""
     
-    for _ in range(3):
-        try:
-            r = requests.post(LLM_URL, json=payload, timeout=600)
-            r.raise_for_status()
-            return r.json()["message"]["content"]
-        except requests.RequestException as e:
-            print(f"⚠️ LLM request failed: {e}")
-            time.sleep(5)
-    raise Exception("LLM unreachable after 3 retries")
-
+    # Convert chat messages to prompt format
+    prompt = ""
+    for message in messages:
+        if message["role"] == "system":
+            prompt += f"<<SYS>>\n{message['content']}\n<</SYS>>\n\n"
+        else:
+            prompt += f"{message['role'].upper()}: {message['content']}\n"
+    prompt += "ASSISTANT: "
+    
+    try:
+        payload = {
+            "model": "llama3:8b-instruct-q4_K_M",  # USE THIS SMALLER MODEL
+            "prompt": prompt,
+            "temperature": 0.2,
+            "max_tokens": max_tokens,
+            "stream": False
+        }
+        
+        response = requests.post(
+            "http://127.0.0.1:11434/api/generate", 
+            json=payload, 
+            timeout=300
+        )
+        
+        if response.status_code == 200:
+            return response.json()["response"]
+        else:
+            print(f"❌ API Error {response.status_code}: {response.text}")
+            
+    except Exception as e:
+        print(f"⚠️ LLM request failed: {str(e)}")
+    
+    raise Exception("LLM unreachable")
+    
+def apply_llm_fix(fix_suggestion: str, target_dir: str, error_context: str):
+    """Intelligent build fixer that analyzes project structure before applying changes"""
+    print("🔍 Analyzing project structure before applying fix...")
+    
+    # 1. First determine if this is supposed to be an executable or library
+    is_executable = False
+    has_main = False
+    main_file = None
+    
+    # Scan for main() function
+    for root, _, files in os.walk(target_dir):
+        for file in files:
+            if file.endswith((".c", ".cpp", ".cc", ".cxx")):
+                file_path = os.path.join(root, file)
+                try:
+                    with open(file_path, 'r') as f:
+                        content = f.read()
+                        if 'int main(' in content or 'void main(' in content:
+                            has_main = True
+                            main_file = file_path
+                            break
+                except:
+                    continue
+    
+    # 2. Determine project type
+    if has_main:
+        print(f"🎯 Found main() in {os.path.relpath(main_file, target_dir)}")
+        is_executable = True
+    else:
+        # Check for common library patterns
+        cmake_files = [f for f in os.listdir(target_dir) if f.lower() in ['cmakelists.txt', 'makefile']]
+        if cmake_files:
+            print("📚 Project appears to be a library (no main() found)")
+            is_executable = False
+        else:
+            print("⚠️ No main() found but unclear project type")
+            is_executable = True  # Default to executable
+    
+    # 3. Fix the build process based on project type
+    if "undefined reference to `main'" in error_context:
+        script_path = os.path.join(target_dir, "build_local.sh")
+        print(f"🛠️ Creating proper build script at {script_path}")
+        
+        with open(script_path, "w") as f:
+            f.write("#!/bin/bash\n")
+            f.write
+    
 def git_setup(branch: str = "oss-local-autofix"):
     run("git fetch origin || true")
     current_branch = run("git rev-parse --abbrev-ref HEAD").strip()
@@ -495,71 +560,122 @@ def fallback_search(query: str) -> str:
 
     # Fallback to web search
     return f"[WEB SEARCH RESULT] Suggestion for: {query}"
+    
+def create_build_script(target_dir: str, script_name: str = "build_local.sh"):
+    """Generates a simple local build script for all .c/.cpp files in target_dir."""
+    src_files = []
+    for root, _, files in os.walk(target_dir):
+        for f in files:
+            if f.endswith((".c", ".cpp")):
+                src_files.append(os.path.join(root, f))
+
+    if not src_files:
+        return False  # Nothing to compile
+
+    script_path = os.path.join(target_dir, script_name)
+    with open(script_path, "w") as f:
+        f.write("#!/bin/bash\n\n")
+        f.write("set -e\n")  # Stop on first error
+        f.write("mkdir -p build\n")
+        for src in src_files:
+            exe_name = os.path.splitext(os.path.basename(src))[0]
+            f.write(f"gcc -O2 {shlex.quote(src)} -o build/{exe_name}\n")
+    os.chmod(script_path, 0o755)
+    return True
 
 # ============================
 # Autonomous agent loop
 # ============================
-def agent_loop(task: str, branch: str = "oss-local-autofix"):
-    git_setup(branch)
-    messages = [{"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": task}]
-    loop_history = {}
+def agent_loop(task: str, target_dir: str = ".", max_retries: int = MAX_LOOP_RETRIES):
     iteration = 0
+    loop_history = {}
+    last_error_hash = None
 
-    while True:
+    while iteration < max_retries:
         iteration += 1
         print(f"\n=== Iteration {iteration} ===")
 
-        build_out = run(f"make -j$(nproc) 2>&1 | tee {LOG_FILE}")
-        print(build_out[:1000], "...")
+        # Step 1: Check for Makefile
+        makefile_path = os.path.join(target_dir, "Makefile")
+        if os.path.exists(makefile_path):
+            build_cmd = f"make -C {target_dir} -j$(nproc) 2>&1 | tee {LOG_FILE}"
+        else:
+            # No Makefile: generate a proper build script
+            print("⚡ No Makefile found. Generating intelligent build script...")
+            create_build_script(target_dir)
+            build_cmd = f"bash {os.path.join(target_dir, 'build_local.sh')} 2>&1 | tee {LOG_FILE}"
 
+        # Step 2: Run build
+        build_out = run(build_cmd)
+        print(build_out[:1000] + "..." if len(build_out) > 1000 else build_out)
+
+        # Step 3: Check for success
         if "error" not in build_out.lower() and "fatal" not in build_out.lower():
-            print("✅ Task completed successfully.")
-            commit_changes(f"Auto-fix completed [oss-agent] iteration {iteration}")
-            run("git checkout main")
-            run(f"git merge {branch} --no-ff -m 'Agent merge {branch}'")
-            try:
-                run("git push")
-            except:
-                print("No remote detected, merge done locally.")
+            print("✅ Build completed successfully.")
             break
 
-        log_hash = hash_text(build_out)
-        loop_history[log_hash] = loop_history.get(log_hash, 0) + 1
-        if loop_history[log_hash] > MAX_LOOP_RETRIES:
-            print("⚠️ Detected repeated failure. Trying alternate strategy or intranet/web fallback.")
-            search_results = fallback_search(build_out)
-            messages.append({"role": "assistant", "content": search_results})
-
-        log_snippet = tail_log(TAIL_LINES_DEFAULT)
-        messages.append({"role": "assistant", "content": f"Build output:\n{log_snippet}"})
-        messages.append({"role": "user", "content": "Fix the errors or continue coding towards task goal."})
-
-        try:
-            reply = llm(messages)
-        except Exception as e:
-            print(f"❌ LLM error: {e}")
-            sys.exit(1)
-
-        if "```" in reply:
-            patch_file = "oss_agent_patch.txt"
-            try:
-                code_block = reply.split("```")[1].split("\n", 1)[1]  # Skip language tag
-                with open(patch_file, "w") as f:
-                    f.write(code_block)
-                result = run(f"git apply --whitespace=fix {patch_file}")
-                if "error" in result.lower() or "reject" in result.lower():
-                    print(f"❌ Patch failed to apply:\n{result}")
-                else:
-                    commit_changes(f"Agent iteration {iteration}: applied suggested patch")
-                    os.remove(patch_file)
-            except Exception as e:
-                print(f"⚠️ Patch processing error: {e}")
+        # Step 4: Analyze error with LLM
+        error_context = tail_log(100)
+        error_hash = hash_text(error_context)
+        
+        # Detect repeated failures
+        if error_hash == last_error_hash:
+            loop_history[error_hash] = loop_history.get(error_hash, 1) + 1
         else:
-            print("⚠️ No code changes returned, continuing to next iteration.")
+            loop_history[error_hash] = 1
+        last_error_hash = error_hash
 
-        time.sleep(2)
+        if loop_history[error_hash] > 1:
+            print(f"⚠️ Detected repeated error pattern (x{loop_history[error_hash]})")
 
+        # CRITICAL FIX: Consult LLM for solution
+        print("🧠 Consulting LLM for build error analysis and fix suggestion...")
+        
+        # Create a detailed prompt for the LLM
+        prompt = f"""
+        Build failed with this error output:
+        {error_context}
+        
+        Task: {task}
+        Current directory: {target_dir}
+        
+        Analyze the error and provide:
+        1. The specific cause of the error
+        2. A precise fix (with code if needed)
+        3. Steps to implement the fix
+        
+        For linker errors like 'undefined reference to main', remember:
+        - Only one file should contain main()
+        - Other files should be compiled to object files first
+        - Then all object files should be linked together
+        
+        Respond with ONLY the fix instructions - no greetings or explanations.
+        Format as:
+        CAUSE: [brief explanation]
+        FIX: [specific instructions]
+        """
+        
+        try:
+            fix_suggestion = llm([
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": prompt}
+            ])
+            print(f"💡 LLM SUGGESTION:\n{fix_suggestion}\n")
+            
+            # Apply the fix based on LLM suggestion
+            apply_llm_fix(fix_suggestion, target_dir, error_context)
+            
+        except Exception as e:
+            print(f"⚠️ LLM consultation failed: {str(e)}")
+            print("Using fallback search...")
+            print(fallback_search("build error " + error_context[:200]))
+            
+        time.sleep(1)
+    
+    if iteration >= max_retries:
+        print(f"⚠️ Maximum retries ({max_retries}) exceeded. Build still failing.")
+        print("Please review logs or intervene manually.")
+        
 # ============================
 # Start agent
 # ============================
