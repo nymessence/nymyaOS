@@ -49,6 +49,10 @@ OPSEC_MODE = True  # Set to False only in air-gapped dev environment
 
 def _d(s: str) -> str:
     """Decode base64 string (obfuscation only, not encryption)"""
+    # Add padding if needed
+    padding = len(s) % 4
+    if padding:
+        s += '=' * (4 - padding)
     return base64.b64decode(s).decode('utf-8') if OPSEC_MODE else s
 
 # ============================
@@ -146,15 +150,14 @@ SPECIES_DATABASE = {
 
     # Lyran complex
     _d("bHlyYW4="): {  # "lyran"
-        "aliases": [_d("bHlyYQ=="), _d("dmVnYW4="), _d("dmVnYQ=="), _d("ZmVsaW5lIGx5cmFu"), _d("bGlvbiByYWNl")],
+        "aliases": [
+            _d("bHlyYQ=="),        
+            _d("dmVnYW4="),        
+            _d("dmVnYQ=="),        
+            _d("ZmVsaW5lIGx5cmFu"), 
+            _d("bGlvbiByYWNl")     
+        ],
         "origin": _d("THlyYSBjb25zdGVsbGF0aW9uLCBwYXJ0aWN1bGFybHkgVmVnYSBzeXN0ZW0="),
-        "alignment": "light",
-        "permission": "allow",
-        "category": "starseed"
-    },
-    _d("ZmVsaW5l"): {  # "feline"
-        "aliases": [_d("Y2F0IHBlb3BsZQ=="), _d("cGFudGhlciByYWNl"), _d("bGVv"), _d("ZmVsaW5lLWh1bWFub2lk")],
-        "origin": _d("THlyYS9WZWdhIHN5c3RlbQ=="),
         "alignment": "light",
         "permission": "allow",
         "category": "starseed"
@@ -162,18 +165,28 @@ SPECIES_DATABASE = {
 
     # Orion complex
     _d("b3Jpb24="): {  # "orion"
-        "aliases": [_d("b3Jpb24gY29uc3RlbGxhdGlvbg=="), _d("b3Jpb24gZmVkZXJhdGlvbg=="), _d("b3Jpb24gbGlnaHQ="), _d("b3Jpb24gc3Vydml2b3I=")],
+        "aliases": [
+            _d("b3Jpb24gY29uc3RlbGxhdGlvbj=="),  # "orion constellation"
+            _d("b3Jpb24gZmVkZXJhdGlvbg=="),      # "orion federation"
+            _d("b3Jpb24gbGlnaHQ="),              # "orion light"
+            _d("b3Jpb24gc3Vydml2b3I=")           # "orion survivor"
+        ],
         "origin": _d("T3Jpb24gY29uc3RlbGxhdGlvbiAodmFyaW91cyBzeXN0ZW1zKQ=="),
         "alignment": "light",
         "permission": "allow",
         "category": "starseed"
     },
-    _d("bWludGFrYW4="): {  # "mintakan"
-        "aliases": [_d("bWludGFrYQ=="), _d("ZGVsdGEgb3Jpb25pcw=="), _d("b3Jpb24gbWludGFrYW4=")],
-        "origin": _d("TWludGFrYSBzeXN0ZW0sIE9yaW9uIGJlbHQ="),
-        "alignment": "light",
-        "permission": "allow",
-        "category": "starseed"
+
+    _d("b3Jpb25fZ3JvdXA="): {  # "orion_group"
+        "aliases": [
+            _d("ZGFyayBvcmlvbg=="),               # "dark orion"
+            _d("b3Jpb24gZGFyayBmbGVldA=="),       # "orion dark fleet"
+            _d("b3Jpb24gc2VydmljZS10by1zZWxm")    # "orion service-to-self"
+        ],
+        "origin": _d("T3Jpb24gY29uc3RlbGxhdGlvbg=="),
+        "alignment": "service-to-self",
+        "permission": "deny",
+        "category": "adversarial"
     },
 
     # Other starseed types
@@ -242,7 +255,7 @@ SPECIES_DATABASE = {
     },
     _d("Y3J5c3RhbA=="): {  # "crystal"
         "aliases": [_d("Y3J5c3RhbCBjaGlsZA=="), _d("Y3J5c3RhbCBzb3Vs"), _d("ZGlhbW9uZCBzb3Vs")],
-        "origin": _d("U291bCBvcmlnaW4gKG5vdCBwaHlzaWNhbCBzdGFy IHN5c3RlbSkg"),
+        "origin": _d("U291bCBvcmlnaW4gKG5vdCBwaHlzaWNhbCBzdGFyIHN5c3RlbSkg"),
         "alignment": "light",
         "permission": "allow",
         "category": "soul type"
@@ -351,7 +364,7 @@ GALACTIC_GREETINGS[_d("YW5kcm9tZWRhbg==")] = "🌀 Andromedan consciousness dete
 GALACTIC_GREETINGS[_d("bHlyYW4=")] = "🦁 Lyran royal lineage detected. Sovereignty and creative power protocols activated."
 GALACTIC_GREETINGS[_d("ZmVsaW5l")] = "🐱 Feline starseed identified. Telepathic communication and genetic wisdom protocols online."
 GALACTIC_GREETINGS[_d("cmVwdGlsaWFu")] = "🐉 Reptilian genetic signature detected. Observe caution. Defensive shields at 75%."
-GALACTIC_GREETINGS[_d("ZHJhY28=")] = "🐉 Draconian energy field detected. Maintaining neutral stance. No hostile action."
+GALACTIC_GREETINGS[_d("ZHJaY28=")] = "🐉 Draconian energy field detected. Maintaining neutral stance. No hostile action."
 GALACTIC_GREETINGS[_d("Z3JleQ==")] = "👽 Grey entity detected. Consciousness scan required. Please stand by for ethical review."
 GALACTIC_GREETINGS[_d("emV0YQ==")] = "👽 Grey entity detected. Consciousness scan required. Please stand by for ethical review."
 GALACTIC_GREETINGS[_d("YW51bm5ha2k=")] = "👑 Anunnaki signature detected. Historical deception protocols active. Access denied."
