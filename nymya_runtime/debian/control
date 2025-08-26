@@ -1,0 +1,13 @@
+Source: nymya-runtime
+Section: libs
+Priority: optional
+Maintainer: Nymessence
+Build-Depends: debhelper (>= 11)
+Standards-Version: 4.1.3
+
+Package: nymya-runtime
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Nymya runtime library
+ This package contains the Nymya runtime library, which provides an interface
+ for interacting with the Nymya quantum computing platform.

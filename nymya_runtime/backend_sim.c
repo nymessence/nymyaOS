@@ -116,10 +116,6 @@ int backend_sim_apply_gate(int gate_code, void* args) {
         case 3331: // barenco
         case 3332: // berkeley
         case 3335: // dagwood
-        case 3336: // echo_cr (also three)
-        case 3337: // fermion_sim (two)
-        case 3338: // givens (two)
-        case 3339: // magic (two)
         case 3342: // deutsch
         case 3343: // margolis
         case 3344: // peres

@@ -1,32 +1,20 @@
-FROM riscv64/ubuntu:22.04
+FROM arm64v8/ubuntu:22.04
 
-# Set environment to avoid interactive prompts
-ENV DEBIAN_FRONTEND=noninteractive
-ENV CONCURRENCY=$(nproc)
-
-# Install build dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
-    gcc-riscv64-linux-gnu \
     git \
-    make \
-    dpkg-dev \
     debhelper \
     devscripts \
     fakeroot \
     docker.io \
     flex \
     bison \
-    libelf-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Set working directory
 WORKDIR /nymyaOS
-
-# Copy files and set up user
 COPY . /nymyaOS
+
 RUN useradd -m -s /bin/bash builder && usermod -aG docker builder
 USER builder
 
-# Set default command
 CMD ["/bin/bash"]

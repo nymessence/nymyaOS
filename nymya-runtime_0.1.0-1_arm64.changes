@@ -1,0 +1,35 @@
+Format: 1.8
+Date: Sat, 23 Aug 2025 17:24:00 +0000
+Source: nymya-runtime
+Binary: nymya-runtime
+Built-For-Profiles: noudeb
+Architecture: source arm64
+Version: 0.1.0-1
+Distribution: unstable
+Urgency: medium
+Maintainer: Nymessence
+Changed-By: Nymessence <contact@nymessence.com>
+Description:
+ nymya-runtime - Nymya runtime library
+Changes:
+ nymya-runtime (0.1.0-1) unstable; urgency=medium
+ .
+   * Initial release.
+Checksums-Sha1:
+ 3272c9637aee895381c458493670d6aae82656ac 522 nymya-runtime_0.1.0-1.dsc
+ ba1e9efa4765ac052d5d14b6f6c710d3687495b0 3904 nymya-runtime_0.1.0-1.tar.xz
+ d071f7ee2d4718bbbba20e74479a50abb8a6b434 2258 nymya-runtime-dbgsym_0.1.0-1_arm64.ddeb
+ b22fc466c4de926083978f07897cf2284bf9879e 6743 nymya-runtime_0.1.0-1_arm64.buildinfo
+ c95099b5e15f16a2a826c1e19be4fa37417ffa86 5284 nymya-runtime_0.1.0-1_arm64.deb
+Checksums-Sha256:
+ 858e978037d81bdefa333cdf1c1d85c08565481eb1e4fc299a79c64f646077d0 522 nymya-runtime_0.1.0-1.dsc
+ afa1c665e805167d62972e8acd0d26d045ac07a8797446b9193593caca54946c 3904 nymya-runtime_0.1.0-1.tar.xz
+ 336178d415eb34a873db2b2758c504837c67d5f0285120b162ac1d68bc7c4016 2258 nymya-runtime-dbgsym_0.1.0-1_arm64.ddeb
+ d54f4f6c7e4f775363a5d8482e419010ae8b6d42f7bfdabe00f74eabd1cf0f55 6743 nymya-runtime_0.1.0-1_arm64.buildinfo
+ 537da8ada694287e669d21dcf0e688cc969f5b8ae14221aaa93e835bbb1ba532 5284 nymya-runtime_0.1.0-1_arm64.deb
+Files:
+ 38358dbb3f962231c73e086d4e7dd7e9 522 libs optional nymya-runtime_0.1.0-1.dsc
+ f02bd496cf22d30d80037fc1cffe0ff2 3904 libs optional nymya-runtime_0.1.0-1.tar.xz
+ 99c57bc33970da135fba265b0f77c841 2258 debug optional nymya-runtime-dbgsym_0.1.0-1_arm64.ddeb
+ 35c929652d99973369ef73c6daeb8866 6743 libs optional nymya-runtime_0.1.0-1_arm64.buildinfo
+ 1aa4340521cf7f8405be3216e4e36be0 5284 libs optional nymya-runtime_0.1.0-1_arm64.deb

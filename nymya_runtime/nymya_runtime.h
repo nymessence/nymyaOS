@@ -2,7 +2,7 @@
 #define NYMYA_RUNTIME_H
 
 #include <stdint.h>
-#include "nymya/nymya.h"
+#include <nymya/nymya.h>
 
 // Set backend: "sim" or "gateqpu"
 void nymya_set_backend(const char* backend_name);

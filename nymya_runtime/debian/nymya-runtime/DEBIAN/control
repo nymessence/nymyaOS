@@ -1,0 +1,11 @@
+Package: nymya-runtime
+Version: 0.1.0-1
+Architecture: arm64
+Maintainer: Nymessence
+Installed-Size: 74
+Depends: libc6 (>= 2.17)
+Section: libs
+Priority: optional
+Description: Nymya runtime library
+ This package contains the Nymya runtime library, which provides an interface
+ for interacting with the Nymya quantum computing platform.

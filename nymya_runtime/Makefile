@@ -15,7 +15,7 @@ LIB_NAME     = nymyaruntime
 LIB_FILE     = lib$(LIB_NAME).so
 
 # Runtime sources
-SOURCES      = nymya_runtime.c backend_sim.c backend_gateqpu.c
+SOURCES      = nymya_runtime.c backend_sim.c backend_qpu.c
 OBJECTS      = $(patsubst %.c,$(OBJ_DIR)/%.o,$(SOURCES))
 
 .PHONY: all clean install
@@ -33,8 +33,9 @@ $(LIB_FILE): $(OBJECTS)
 
 # Install to system (optional)
 install: all
-	@echo "Installing $(LIB_FILE) to /usr/lib"
-	sudo cp $(LIB_FILE) /usr/lib/
+	@echo "Installing $(LIB_FILE) to $(DESTDIR)/usr/lib"
+	mkdir -p $(DESTDIR)/usr/lib
+	cp $(LIB_FILE) $(DESTDIR)/usr/lib/
 	@echo "Done."
 
 clean:
