@@ -57,6 +57,25 @@ def tail_log(log_path, n=TAIL_LINES_DEFAULT):
 
 def git_commit(message="auto commit"):
     run_command(f'git add -A && git commit -m "{message}"')
+    
+def git_commit_auto(message="Autonomous code edit"):
+    """
+    Commits all changes to a dedicated branch for the agent.
+    Creates the branch if it does not exist.
+    """
+    # Ensure the branch exists
+    run_command("git fetch origin")
+    branch_check = run_command("git rev-parse --verify oss-local-autofix")
+    if not branch_check["success"]:
+        # Create branch from current HEAD
+        run_command("git checkout -b oss-local-autofix")
+    else:
+        # Switch to the branch
+        run_command("git checkout oss-local-autofix")
+    
+    # Add all changes and commit
+    run_command('git add -A')
+    run_command(f'git commit -a -m "{message}"')
 
 def read_file(path):
     try:
@@ -266,7 +285,7 @@ Current code chunk:
 
                 apply_change(path, suggestion)
                 summary = summarize_edit(suggestion)
-                git_commit(f"Edit: {summary}")
+                git_commit_auto(f"Edit: {summary}")
                 changes_made = True
 
                 # Now actually run the file dynamically
