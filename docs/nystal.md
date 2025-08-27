@@ -71,7 +71,7 @@ order.
     integrated in the base.\
 -   **Secondary Input:** Environmental photonic absorption through
     quartz lattice.\
--   **Wearable Integration:** Base crystal doubles as a **nyclace
+-   **Wearable Integration:** The base of the crystal doubles as a **nyclace
     (nystal necklace)**, offering passive power stability and
     portability.
 
